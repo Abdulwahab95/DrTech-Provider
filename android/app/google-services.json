@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "499525300846",
+    "firebase_url": "https://doctortec-7603c.firebaseio.com",
+    "project_id": "doctortec-7603c",
+    "storage_bucket": "doctortec-7603c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:499525300846:android:394676aa21e3d7b3",
+        "android_client_info": {
+          "package_name": "app.android.doctortecapp.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "499525300846-vo9f8kra1lo8b5rat1ar97p96o6893am.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4eJM9WFOc_xITCWRTfw9ekWlhT6aw2ok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "499525300846-vo9f8kra1lo8b5rat1ar97p96o6893am.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "499525300846-0bhb67lkmmha6u8tt1u129g61djqfnjg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mitdone.projects.doctortec"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
