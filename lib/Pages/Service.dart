@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
@@ -102,6 +104,7 @@ class _ServiceState extends State<Service> {
         children: [
           Column(
             children: [
+
               Container(
                   decoration:
                       BoxDecoration(color: Converter.hexToColor("#2094cd")),
@@ -612,10 +615,104 @@ class _ServiceState extends State<Service> {
                   children: [
                     Expanded(
                       child: InkWell(
-                        onTap: () async {
+                        onLongPress: () async {
+                          // if (Platform.isIOS) {
+                          // iOS
                           var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                          var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
                           var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                          await canLaunch(whatsappUrl)? launch(whatsappUrl):Alert.show(context, "تعذر الوصول إلى تطبيق الواتس أب");;
+                          whatsappUrl = Uri.encodeFull(whatsappUrl);
+                          whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
+
+
+
+                          //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                          //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                                  var txtControll = TextEditingController();
+                                Alert.show(
+                                    context,
+                                    Container(
+                                      padding: EdgeInsets.all(5),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.only(left: 10, right: 10),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(10),
+                                                color: Converter.hexToColor("#F2F2F2")),
+                                            child: TextField(
+                                              controller: txtControll,
+                                              onChanged: (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
+                                              textDirection: LanguageManager.getTextDirection(),
+                                              textAlign: LanguageManager.getDirection()
+                                                  ? TextAlign.right
+                                                  : TextAlign.left,
+                                              decoration: InputDecoration(
+                                                  border: InputBorder.none,
+                                                  hintText: LanguageManager.getText(33)),
+
+                                            ),
+                                          ),
+                                          Container(height: 15,),
+                                          InkWell(
+                                            onTap: () async{
+                                              if(txtControll.text.isEmpty)
+                                                txtControll.text= whatsappUrl;
+                                              else if(txtControll.text == "aaa")
+                                                txtControll.text = whatsappUrl2;
+                                              else {
+                                            Navigator.pop(context);
+                                            await canLaunch(whatsappUrl)
+                                                ? launch(whatsappUrl)
+                                                : await canLaunch(whatsappUrl2)
+                                                ? launch(whatsappUrl2)
+                                                : Alert.show(context,
+                                                "تعذر الوصول إلى تطبيق الواتس أب");
+                                          }
+                                        },
+                                            child: Container(
+                                              height: 45,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                LanguageManager.getText(34),
+                                                style: TextStyle(color: Colors.white),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                        color: Colors.black.withAlpha(15),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 2)
+                                                  ],
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: Converter.hexToColor("#344f64")),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    type: AlertType.WIDGET);
+
+
+                        },
+                        onTap: () async {
+                            // if (Platform.isIOS) {
+                              // iOS
+                                var url = 'http://maps.apple.com/';
+                                var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                                var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
+                                var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                                whatsappUrl = Uri.encodeFull(whatsappUrl);
+                                whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
+                                await canLaunch(whatsappUrl)
+                              ? launch(whatsappUrl)
+                              : await canLaunch(whatsappUrl2)
+                                  ? launch(whatsappUrl2)
+                                  : Alert.show(context,
+                                      "تعذر الوصول إلى تطبيق الواتس أب");
+                          
+
                           },
                         child: Container(
                           height: 40,

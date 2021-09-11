@@ -23,8 +23,8 @@ dependencies:
   webview_flutter: ^0.3.19+5
   flutter_webview_plugin: ^0.3.10+1
   url_launcher: ^6.0.0
-  firebase_core: ^1.5.0
-  firebase_messaging: ^10.0.5
+  firebase_core:
+  firebase_messaging:
   assets_audio_player: ^3.0.3+6
   share: ^2.0.4
   # Pickers

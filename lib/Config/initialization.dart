@@ -8,13 +8,13 @@ import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 
 class Initialization {
   Initialization(callback) {
-    FlutterSimCountryCode.simCountryCode.then((value) {
+    // FlutterSimCountryCode.simCountryCode.then((value) {
     //   print('$value');
       DatabaseManager.liveDatabase["country"] = "DZ"; //value.toString();
       Firebase(() {
         this.init(callback);
       });
-    });
+    // });
   }
   void init(callback) async {
     Globals.sharedPreferences = await SharedPreferences.getInstance();

@@ -30,6 +30,16 @@ class Globals {
     return false;
   }
 
+  static bool showNotOriginal(){
+    for (var item in settings) {
+      if(item['name'] == 'not_original' && item['value'] == 'true'){
+        return true;
+      }
+    }
+    return false;
+  }
+
+
   static String getWebViewUrl() {
     String url = "";
     for (var item in settings) {

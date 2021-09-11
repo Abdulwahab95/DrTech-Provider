@@ -1,4 +1,6 @@
 
+import 'dart:ui';
+
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
@@ -6,8 +8,10 @@ import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Pages/OnlineServices.dart';
 import 'package:dr_tech/Pages/Service.dart';
 import 'package:dr_tech/Pages/Store.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 
 class MainScreen extends StatefulWidget {
@@ -30,6 +34,11 @@ class _MainScreenState extends State<MainScreen> {
       child: Column(
         children: [
           widget.slider,
+          Globals.showNotOriginal()?Container(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: Text('* هام جدا: استخدام صيانة أجهزة ابل يلغي من ضمان شركة ابل٫ والقطع المستخدمة تكون غير أصلية.'
+            , style: TextStyle(color: Colors.red), textDirection: LanguageManager.getTextDirection(),),
+          ):Container(),
           getServices(),
         ],
       ),

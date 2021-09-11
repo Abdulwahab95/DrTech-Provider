@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>573995175331-77c4kgrmd580idr563aakkg06b69lh5p.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.573995175331-77c4kgrmd580idr563aakkg06b69lh5p</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>573995175331-5jf11ov93g1kb1pj3ipl4t32ftn3kfdn.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAkpav6ieY4p3pb4d6CEZf2JMa5LjxKQvc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>573995175331</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.mitdone.projects.doctortec</string>
+	<key>PROJECT_ID</key>
+	<string>doctortec-19bb8</string>
+	<key>STORAGE_BUCKET</key>
+	<string>doctortec-19bb8.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:573995175331:ios:7c7fa0537a52d5ff61de16</string>
+	<key>DATABASE_URL</key>
+	<string>https://doctortec-19bb8.firebaseio.com</string>
+</dict>
+</plist>
