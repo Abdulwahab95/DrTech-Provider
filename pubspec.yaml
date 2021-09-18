@@ -30,7 +30,7 @@ dependencies:
   # Pickers
   image_picker: ^0.7.0
   file_picker: ^3.0.0
-
+  device_info: ^2.0.2
   cupertino_icons: ^1.0.2
 
 dev_dependencies:

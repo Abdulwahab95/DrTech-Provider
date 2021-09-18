@@ -30,6 +30,46 @@ class Globals {
     return false;
   }
 
+  static bool isEncodeUrl1(){
+    for (var item in settings) {
+      if(item['name'] == 'encode_url_1' && item['value'] == 'true'){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool isEncodeUrl2(){
+    for (var item in settings) {
+      if(item['name'] == 'encode_url_2' && item['value'] == 'true'){
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  static String getWhatsappUrl1() {
+    String url = "";
+    for (var item in settings) {
+      if(item['name'] == 'whatsapp_url_1'){
+        url = item['value'];
+      }
+    }
+    print('getWhatsappUrl1: $url');
+    return url.isNotEmpty ?url: "";
+  }
+
+  static String getWhatsappUrl2() {
+    String url = "";
+    for (var item in settings) {
+      if(item['name'] == 'whatsapp_url_2'){
+        url = item['value'];
+      }
+    }
+    print('getWhatsappUrl2: $url');
+    return url.isNotEmpty ?url: "";
+  }
   static bool showNotOriginal(){
     for (var item in settings) {
       if(item['name'] == 'not_original' && item['value'] == 'true'){

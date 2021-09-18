@@ -52,7 +52,7 @@ class _EmptyPageState extends State<EmptyPage> {
                           textAlign: TextAlign.center,
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle
+                              .subtitle1
                               .apply(color: Theme.of(context).primaryColor),
                         ),
                       ],

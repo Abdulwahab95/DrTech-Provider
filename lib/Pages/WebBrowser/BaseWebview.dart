@@ -40,7 +40,7 @@ class BaseWebview extends State<WebBrowser> {
                       size: 26,
                     ),
                   ),
-                  Text(widget.title, style: Theme.of(context).textTheme.title),
+                  Text(widget.title, style: Theme.of(context).textTheme.headline6),
                   Container(
                     width: 24,
                   )

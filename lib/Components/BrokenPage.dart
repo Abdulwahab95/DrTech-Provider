@@ -51,7 +51,7 @@ class _BrokenPageState extends State<BrokenPage> {
                     textAlign: TextAlign.center,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle
+                        .subtitle1
                         .apply(color: Theme.of(context).primaryColor),
                   ),
                   Icon(widget.icon != null ? widget.icon : Icons.refresh,
