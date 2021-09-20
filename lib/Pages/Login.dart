@@ -151,8 +151,7 @@ class _LoginState extends State<Login> {
                                     LanguageManager.getTextDirection(),
                                 children: [
                                   Container(
-                                    child: Text(
-                                        selectedCountrieCode["phone_code"]),
+                                    child: Text(selectedCountrieCode["phone_code"]),
                                   ),
                                   Container(
                                     width: 6,

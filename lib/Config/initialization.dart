@@ -3,6 +3,7 @@ import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/Firebase.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 
@@ -12,7 +13,13 @@ class Initialization {
     //   print('$value');
       DatabaseManager.liveDatabase["country"] = "DZ"; //value.toString();
       Firebase(() {
-        this.init(callback);
+        PackageInfo.fromPlatform().then((info) {
+          Globals.version = info.version;
+          Globals.buildNumber = info.buildNumber;
+          this.init(callback);
+          print('heree: ${Globals.version}');
+          print('heree: ${Globals.buildNumber}');
+        });
       });
     // });
   }

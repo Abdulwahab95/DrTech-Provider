@@ -8,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Globals {
   static String deviceToken = "";
   static Map deviceInfo = {};
-  static const String version = "0.0.1";
+  static String version = "0.0.1";
+  static String buildNumber = "1";
   static var config;
   static String authoKey = "x-autho";
   static String baseUrl = "https://server.drtechapp.com/";
@@ -98,6 +99,7 @@ class Globals {
       authoKey: DatabaseManager.load(authoKey) ?? "",
       "x-os": kIsWeb ? "web" : (Platform.isIOS ? "ios" : "Android"),
       "x-app-version": version,
+      "x-build-number": buildNumber,
       "x-token": deviceToken
     };
     if (DatabaseManager.liveDatabase[Globals.authoKey] != null) {
