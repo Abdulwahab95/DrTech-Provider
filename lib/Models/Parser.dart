@@ -3,10 +3,10 @@ import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/IconsMap.dart';
 import 'package:dr_tech/Models/parsers/WebParser.dart';
+import 'package:dr_tech/models/Router.dart' as Custom;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:dr_tech/models/Router.dart' as Custom;
 
 class Parser {
   final BuildContext context;

@@ -65,10 +65,10 @@ class NetworkManager {
       try {
         // log
         log("----------START---------");
-        log(url);
-        log(body);
-        log(header);
-        log(response.body);
+        log('url: $url');
+        log('form-data: $body');
+        log('header: $header');
+        log('response.body: ${response.body}');
         log("-----------END--------");
 
         if (cachable == true) {
@@ -138,6 +138,15 @@ class NetworkManager {
     final responceBody = await streamedResponse.stream.bytesToString();
     try {
       var jsonResponce = json.decode(responceBody);
+
+      log("----------START---------");
+      log('url: $url');
+      log('form-data: $body');
+      log('header: $header');
+      log('response.body: $jsonResponce');
+      log("-----------END--------");
+
+
       callback(jsonResponce);
     } catch (e) {
       print(responceBody);

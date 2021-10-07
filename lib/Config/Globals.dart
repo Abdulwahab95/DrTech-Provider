@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,8 +20,21 @@ class Globals {
   static dynamic data = [];
   // Callbacks
   static Function updateInCartCount;
-
   static var settings;
+  // Chat + Notification
+  static String currentConversationId = '';
+  static bool isOpenFromNotification = false;
+
+  static void logNotification(String s, RemoteMessage message) {
+    print('---------------Start--logNotification-- $s --------------------');
+    if(message != null){
+      print("heree: ${message.messageId ?? ''}");
+      print("heree: ${message ?? ''}");
+      print("heree: notification: ${message.notification ?? ''}");
+      print("heree: data: ${message.data ?? ''}");
+    }
+    print('---------------End--logNotification---------------------------');
+  }
 
   static bool checkUpdate(){
     for (var item in settings) {

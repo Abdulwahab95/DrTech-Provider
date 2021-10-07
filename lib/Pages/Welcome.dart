@@ -5,9 +5,12 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
+import 'package:dr_tech/Pages/Login.dart';
 import 'package:flutter/material.dart';
 
 import 'Home.dart';
+import 'LiveChat.dart';
 import 'WebBrowser.dart';
 
 class Welcome extends StatefulWidget {
@@ -277,8 +280,11 @@ class _WelcomeState extends State<Welcome> {
         context,
         MaterialPageRoute(
             builder: (c) =>
-                Globals.checkUpdate() && Globals.getWebViewUrl().isNotEmpty
-                    ? WebBrowser(Globals.getWebViewUrl(), '')
-                    : Home()));
+            Globals.checkUpdate() && Globals.getWebViewUrl().isNotEmpty
+                ? WebBrowser(Globals.getWebViewUrl(), '')
+                :
+            UserManager.currentUser("id").isNotEmpty
+                ? Globals.isOpenFromNotification? LiveChat(Globals.currentConversationId) : Home()
+                : Login()));
   }
 }

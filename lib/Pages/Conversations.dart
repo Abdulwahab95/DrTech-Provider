@@ -13,6 +13,8 @@ import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import 'Home.dart';
+
 class Conversations extends StatefulWidget {
   final bool noheader;
   const Conversations({this.noheader = false});
@@ -33,9 +35,8 @@ class _ConversationsState extends State<Conversations> {
   }
 
   void load() {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() {isLoading = true;});
+
     NetworkManager.httpGet(Globals.baseUrl + "chat/conversations?page=$page",
         (r) {
       setState(() {
@@ -54,49 +55,50 @@ class _ConversationsState extends State<Conversations> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          widget.noheader == true
-              ? Container()
-              : Container(
-                  decoration:
-                      BoxDecoration(color: Converter.hexToColor("#2094cd")),
-                  padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: EdgeInsets.only(
-                          left: 25, right: 25, bottom: 10, top: 25),
-                      child: Row(
-                        textDirection: LanguageManager.getTextDirection(),
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Icon(
-                                LanguageManager.getDirection()
-                                    ? FlutterIcons.chevron_right_fea
-                                    : FlutterIcons.chevron_left_fea,
-                                color: Colors.white,
-                                size: 26,
-                              )),
-                          Text(
-                            LanguageManager.getText(36),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          NotificationIcon(),
-                        ],
-                      ))),
-          Expanded(
-            child: getChatConversations(),
-          )
-        ],
+    return WillPopScope(
+      onWillPop: _close,
+      child: Scaffold(
+        body: Column(
+          children: [
+            widget.noheader == true
+                ? Container()
+                : Container(
+                    decoration:
+                        BoxDecoration(color: Converter.hexToColor("#2094cd")),
+                    padding:
+                        EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.only(
+                            left: 25, right: 25, bottom: 10, top: 25),
+                        child: Row(
+                          textDirection: LanguageManager.getTextDirection(),
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                                onTap: _close,
+                                child: Icon(
+                                  LanguageManager.getDirection()
+                                      ? FlutterIcons.chevron_right_fea
+                                      : FlutterIcons.chevron_left_fea,
+                                  color: Colors.white,
+                                  size: 26,
+                                )),
+                            Text(
+                              LanguageManager.getText(36),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            NotificationIcon(),
+                          ],
+                        ))),
+            Expanded(
+              child: getChatConversations(),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -201,4 +203,13 @@ class _ConversationsState extends State<Conversations> {
       ),
     );
   }
+
+  Future<bool> _close() async{
+    if(Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return true;
+    } else
+      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home()), (Route<dynamic> route) => false);
+  }
+
 }

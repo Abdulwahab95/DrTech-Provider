@@ -1,29 +1,21 @@
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:device_info/device_info.dart';
 import 'package:dr_tech/Components/Alert.dart';
-import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Components/RateStars.dart';
 import 'package:dr_tech/Components/Recycler.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
-import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/ShareManager.dart';
-import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:dr_tech/Pages/EngineerPage.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+import 'EngineerPage.dart';
 
 class Service extends StatefulWidget {
   final target, title;
@@ -43,15 +35,11 @@ class _ServiceState extends State<Service> {
 
   ScrollController controller = ScrollController();
 
-  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-  Map<String, dynamic> _deviceData = <String, dynamic>{};
-
   @override
   void initState() {
     getConfig();
     load();
     super.initState();
-    initPlatformState();
   }
 
   void getConfig() {
@@ -418,26 +406,24 @@ class _ServiceState extends State<Service> {
         items.add(getEngineerUi(item));
       }
     }
-    if(items.length == 1)
-    items.add(getEngineerUi({
-      "id": "2",
-      "name": "\u0645\u0632\u0648\u062f \u062e\u062f\u0645\u0629",
-      "image": "https:\/\/server.drtechapp.com\/storage\/images\/610fb357ecdf7.jpg",
-      "service_name": "\u0627\u0635\u0644\u0627\u062d \u0627\u0644\u062c\u0648\u0644\u0627\u062a",
-      "city_id": "8363",
-      "street_id": "633",
-      "phone":"+966573284334",
-      "rating": 5,
-      "city_name": " جدة",
-      "street_name": "المدينة المنورة",
-      "verified": true,
-      "available": true
-    }));
+    // if(items.length == 1)
+    // items.add(getEngineerUi({
+    //   "id": "2",
+    //   "name": "\u0645\u0632\u0648\u062f \u062e\u062f\u0645\u0629",
+    //   "image": "https:\/\/server.drtechapp.com\/storage\/images\/610fb357ecdf7.jpg",
+    //   "service_name": "\u0627\u0635\u0644\u0627\u062d \u0627\u0644\u062c\u0648\u0644\u0627\u062a",
+    //   "city_id": "8363",
+    //   "street_id": "633",
+    //   "phone":"+966573284334",
+    //   "rating": 5,
+    //   "city_name": " جدة",
+    //   "street_name": "المدينة المنورة",
+    //   "verified": true,
+    //   "available": true
+    // }));
 
-    return widget.target == '2' || widget.target == '3'?Center(child: Text('قريبا...', textDirection: TextDirection.rtl,)):Recycler(
-      onScrollDown: load,
-      children: items,
-    );
+    // widget.target == '2' || widget.target == '3'?Center(child: Text('قريبا...', textDirection: TextDirection.rtl,)):
+    return Recycler(onScrollDown: load, children: items,);
   }
 
   Widget getEngineerUi(item) {
@@ -450,10 +436,10 @@ class _ServiceState extends State<Service> {
       ], borderRadius: BorderRadius.circular(15), color: Colors.white),
       child: InkWell(
         onTap: () {
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (_) => EngineerPage(item['id'], widget.target)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => EngineerPage(item['id'], widget.target)));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,180 +607,107 @@ class _ServiceState extends State<Service> {
                 Row(
                   textDirection: LanguageManager.getTextDirection(),
                   children: [
-                    Expanded(
-                      child: InkWell(
-                        onLongPress: () async {
-                          // if (Platform.isIOS) {
-                          // iOS
-                          var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
-                          var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
-                          var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                          whatsappUrl = Uri.encodeFull(whatsappUrl);
-                          whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
-
-
-
-                          //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
-                          //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                                  var txtControll = TextEditingController();
-                                Alert.show(
-                                    context,
-                                    Container(
-                                      padding: EdgeInsets.all(5),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            padding: EdgeInsets.only(left: 10, right: 10),
-                                            decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(10),
-                                                color: Converter.hexToColor("#F2F2F2")),
-                                            child: TextField(
-                                              controller: txtControll,
-                                              onChanged: (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
-                                              textDirection: LanguageManager.getTextDirection(),
-                                              textAlign: LanguageManager.getDirection()
-                                                  ? TextAlign.right
-                                                  : TextAlign.left,
-                                              decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                  hintText: LanguageManager.getText(33)),
-
-                                            ),
-                                          ),
-                                          Container(height: 15,),
-                                          InkWell(
-                                            onTap: () async{
-                                              if(txtControll.text.isEmpty)
-                                                txtControll.text= whatsappUrl;
-                                              else if(txtControll.text == "aaa")
-                                                txtControll.text = whatsappUrl2;
-                                              else {
-                                            Navigator.pop(context);
-                                            await canLaunch(whatsappUrl)
-                                                ? launch(whatsappUrl)
-                                                : await canLaunch(whatsappUrl2)
-                                                ? launch(whatsappUrl2)
-                                                : Alert.show(context,
-                                                "تعذر الوصول إلى تطبيق الواتس أب");
-                                          }
-                                        },
-                                            child: Container(
-                                              height: 45,
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                LanguageManager.getText(34),
-                                                style: TextStyle(color: Colors.white),
-                                              ),
-                                              decoration: BoxDecoration(
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors.black.withAlpha(15),
-                                                        spreadRadius: 2,
-                                                        blurRadius: 2)
-                                                  ],
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  color: Converter.hexToColor("#344f64")),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    type: AlertType.WIDGET);
-
-
-                        },
-                        onTap: () async {
-                            // if (Platform.isIOS) {
-                              // iOS
-                          if(item['id'] == '2'){
-
-                            var urlsEncode= Uri.encodeFull(Globals.getWhatsappUrl2());
-                            if(Globals.isEncodeUrl2())
-                              await canLaunch(urlsEncode) ?
-                              launch(urlsEncode).then((value) {
-                                print('heree: 2$value');
-                                writeLog('1', 'can launch');
-                              }) : alert_log('1', 'false');
-                            else
-                              await canLaunch(Globals.getWhatsappUrl2()) ?
-                              launch(Globals.getWhatsappUrl2()).then((value) {
-                                print('heree: 2$value');
-                                writeLog('2', 'can launch');
-                              }) : alert_log('2', 'false');
-
-                          }else{
-
-                            var urlsEncode= Uri.encodeFull(Globals.getWhatsappUrl1());
-                            if(Globals.isEncodeUrl1())
-
-                              await canLaunch(urlsEncode) ?
-                              launch(urlsEncode).then((value) {
-                                print('heree: 2$value');
-                                writeLog('3', 'can launch');
-                              }) : alert_log('3', 'false');
-
-                            else
-                              await canLaunch(Globals.getWhatsappUrl1())?
-                              launch(Globals.getWhatsappUrl1()).then((value) {
-                                print('heree: 2$value');
-                                writeLog('4', 'can launch');
-                              }) : alert_log('4', 'false');
-
-                          }
-                              //   var url = 'http://maps.apple.com/';
-                              //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
-                              //   var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
-                              //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                              //   whatsappUrl = Uri.encodeFull(whatsappUrl);
-                              //   whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
-                              //   await canLaunch(whatsappUrl)
-                              // ? launch(whatsappUrl)
-                              // : await canLaunch(whatsappUrl2)
-                              //     ? launch(whatsappUrl2)
-                              //     : Alert.show(context,
-                              //         "تعذر الوصول إلى تطبيق الواتس أب");
-                          
-
-                          },
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            textDirection: LanguageManager.getTextDirection(),
-                            children: [
-                              Icon(
-                                FlutterIcons.whatsapp_faw,
-                                color: Colors.white,
-                              ),
-                              Container(
-                                width: 5,
-                              ),
-                              Text(
-                                LanguageManager.getText(117),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withAlpha(15),
-                                    spreadRadius: 2,
-                                    blurRadius: 2)
-                              ],
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.green),
-                        ),
-                      ),
-                    ),
                     // Expanded(
                     //   child: InkWell(
-                    //     onTap: () {},
+                    //     onLongPress: () async {
+                    //       // if (Platform.isIOS) {
+                    //       // iOS
+                    //       var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                    //       var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
+                    //       var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                    //       whatsappUrl = Uri.encodeFull(whatsappUrl);
+                    //       whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
+                    //
+                    //
+                    //
+                    //       //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                    //       //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                    //               var txtControll = TextEditingController();
+                    //             Alert.show(
+                    //                 context,
+                    //                 Container(
+                    //                   padding: EdgeInsets.all(5),
+                    //                   child: Column(
+                    //                     mainAxisSize: MainAxisSize.min,
+                    //                     children: [
+                    //                       Container(
+                    //                         padding: EdgeInsets.only(left: 10, right: 10),
+                    //                         decoration: BoxDecoration(
+                    //                             borderRadius: BorderRadius.circular(10),
+                    //                             color: Converter.hexToColor("#F2F2F2")),
+                    //                         child: TextField(
+                    //                           controller: txtControll,
+                    //                           onChanged: (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
+                    //                           textDirection: LanguageManager.getTextDirection(),
+                    //                           textAlign: LanguageManager.getDirection()
+                    //                               ? TextAlign.right
+                    //                               : TextAlign.left,
+                    //                           decoration: InputDecoration(
+                    //                               border: InputBorder.none,
+                    //                               hintText: LanguageManager.getText(33)),
+                    //
+                    //                         ),
+                    //                       ),
+                    //                       Container(height: 15,),
+                    //                       InkWell(
+                    //                         onTap: () async{
+                    //                           if(txtControll.text.isEmpty)
+                    //                             txtControll.text= whatsappUrl;
+                    //                           else if(txtControll.text == "aaa")
+                    //                             txtControll.text = whatsappUrl2;
+                    //                           else {
+                    //                         Navigator.pop(context);
+                    //                         await canLaunch(whatsappUrl)
+                    //                             ? launch(whatsappUrl)
+                    //                             : await canLaunch(whatsappUrl2)
+                    //                             ? launch(whatsappUrl2)
+                    //                             : Alert.show(context,
+                    //                             "تعذر الوصول إلى تطبيق الواتس أب");
+                    //                       }
+                    //                     },
+                    //                         child: Container(
+                    //                           height: 45,
+                    //                           alignment: Alignment.center,
+                    //                           child: Text(
+                    //                             LanguageManager.getText(34),
+                    //                             style: TextStyle(color: Colors.white),
+                    //                           ),
+                    //                           decoration: BoxDecoration(
+                    //                               boxShadow: [
+                    //                                 BoxShadow(
+                    //                                     color: Colors.black.withAlpha(15),
+                    //                                     spreadRadius: 2,
+                    //                                     blurRadius: 2)
+                    //                               ],
+                    //                               borderRadius: BorderRadius.circular(8),
+                    //                               color: Converter.hexToColor("#344f64")),
+                    //                         ),
+                    //                       ),
+                    //                     ],
+                    //                   ),
+                    //                 ),
+                    //                 type: AlertType.WIDGET);
+                    //
+                    //
+                    //     },
+                    //     onTap: () async {
+                    //         // if (Platform.isIOS) {
+                    //           // iOS
+                    //             var url = 'http://maps.apple.com/';
+                    //             var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                    //             var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
+                    //             var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                    //             whatsappUrl = Uri.encodeFull(whatsappUrl);
+                    //             whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
+                    //             await canLaunch(whatsappUrl)
+                    //           ? launch(whatsappUrl)
+                    //           : await canLaunch(whatsappUrl2)
+                    //               ? launch(whatsappUrl2)
+                    //               : Alert.show(context,
+                    //                   "تعذر الوصول إلى تطبيق الواتس أب");
+                    //
+                    //
+                    //       },
                     //     child: Container(
                     //       height: 40,
                     //       alignment: Alignment.center,
@@ -803,14 +716,14 @@ class _ServiceState extends State<Service> {
                     //         textDirection: LanguageManager.getTextDirection(),
                     //         children: [
                     //           Icon(
-                    //             FlutterIcons.phone_faw,
+                    //             FlutterIcons.whatsapp_faw,
                     //             color: Colors.white,
                     //           ),
                     //           Container(
                     //             width: 5,
                     //           ),
                     //           Text(
-                    //             LanguageManager.getText(96),
+                    //             LanguageManager.getText(117),
                     //             style: TextStyle(
                     //                 color: Colors.white,
                     //                 fontSize: 15,
@@ -826,56 +739,94 @@ class _ServiceState extends State<Service> {
                     //                 blurRadius: 2)
                     //           ],
                     //           borderRadius: BorderRadius.circular(12),
-                    //           color: Converter.hexToColor("#344f64")),
+                    //           color: Colors.green),
                     //     ),
                     //   ),
                     // ),
-                    // Container(
-                    //   width: 10,
-                    // ),
-                    // Expanded(
-                    //   child: InkWell(
-                    //     onTap: () {
-                    //       startNewConversation(item['id']);
-                    //     },
-                    //     child: Container(
-                    //       height: 40,
-                    //       alignment: Alignment.center,
-                    //       child: Row(
-                    //         mainAxisAlignment: MainAxisAlignment.center,
-                    //         textDirection: LanguageManager.getTextDirection(),
-                    //         children: [
-                    //           Icon(
-                    //             Icons.chat,
-                    //             color: Converter.hexToColor("#344f64"),
-                    //             size: 20,
-                    //           ),
-                    //           Container(
-                    //             width: 5,
-                    //           ),
-                    //           Text(
-                    //             LanguageManager.getText(117),
-                    //             style: TextStyle(
-                    //                 color: Converter.hexToColor("#344f64"),
-                    //                 fontSize: 15,
-                    //                 fontWeight: FontWeight.w600),
-                    //           ),
-                    //         ],
-                    //       ),
-                    //       decoration: BoxDecoration(
-                    //           color: Colors.white,
-                    //           boxShadow: [
-                    //             BoxShadow(
-                    //                 color: Colors.black.withAlpha(15),
-                    //                 spreadRadius: 2,
-                    //                 blurRadius: 2)
-                    //           ],
-                    //           borderRadius: BorderRadius.circular(12),
-                    //           border: Border.all(
-                    //               color: Converter.hexToColor("#344f64"))),
-                    //     ),
-                    //   ),
-                    // ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {},
+                        child: Container(
+                          height: 40,
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            textDirection: LanguageManager.getTextDirection(),
+                            children: [
+                              Icon(
+                                FlutterIcons.phone_faw,
+                                color: Colors.white,
+                              ),
+                              Container(
+                                width: 5,
+                              ),
+                              Text(
+                                LanguageManager.getText(96),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black.withAlpha(15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2)
+                              ],
+                              borderRadius: BorderRadius.circular(12),
+                              color: Converter.hexToColor("#344f64")),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          startNewConversation(item['id']);
+                        },
+                        child: Container(
+                          height: 40,
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            textDirection: LanguageManager.getTextDirection(),
+                            children: [
+                              Icon(
+                                Icons.chat,
+                                color: Converter.hexToColor("#344f64"),
+                                size: 20,
+                              ),
+                              Container(
+                                width: 5,
+                              ),
+                              Text(
+                                LanguageManager.getText(117),
+                                style: TextStyle(
+                                    color: Converter.hexToColor("#344f64"),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black.withAlpha(15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2)
+                              ],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: Converter.hexToColor("#344f64"))),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 Container(
@@ -957,100 +908,4 @@ class _ServiceState extends State<Service> {
       ),
     );
   }
-
-  void writeLog(String info, String status) {
-    NetworkManager.httpPost(Globals.baseUrl + "user/register_log", (r) {
-      print('heree: $r');
-      // Alert.endLoading();
-      // if (r['status'] == true) {
-      //   DatabaseManager.save(Globals.authoKey, r['token']);
-      //   UserManager.proccess(r['user']);
-      //   Navigator.pushReplacement(
-      //       context, MaterialPageRoute(builder: (_) => Home()));
-      //   // success
-      // } else if (r['message'] != null) {
-      //   Alert.show(context, Converter.getRealText(r['message']));
-      // }
-    }, body: {
-      'info': info
-          + ' | ${kIsWeb ? "web" : (Platform.isIOS ? "ios" : "Android")} | ${UserManager.nameUser("name")} | ${_deviceData}',
-      'status': status});
-  }
-
-  alert_log(String s, String t) {
-    writeLog(s, t);
-    Alert.show(context, "تعذر الوصول إلى تطبيق الواتس أب");
-  }
-
-   Future<void> initPlatformState() async {
-      Map<String, dynamic> deviceData = <String, dynamic>{};
-
-      try {
-        if (Platform.isAndroid) {
-          deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
-        } else if (Platform.isIOS) {
-          deviceData = _readIosDeviceInfo(await deviceInfoPlugin.iosInfo);
-        }
-      } on PlatformException {
-        deviceData = <String, dynamic>{
-          'Error:': 'Failed to get platform version.'
-        };
-      }
-
-      if (!mounted) return;
-
-      setState(() {
-        _deviceData = deviceData;
-      });
-    }
-
-  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
-    return <String, dynamic>{
-      'version.securityPatch': build.version.securityPatch,
-      'version.sdkInt': build.version.sdkInt,
-      'version.release': build.version.release,
-      'version.previewSdkInt': build.version.previewSdkInt,
-      'version.incremental': build.version.incremental,
-      'version.codename': build.version.codename,
-      'version.baseOS': build.version.baseOS,
-      'board': build.board,
-      'bootloader': build.bootloader,
-      'brand': build.brand,
-      'device': build.device,
-      'display': build.display,
-      'fingerprint': build.fingerprint,
-      'hardware': build.hardware,
-      'host': build.host,
-      'id': build.id,
-      'manufacturer': build.manufacturer,
-      'model': build.model,
-      'product': build.product,
-      'supported32BitAbis': build.supported32BitAbis,
-      'supported64BitAbis': build.supported64BitAbis,
-      'supportedAbis': build.supportedAbis,
-      'tags': build.tags,
-      'type': build.type,
-      'isPhysicalDevice': build.isPhysicalDevice,
-      'androidId': build.androidId,
-      'systemFeatures': build.systemFeatures,
-    };
-  }
-
-  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
-    return <String, dynamic>{
-      'name': data.name,
-      'systemName': data.systemName,
-      'systemVersion': data.systemVersion,
-      'model': data.model,
-      'localizedModel': data.localizedModel,
-      'identifierForVendor': data.identifierForVendor,
-      'isPhysicalDevice': data.isPhysicalDevice,
-      'utsname.sysname:': data.utsname.sysname,
-      'utsname.nodename:': data.utsname.nodename,
-      'utsname.release:': data.utsname.release,
-      'utsname.version:': data.utsname.version,
-      'utsname.machine:': data.utsname.machine,
-    };
-  }
-
 }

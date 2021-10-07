@@ -35,11 +35,11 @@ class _ServicesScreenState extends State<ServicesScreen> {
     var servicesApi = Globals.getConfig("services");
     if (servicesApi == "") return Container();
     List<Widget> lastInsert = [];
-    var numItemAdd = 0;
-    var numItemInactive = 0;
+    // var numItemAdd = 0;
+    // var numItemInactive = 0;
     for (var item in servicesApi) {
 
-      if (item["status"] != "inactive"){
+      // if (item["status"] != "inactive"){
         if (lastInsert.length < 3) {
           print('item: $item');
           lastInsert.add(createService(item["icon"], item["name"], () {
@@ -65,7 +65,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
         lastInsert.add(Container(width: 20,));
       }
       if (lastInsert.length == 3) {
-        numItemAdd += 2;
+        // numItemAdd += 2;
         print('row: $item');
         rows.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -76,19 +76,19 @@ class _ServicesScreenState extends State<ServicesScreen> {
         lastInsert = [];
       }
 
-    } else numItemInactive++;
-
+    // } else numItemInactive++;
+    //
     }
 
-    if ((servicesApi.length - numItemInactive) % 2 != 0 && servicesApi.length - numItemInactive - 1 == numItemAdd ){
-      rows.add(Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        textDirection: LanguageManager.getTextDirection(),
-        children: lastInsert,
-      ));
-      lastInsert.add(Container(width: 7,));
-      rows.add(Container(height: 20,));
-    }
+    // if ((servicesApi.length - numItemInactive) % 2 != 0 && servicesApi.length - numItemInactive - 1 == numItemAdd ){
+    //   rows.add(Row(
+    //     mainAxisAlignment: MainAxisAlignment.end,
+    //     textDirection: LanguageManager.getTextDirection(),
+    //     children: lastInsert,
+    //   ));
+    //   lastInsert.add(Container(width: 7,));
+    //   rows.add(Container(height: 20,));
+    // }
 
     return Expanded(
       child: Container(

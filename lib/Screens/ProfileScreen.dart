@@ -13,7 +13,6 @@ import 'package:dr_tech/Pages/ExtraPages/Terms.dart';
 import 'package:dr_tech/Pages/FrequentlyAskedQuestions.dart';
 import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:dr_tech/Pages/ProfileEdit.dart';
-import 'package:dr_tech/Pages/Transactions.dart';
 import 'package:dr_tech/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -34,124 +33,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return ScrollConfiguration(
       behavior: CustomBehavior(),
       child: ListView(
+        padding: EdgeInsets.only(top: 25),
         children: [
-          // getProfileHeader(),
-          // Container(height: 10,),
-          // UserManager.currentUser("type") != "ENGINEER"
-          //     ? Container()
-          //     : Container(
-          //         margin: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 5),
-          //         child: Row(
-          //           textDirection: LanguageManager.getTextDirection(),
-          //           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //           children: [
-          //             SvgPicture.asset(
-          //               "assets/icons/lang.svg",
-          //               fit: BoxFit.fill,
-          //               width: 30,
-          //               height: 30,
-          //             ),
-          //             Text(
-          //               LanguageManager.getText(268),
-          //               style: TextStyle(
-          //                   fontWeight: FontWeight.w600, fontSize: 16),
-          //             ),
-          //             Row(
-          //               textDirection: LanguageManager.getTextDirection(),
-          //               children: [
-          //                 Text(
-          //                   LanguageManager.getText(100),
-          //                   style: TextStyle(
-          //                       fontWeight: FontWeight.normal,
-          //                       color: Colors.blue),
-          //                 ),
-          //                 Switch(
-          //                     value: UserManager.currentUser("status") == "1",
-          //                     onChanged: (v) {
-          //                       setState(() {
-          //                         DatabaseManager.save("status", v ? "1" : "0");
-          //                         UserManager.update("status", v ? "1" : "0",
-          //                             (r) {
-          //                           setState(() {});
-          //                         });
-          //                       });
-          //                       widget.refrashState();
-          //                     }),
-          //                 Text(
-          //                   LanguageManager.getText(101),
-          //                   style: TextStyle(
-          //                       fontWeight: FontWeight.normal,
-          //                       color: Colors.blue),
-          //                 ),
-          //               ],
-          //             )
-          //           ],
-          //         ),
-          //       ),
-          // Container(
-          //   margin: EdgeInsets.only(top: 0, bottom: 10, left: 5, right: 5),
-          //   child: Row(
-          //     textDirection: LanguageManager.getTextDirection(),
-          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //     children: [
-          //       SvgPicture.asset(
-          //         "assets/icons/lang.svg",
-          //         fit: BoxFit.fill,
-          //         width: 30,
-          //         height: 30,
-          //       ),
-          //       Text(
-          //         LanguageManager.getText(48),
-          //         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          //       ),
-          //       Row(
-          //         textDirection: LanguageManager.getTextDirection(),
-          //         children: [
-          //           Text(
-          //             LanguageManager.getText(49),
-          //             style: TextStyle(
-          //                 fontWeight: FontWeight.normal, color: Colors.blue),
-          //           ),
-          //           Switch(
-          //               value: LanguageManager.getDirection(),
-          //               onChanged: (v) {
-          //                 setState(() {
-          //                   if (v) {
-          //                     LanguageManager.setLanguage("ar,SA");
-          //                   } else {
-          //                     LanguageManager.setLanguage("en,US");
-          //                   }
-          //                 });
-          //                 widget.refrashState();
-          //               }),
-          //           Text(
-          //             LanguageManager.getText(50),
-          //             style: TextStyle(
-          //                 fontWeight: FontWeight.normal, color: Colors.blue),
-          //           ),
-          //         ],
-          //       )
-          //     ],
-          //   ),
-          // ),
-          // getProfileItem(FlutterIcons.list_fea, 185, () {
-          //   Navigator.push(
-          //       context, MaterialPageRoute(builder: (_) => Transactions()));
-          // }),
+          getProfileHeader(),
+          Container(
+            height: 10,
+          ),
+          UserManager.currentUser("type") != "ENGINEER"
+              ? Container()
+              : Container(
+            margin: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 5),
+            child: Row(
+              textDirection: LanguageManager.getTextDirection(),
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                SvgPicture.asset(
+                  "assets/icons/lang.svg",
+                  fit: BoxFit.fill,
+                  width: 30,
+                  height: 30,
+                ),
+                Text(
+                  LanguageManager.getText(268),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                Row(
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [
+                    Text(
+                      LanguageManager.getText(100),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          color: Colors.blue),
+                    ),
+                    Switch(
+                        value: UserManager.currentUser("status") == "1",
+                        onChanged: (v) {
+                          setState(() {
+                            DatabaseManager.save("status", v ? "1" : "0");
+                            UserManager.update("status", v ? "1" : "0",
+                                    (r) {
+                                  setState(() {});
+                                });
+                          });
+                          widget.refrashState();
+                        }),
+                    Text(
+                      LanguageManager.getText(101),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          color: Colors.blue),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 0, bottom: 10, left: 5, right: 5),
+            child: Row(
+              textDirection: LanguageManager.getTextDirection(),
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                SvgPicture.asset(
+                  "assets/icons/lang.svg",
+                  fit: BoxFit.fill,
+                  width: 30,
+                  height: 30,
+                ),
+                Text(
+                  LanguageManager.getText(48),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                Row(
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [
+                    Text(
+                      LanguageManager.getText(49),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, color: Colors.blue),
+                    ),
+                    Switch(
+                        value: LanguageManager.getDirection(),
+                        onChanged: (v) {
+                          setState(() {
+                            if (v) {
+                              LanguageManager.setLanguage("ar,SA");
+                            } else {
+                              LanguageManager.setLanguage("en,US");
+                            }
+                          });
+                          widget.refrashState();
+                        }),
+                    Text(
+                      LanguageManager.getText(50),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, color: Colors.blue),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
           getProfileItem(FlutterIcons.list_fea, 59, () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => Terms()));
           }),
           getProfileItem(FlutterIcons.info_fea, 60, () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => About()));
           }),
-          // getProfileItem(FlutterIcons.server_fea, 61, () {
-          //   Navigator.push(
-          //       context, MaterialPageRoute(builder: (_) => JoinRequest()));
-          // }),
-          // getProfileItem(FlutterIcons.flag_fea, 62, () {
-          //   Navigator.push(context,
-          //       MaterialPageRoute(builder: (_) => FrequentlyAskedQuestions()));
-          // }),
+          getProfileItem(FlutterIcons.server_fea, 61, () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => JoinRequest()));
+          }),
+          getProfileItem(FlutterIcons.flag_fea, 62, () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => FrequentlyAskedQuestions()));
+          }),
           getProfileItem(FlutterIcons.headphones_fea, 63, () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => ContactUs()));
@@ -180,10 +178,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => RateApp()));
           }),
-          // getProfileItem(FlutterIcons.log_out_fea, 66, () {
-          //   UserManager.logout();
-          //   main();
-          // }, withArraw: false),
+          getProfileItem(FlutterIcons.log_out_fea, 66, () {
+            UserManager.logout();
+            main();
+          }, withArraw: false),
         ],
       ),
     );
@@ -243,23 +241,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             Expanded(
                 child: Text(
-              LanguageManager.getText(title),
-              textDirection: LanguageManager.getTextDirection(),
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Converter.hexToColor("#707070")),
-            )),
+                  LanguageManager.getText(title),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Converter.hexToColor("#707070")),
+                )),
             Container(
               width: 10,
             ),
             withArraw
                 ? Icon(
-                    LanguageManager.getDirection()
-                        ? FlutterIcons.chevron_left_fea
-                        : FlutterIcons.chevron_left_fea,
-                    size: 18,
-                    color: Colors.blue,
-                  )
+              LanguageManager.getDirection()
+                  ? FlutterIcons.chevron_left_fea
+                  : FlutterIcons.chevron_left_fea,
+              size: 18,
+              color: Colors.blue,
+            )
                 : Container()
           ],
         ),
@@ -282,12 +280,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(
-                        UserManager.currentUser("image"))),
+                    image: CachedNetworkImageProvider(UserManager.currentUser("image"))),
               )),
-          Container(
-            width: 20,
-          ),
+          Container(width: 20),
           Expanded(
             child: Column(
               textDirection: LanguageManager.getTextDirection(),
@@ -305,10 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 5,
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => ProfileEdit()));
-                  },
+                  onTap: () { _navigateAndDisplaySelection(context); },
                   child: Container(
                     alignment: !LanguageManager.getDirection()
                         ? Alignment.centerLeft
@@ -337,4 +329,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+
+  void _navigateAndDisplaySelection(BuildContext context) async {
+    var oldImageUrl = UserManager.currentUser("image");
+    // Navigator.push returns a Future that completes after calling
+    // Navigator.pop on the Selection Screen.
+    final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileEdit()));
+
+    var newImageUrl = UserManager.currentUser("image");
+    if(oldImageUrl != newImageUrl){ // update image
+      setState(() {});
+    }
+
+    // After the Selection Screen returns a result, hide any previous snackbars
+    // and show the new result.
+    // ScaffoldMessenger.of(context)
+    //   ..removeCurrentSnackBar()
+    //   ..showSnackBar(SnackBar(content: Text('$result , old: $old, new: ${UserManager.currentUser("image")}')));
+  }
+
 }

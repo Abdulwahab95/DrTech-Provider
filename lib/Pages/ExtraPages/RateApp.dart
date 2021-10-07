@@ -8,7 +8,6 @@ import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RateApp extends StatefulWidget {

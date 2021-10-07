@@ -7,6 +7,7 @@ import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
+import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
@@ -29,6 +30,7 @@ class _ProfileEditState extends State<ProfileEdit> {
   void initState() {
     body["name"] = UserManager.currentUser("name");
     selectedTexts["name"] = UserManager.currentUser("name");
+    selectedTexts["about"] = UserManager.currentUser("about");
     super.initState();
   }
 
@@ -43,16 +45,13 @@ class _ProfileEditState extends State<ProfileEdit> {
             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
             child: Container(
                 width: MediaQuery.of(context).size.width,
-                padding:
-                    EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
+                padding: EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
                 child: Row(
                   textDirection: LanguageManager.getTextDirection(),
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
+                        onTap: () {Navigator.pop(context);},
                         child: Icon(
                           LanguageManager.getDirection()
                               ? FlutterIcons.chevron_right_fea
@@ -61,7 +60,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                           size: 26,
                         )),
                     Text(
-                      LanguageManager.getText(269),
+                      LanguageManager.getText(269), // بيناتي
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -83,7 +82,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                         onTap: () async {
                           if (isUploading) return;
                           await pickImage(ImageSource.gallery);
-                          updateImage();
+                          if(selectedImage != null) updateImage();
                         },
                         child: Container(
                             width: imageSize,
@@ -91,10 +90,8 @@ class _ProfileEditState extends State<ProfileEdit> {
                             child: isUploading
                                 ? Container(
                                     decoration: BoxDecoration(
-                                        color: Converter.hexToColor("#000000")
-                                            .withAlpha(70),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
+                                        color: Converter.hexToColor("#000000").withAlpha(70),
+                                        borderRadius: BorderRadius.circular(10)),
                                     alignment: Alignment.center,
                                     child: CustomLoading())
                                 : Container(),
@@ -103,8 +100,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                               borderRadius: BorderRadius.circular(10),
                               image: DecorationImage(
                                   fit: BoxFit.cover,
-                                  image: CachedNetworkImageProvider(
-                                      UserManager.currentUser("image"))),
+                                  image: CachedNetworkImageProvider(UserManager.currentUser("image"))),
                             )),
                       ),
                     ),
@@ -114,7 +110,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                     Container(
                       margin: EdgeInsets.only(left: 10, right: 10, top: 10),
                       child: Text(
-                        LanguageManager.getText(272),
+                        LanguageManager.getText(272), // نبذه عني
                         textDirection: LanguageManager.getTextDirection(),
                         style: TextStyle(
                             fontSize: 16,
@@ -132,7 +128,7 @@ class _ProfileEditState extends State<ProfileEdit> {
             height: 45,
             alignment: Alignment.center,
             child: Text(
-              LanguageManager.getText(170),
+              LanguageManager.getText(170), // تعديل
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
@@ -240,11 +236,9 @@ class _ProfileEditState extends State<ProfileEdit> {
       if (pickedFile == null) return;
       var extantion = pickedFile.path.split(".").last;
       Uint8List data = await pickedFile.readAsBytes();
-      setState(() {
-        selectedImage = data;
-      });
+      setState(() {selectedImage = data;});
     } catch (e) {
-      Alert.show(context, LanguageManager.getText(27));
+      Alert.show(context, LanguageManager.getText(27)); // حدث خطأ غير متوقع . يرجي اعادة المحاولة لاحقا
       // error
     }
   }
@@ -258,11 +252,17 @@ class _ProfileEditState extends State<ProfileEdit> {
 
   void update() {
     hideKeyBoard();
-    Alert.startLoading(context);
-    UserManager.update("about", body['about'], (r) {
-      Alert.endLoading();
-    });
+    if (body['about'] != null) {
+      Alert.startLoading(context);
+      UserManager.update("about", body['about'], (r) {
+        if (r) {DatabaseManager.save('about', body['about']);}
+        Alert.endLoading();
+      });
+    } else {
+      Alert.show(context, LanguageManager.getText(281));
+    }
   }
+
 
   void updateImage() {
     if (isUploading) return;

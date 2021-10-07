@@ -6,10 +6,10 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
+import 'package:dr_tech/Pages/OrderDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:dr_tech/Pages/OrderDetails.dart';
 
 class Orders extends StatefulWidget {
   final status = ['PENDING', 'COMPLETED', 'CANCELED'];

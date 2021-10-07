@@ -29,6 +29,8 @@ class _JoinRequestState extends State<JoinRequest> {
   Map config, data;
   Map slectedListOptions = {};
   List<Map> selectedFiles = [];
+
+
   @override
   void initState() {
     loadConfig();
@@ -123,17 +125,9 @@ class _JoinRequestState extends State<JoinRequest> {
     if (data != null) {
       return Column(
         children: [
-          Container(
-            height: 70,
-          ),
-          SvgPicture.asset(
-            "assets/illustration/join.svg",
-            width: 120,
-            height: 120,
-          ),
-          Container(
-            height: 10,
-          ),
+          Container(height: 70),
+          SvgPicture.asset("assets/illustration/join.svg", width: 120, height: 120),
+          Container(height: 10),
           Container(
             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
             child: Text(
@@ -145,9 +139,7 @@ class _JoinRequestState extends State<JoinRequest> {
                   color: Converter.hexToColor("#2094CD")),
             ),
           ),
-          Container(
-            height: 10,
-          ),
+          Container(height: 10),
           Container(
             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
             child: Row(
@@ -162,9 +154,7 @@ class _JoinRequestState extends State<JoinRequest> {
                       fontSize: 16,
                       color: Converter.hexToColor("#344F64")),
                 ),
-                Container(
-                  width: 10,
-                ),
+                Container(width: 10),
                 getStatusText(),
               ],
             ),
@@ -174,8 +164,7 @@ class _JoinRequestState extends State<JoinRequest> {
     }
     List<Widget> items = [];
 
-    items.add(
-        createSelectInput("service", 200, config['service'], onSelected: (v) {
+    items.add(createSelectInput("service", 200, config['service'], onSelected: (v) {
       setState(() {
         selectedTexts["service"] = v['name'];
         body["service"] = v['id'];
@@ -189,29 +178,28 @@ class _JoinRequestState extends State<JoinRequest> {
       });
     }));
 
-    items.add(createSelectInput(
-        "service_catigory", 201, selectOptions['service_catigories'],
+    items.add(createSelectInput("service_catigory", 201, selectOptions['service_catigories'],
         onSelected: (v) {
-      setState(() {
-        selectOptions["sub_service_catigory"] = v['children'];
-        selectedTexts["service_catigory"] = v['name'];
-        body["service_catigory"] = v['id'];
-      });
+          setState(() {
+            selectOptions["sub_service_catigory"] = v['children'];
+            selectedTexts["service_catigory"] = v['name'];
+            body["service_catigory"] = v['id'];
+          });
     }, onEmptyMessage: LanguageManager.getText(204)));
 
     items.add(createSelectInput("device", 202, selectOptions['devices'],
         onSelected: (v) {
-      var key = "device";
-      setState(() {
-        if (slectedListOptions[key] == null) {
-          slectedListOptions[key] = [];
-        }
-        if ((slectedListOptions[key] as List).contains(v)) {
-          int index = (slectedListOptions[key] as List).indexOf(v);
-          slectedListOptions[key][index]["fucsed"] = true;
-        } else
-          slectedListOptions[key].add(v);
-      });
+          var key = "device";
+          setState(() {
+            if (slectedListOptions[key] == null) {
+              slectedListOptions[key] = [];
+            }
+            if ((slectedListOptions[key] as List).contains(v)) {
+              int index = (slectedListOptions[key] as List).indexOf(v);
+              slectedListOptions[key][index]["fucsed"] = true;
+            } else
+              slectedListOptions[key].add(v);
+          });
     }, onEmptyMessage: LanguageManager.getText(204)));
 
     items.add(getSelectedOptionList("device"));
@@ -219,24 +207,23 @@ class _JoinRequestState extends State<JoinRequest> {
     items.add(createSelectInput(
         "sub_service_catigory", 203, selectOptions['sub_service_catigory'],
         onSelected: (v) {
-      var key = "sub_service_catigory";
-      setState(() {
-        if (slectedListOptions[key] == null) {
-          slectedListOptions[key] = [];
-        }
-        if ((slectedListOptions[key] as List).contains(v)) {
-          int index = (slectedListOptions[key] as List).indexOf(v);
-          slectedListOptions[key][index]["fucsed"] = true;
-        } else
-          slectedListOptions[key].add(v);
-      });
+          var key = "sub_service_catigory";
+          setState(() {
+            if (slectedListOptions[key] == null) {
+              slectedListOptions[key] = [];
+            }
+            if ((slectedListOptions[key] as List).contains(v)) {
+              int index = (slectedListOptions[key] as List).indexOf(v);
+              slectedListOptions[key][index]["fucsed"] = true;
+            } else
+              slectedListOptions[key].add(v);
+          });
     }, onEmptyMessage: LanguageManager.getText(205)));
     items.add(getSelectedOptionList("sub_service_catigory"));
     items.add(createInput("first_name", 206));
     items.add(createInput("middel_name", 207));
     items.add(createInput("last_name", 208));
-    items.add(
-        createInput("connection_phone", 209, textType: TextInputType.number));
+    items.add(createInput("connection_phone", 209, textType: TextInputType.number));
     items.add(Container(
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       child: Text(
@@ -281,6 +268,7 @@ class _JoinRequestState extends State<JoinRequest> {
     return ScrollConfiguration(
       behavior: CustomBehavior(),
       child: ListView(
+        padding: EdgeInsets.only(top: 25),
         children: items,
       ),
     );
@@ -496,9 +484,7 @@ class _JoinRequestState extends State<JoinRequest> {
   }
 
   void send() {
-    setState(() {
-      errors = {};
-    });
+    setState(() {errors = {};});
     List validateKeys = [
       "service",
       "service_catigory",

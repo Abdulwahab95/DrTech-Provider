@@ -9,15 +9,13 @@ import 'package:dr_tech/Models/Parser.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/Home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
-import 'package:intl/intl.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:vibration/vibration.dart';
 
 class EnterCode extends StatefulWidget {
-  final CodeSendType type;
-  const EnterCode(this.type);
+  EnterCode();
 
   @override
   _EnterCodeState createState() => _EnterCodeState();
@@ -30,10 +28,15 @@ class _EnterCodeState extends State<EnterCode> {
   List<Map> fileds = [];
   String countDownTimer = "00:00";
   int resendTime = 0;
-  bool error = false;
+  bool errorInputOtp = false;
+
+  String phoneNumber, verificationId, otp;
+  static const int duration = 60;
+  int  _forceCodeResent = 0;
+
   @override
   void initState() {
-    for (var i = 0; i < 4; i++)
+    for (var i = 0; i < 6; i++)
       fileds.add({"Node": FocusNode(), "Controller": TextEditingController()});
 
     KeyboardVisibilityNotification().addNewListener(
@@ -54,11 +57,19 @@ class _EnterCodeState extends State<EnterCode> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fileds[0]["Node"].requestFocus();
     });
-    tick();
+
+
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      print('heree: addPostFrameCallback');
+      sendSms();
+    });
   }
 
+
   void tick() {
+    print('heree: tick()');
     Timer(Duration(seconds: 1), () {
       if (!mounted) return;
       setState(() {
@@ -83,12 +94,8 @@ class _EnterCodeState extends State<EnterCode> {
           title: Container(
             margin: EdgeInsets.only(top: 15),
             child: Text(
-              LanguageManager.getText(
-                  CodeSendType.EMAIL == widget.type ? 17 : 16),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
+              LanguageManager.getText(16),//تاكيد رقم الهاتف
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
           elevation: 1.5,
@@ -107,8 +114,7 @@ class _EnterCodeState extends State<EnterCode> {
                           top: MediaQuery.of(context).size.width * 0.15,
                           bottom: 25),
                       child: Text(
-                        LanguageManager.getText(
-                            CodeSendType.EMAIL == widget.type ? 18 : 19),
+                        LanguageManager.getText(19),//الرجاء ادخال الرمز المرسل على رقم الجوال
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Converter.hexToColor("#00463e"),
@@ -129,6 +135,8 @@ class _EnterCodeState extends State<EnterCode> {
                           getCodeField(1),
                           getCodeField(2),
                           getCodeField(3),
+                          getCodeField(4),
+                          getCodeField(5),
                         ],
                       ),
                     ),
@@ -141,10 +149,8 @@ class _EnterCodeState extends State<EnterCode> {
                           InkWell(
                             onTap: sendCode,
                             child: Text(
-                              LanguageManager.getText(20),
-                              style: TextStyle(
-                                  color: Converter.hexToColor("#40746e")),
-                            ),
+                                LanguageManager.getText(20),//اعادة ارسال
+                                style: TextStyle(color: Converter.hexToColor("#40746e"))),
                           ),
                           Text(
                             countDownTimer,
@@ -161,27 +167,24 @@ class _EnterCodeState extends State<EnterCode> {
             visibleKeyboard
                 ? Container()
                 : Expanded(
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: InkWell(
+                    onTap: conferm,
                     child: Container(
-                    alignment: Alignment.bottomCenter,
-                    child: InkWell(
-                      onTap: conferm,
-                      child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Converter.hexToColor("#344f64")),
-                        height: 50,
-                        width: 300,
-                        child: Text(
-                          LanguageManager.getText(21),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Converter.hexToColor("#344f64")),
+                      height: 50,
+                      width: 300,
+                      child: Text(
+                        LanguageManager.getText(21),// تأكيد
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
-                  )),
+                  ),
+                )),
             Container(
               height: 20,
             )
@@ -190,8 +193,8 @@ class _EnterCodeState extends State<EnterCode> {
   }
 
   Widget getCodeField(index) {
-    double size = MediaQuery.of(context).size.width * 0.15;
-    if (size > 60) size = 60;
+    double size = MediaQuery.of(context).size.width * 0.12;
+    // if (size > 60) size = 60;
     return Container(
       width: size,
       height: size,
@@ -201,16 +204,16 @@ class _EnterCodeState extends State<EnterCode> {
               color: selectedIndex == index
                   ? Converter.hexToColor("#2094cd")
                   : Colors.transparent),
-          color: Converter.hexToColor(error
+          color: Converter.hexToColor(errorInputOtp
               ? "#ffb6b6"
               : selectedIndex == index
-                  ? "#ddeef7"
-                  : "#f2f2f2"),
+              ? "#ddeef7"
+              : "#f2f2f2"),
           borderRadius: BorderRadius.circular(5)),
       child: TextField(
         onTap: () {
           setState(() {
-            error = false;
+            errorInputOtp = false;
             hideKeyBoard();
             fileds[index]["Node"].requestFocus();
             fileds[index]["Controller"].text = "";
@@ -222,9 +225,9 @@ class _EnterCodeState extends State<EnterCode> {
         focusNode: fileds[index]["Node"],
         onChanged: (v) {
           setState(() {
-            error = false;
+            errorInputOtp = false;
             code[index] = v;
-            if (index < 3) {
+            if (index < 5) {
               fileds[index + 1]["Node"].requestFocus();
               fileds[index + 1]["Controller"].text = "";
             } else {
@@ -260,54 +263,74 @@ class _EnterCodeState extends State<EnterCode> {
 
   void sendCode() {
     if (resendTime > 0) {
-      Alert.show(context, LanguageManager.getText(24));
+      Alert.show(context, LanguageManager.getText(24)); //يرجي الانتظار قليلا قبل اعادة ارسال الرمز مجددا
       return;
     }
 
-    Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/resend", (r) {
-      Alert.endLoading();
-      if (r['status'] == true) {
-        setState(() {
-          resendTime = r['time'];
-          tick();
-        });
-        Alert.show(
-            context,
-            LanguageManager.getText(r['at'] == "PHONE" ? 24 : 25) +
-                "\n" +
-                r["to"]);
-        // success
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    });
+    sendSms();
+    // NetworkManager.httpPost(Globals.baseUrl + "user/resend", (r) {
+    //   Alert.endLoading();
+    //   if (r['status'] == true) {
+    //     setState(() {
+    //       resendTime = r['time'];
+    //       tick();
+    //     });
+    //     Alert.show(
+    //         context,
+    //         LanguageManager.getText(r['at'] == "PHONE" ? 24 : 25) + "\n" + r["to"] //تم ارسال رمز مكون من 6 ارقام للرقم الجوال التالي
+    //     );
+    //     // success
+    //   } else if (r['message'] != null) {
+    //     Alert.show(context, Converter.getRealText(r['message']));
+    //   }
+    // });
   }
 
-  void conferm() {
-    setState(() {
-      error = false;
-    });
-    if (code.keys.length < 4) {
-      error = true;
+  Future<void> conferm() async {
+    setState(() {errorInputOtp = false;});
+
+    if (code.keys.length < 6) {
+      errorInputOtp = true;
       vibrate();
       return;
     }
-    Map<String, String> body = {"code": code.values.join()};
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/active", (r) {
+    signIn(code.values.join(), context);
+
+  }
+
+  Future<void> signIn(String otp, BuildContext contextPage) async {
+    print('heree: signIn');
+    var errorStr = '';
+    await FirebaseAuth.instance.signInWithCredential(
+        PhoneAuthProvider.credential(verificationId: verificationId, smsCode: otp)).
+    onError((error, stackTrace) {errorStr = error.toString(); return;}).
+    then((value) {
       Alert.endLoading();
-      if (r['status'] == true) {
-        DatabaseManager.save(Globals.authoKey, r['token']);
-        UserManager.proccess(r['user']);
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => Home()));
-        // success
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
+      print('heree: $value');
+      if(errorStr.isNotEmpty){
+        if(errorStr.contains('credential is invalid'))
+          Alert.show(contextPage, LanguageManager.getText(23));
+        else
+          Alert.show(contextPage, errorStr);
+      } else if(value.runtimeType == UserCredential){
+        print('heree: ${value.user.uid}');
+        // Navigator.pop(context, true);
+        NetworkManager.httpPost(Globals.baseUrl + "user/active", (r) {
+          Alert.endLoading();
+          if (r['status'] == true) {
+            DatabaseManager.save(Globals.authoKey, r['token']);
+            DatabaseManager.save('about', r['about']);
+            UserManager.proccess(r['user']);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home()));
+            // success
+          } else if (r['message'] != null) {
+            Alert.show(context, Converter.getRealText(r['message']));
+          }
+        }, body: {});
       }
-    }, body: body);
+    });
   }
 
   void hideKeyBoard() {
@@ -321,6 +344,54 @@ class _EnterCodeState extends State<EnterCode> {
     if (await Vibration.hasVibrator()) {
       Vibration.vibrate();
     }
+  }
+
+  Future<void> sendSms() async {
+    print('heree: sendSms');
+
+    Alert.startLoading(context);
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: "+249965095703",
+      forceResendingToken: _forceCodeResent,
+      timeout: const Duration(seconds: duration),
+      verificationCompleted: (PhoneAuthCredential  authCredential) {
+        print('heree: verificationCompleted');
+        Alert.endLoading();
+        // setState(() {authStatus = "Your account is successfully verified";});
+        // loginApi();
+      },
+      verificationFailed: (FirebaseAuthException  authException) {
+        print('heree: verificationFailed: ${authException.code}, ${authException.message}');
+        Alert.endLoading();
+        // Alert.show(context, Converter.getRealText(r['message']));
+        Alert.show(context, authException.message);
+        // setState(() {authStatus = "Authentication failed";});
+      },
+      codeSent: (String verId, [int forceCodeResent]) {
+        Alert.endLoading();
+        print('heree: codeSent');
+        verificationId = verId;
+        // setState(() {authStatus = "OTP has been successfully send";});
+        _forceCodeResent = forceCodeResent;
+
+        resendTime = Globals.getConfig("resend_time") != ""
+            ? Parser(context).getRealValue(Globals.getConfig("resend_time"))
+            : 60;
+
+
+        tick();
+        // Navigator.push(context, MaterialPageRoute(builder: (_) => EnterCode(verId)))
+        //     .then((value) {print('heree: back_here $value');});
+      },
+      codeAutoRetrievalTimeout: (String verId) {
+        print('heree: codeAutoRetrievalTimeout');
+        verificationId = verId;
+        // setState(() {authStatus = "TIMEOUT";});
+      },
+    );
+
+
   }
 }
 

@@ -30,23 +30,42 @@ class _UserProductsState extends State<UserProducts> {
   }
 
   void load() {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() {isLoading = true;});
+
     NetworkManager.httpGet(
         Globals.baseUrl + "product/load?page=$page&type=user", (r) {
-      setState(() {
-        isLoading = false;
-      });
+
       if (r['status'] == true) {
+
+        if(data.isNotEmpty) {
+          var exist = false;
+          for (var v in data.values) {
+            if (v.toString() == r['data'].toString())
+              {
+                exist = true;
+              }
+            print('heree: exist: $exist');
+            print('heree: v: $v');
+            print('heree: r[\'data\']: ${r['data']}');
+            //below is the solution
+          }
+          if(!exist)
+            setState(() {
+              page++;
+              data[r['page']] = r['data'];
+            });
+        } else
         setState(() {
+          print('heree: first time');
           page++;
           data[r['page']] = r['data'];
         });
+        setState(() {isLoading = false;});
       } else if (r['message'] != null) {
         Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
+
   }
 
   @override
