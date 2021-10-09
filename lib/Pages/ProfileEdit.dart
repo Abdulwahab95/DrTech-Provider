@@ -7,6 +7,7 @@ import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
+import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
@@ -29,6 +30,7 @@ class _ProfileEditState extends State<ProfileEdit> {
   void initState() {
     body["name"] = UserManager.currentUser("name");
     selectedTexts["name"] = UserManager.currentUser("name");
+    selectedTexts["about"] = UserManager.currentUser("about");
     super.initState();
   }
 
@@ -83,7 +85,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                         onTap: () async {
                           if (isUploading) return;
                           await pickImage(ImageSource.gallery);
-                          updateImage();
+                          if(selectedImage != null) updateImage();
                         },
                         child: Container(
                             width: imageSize,
@@ -122,7 +124,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                             color: Converter.hexToColor("#2094CD")),
                       ),
                     ),
-                    createInput("about", 271, maxLines: 4, maxInput: 250),
+                    createInput("about", 271, maxLines: 4, maxInput: 250, textType: TextInputType.multiline),
                   ],
                 ))),
         InkWell(
@@ -258,10 +260,15 @@ class _ProfileEditState extends State<ProfileEdit> {
 
   void update() {
     hideKeyBoard();
-    Alert.startLoading(context);
-    UserManager.update("about", body['about'], (r) {
-      Alert.endLoading();
-    });
+    if(body['about'] != null) {
+      Alert.startLoading(context);
+      UserManager.update("about", body['about'], (r) {
+        if (r) {DatabaseManager.save('about', body['about']);}
+        Alert.endLoading();
+      });
+    }else{
+      Alert.show(context, LanguageManager.getText(281));
+    }
   }
 
   void updateImage() {

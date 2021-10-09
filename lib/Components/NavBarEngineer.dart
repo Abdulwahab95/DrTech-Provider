@@ -5,7 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class NavBarEngineer extends StatefulWidget {
   final onUpdate;
-  const NavBarEngineer({this.onUpdate});
+  final page;
+  const NavBarEngineer({this.onUpdate,this.page});
 
   @override
   _NavBarEngineerState createState() => _NavBarEngineerState();
@@ -18,6 +19,7 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
   @override
   void initState() {
     activeColor = Converter.hexToColor("#2094CD");
+    if(widget.page != null) iSelectedIndex = widget.page;
     super.initState();
   }
 
@@ -69,20 +71,16 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
               }, iSelectedIndex == 2),
               createIcon("bell", 45, () {
                 setState(() {
-                  // iSelectedIndex = 3;
-                  iSelectedIndex = 2;
-                });
-                widget.onUpdate(iSelectedIndex);
-              // }, iSelectedIndex == 3),
-              }, iSelectedIndex == 2),
-              createIcon("menu", 46, () {
-                setState(() {
-                  // iSelectedIndex = 4;
                   iSelectedIndex = 3;
                 });
                 widget.onUpdate(iSelectedIndex);
-              // }, iSelectedIndex == 4),
               }, iSelectedIndex == 3),
+              createIcon("menu", 46, () {
+                setState(() {
+                  iSelectedIndex = 4;
+                });
+                widget.onUpdate(iSelectedIndex);
+              }, iSelectedIndex == 4),
             ],
           ),
         ),

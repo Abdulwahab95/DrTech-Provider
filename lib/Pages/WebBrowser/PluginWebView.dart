@@ -62,7 +62,7 @@ class PluginWebView extends State<WebBrowser> {
         elevation: 0,
         backgroundColor: Colors.white,
         title: Center(
-          child: Text(widget.title, style: Theme.of(context).textTheme.title),
+          child: Text(widget.title, style: Theme.of(context).textTheme.headline6),
         ),
         actions: [
           Container(
@@ -104,7 +104,7 @@ class PluginWebView extends State<WebBrowser> {
                         height: 20,
                       ),
                       Text(LanguageManager.getText(206),
-                          style: Theme.of(context).textTheme.title),
+                          style: Theme.of(context).textTheme.headline6),
                     ],
                   )
                 : CustomLoading(),

@@ -5,9 +5,9 @@ import 'package:dr_tech/Components/HomeSlider.dart';
 import 'package:dr_tech/Components/NavBar.dart';
 import 'package:dr_tech/Components/NavBarEngineer.dart';
 import 'package:dr_tech/Config/Converter.dart';
-import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/LocalNotifications.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Pages/Conversations.dart';
 import 'package:dr_tech/Pages/Orders.dart';
@@ -32,8 +32,16 @@ class Home extends StatefulWidget {
 
 class _HomeEngineerState extends State<Home> {
   int iScreenIndex = 0;
+
+  @override
+  void initState() {
+    if (widget.page != null) iScreenIndex = widget.page;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Column(
         children: [
@@ -46,8 +54,8 @@ class _HomeEngineerState extends State<Home> {
                     EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
                 child: Text(
                   LanguageManager.getText(
-                      // [249, 250, 44, 35, 45, 46][iScreenIndex]),
                       [249, 250, 35, 45, 46][iScreenIndex]),
+                      // [249, 250, 35, 45, 46][iScreenIndex]),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 16,
@@ -71,7 +79,7 @@ class _HomeEngineerState extends State<Home> {
               setState(() {
                 iScreenIndex = index;
               });
-            }),
+            }, page: iScreenIndex),
           )
         ],
       ),
@@ -136,11 +144,11 @@ class _HomeState extends State<Home> {
                       UserManager.update("name", name, (status) {
                         DatabaseManager.save("name", name);
                         Alert.endLoading();
-                        // if (status == true) {
+                        if (status == true) {
                           setState(() {
                             nameUserTxt = name;
                           });
-                        // }
+                        }
                       });
                     },
                     child: Container(
@@ -190,8 +198,8 @@ class _HomeState extends State<Home> {
                   iScreenIndex != 0 ?
                   Text(
                           LanguageManager.getText(
-                              // [43, 44, 45, 46][iScreenIndex]),
-                              [43, 45, 46][iScreenIndex]),
+                              [43, 44, 45, 46][iScreenIndex]),
+                              // [43, 45, 46][iScreenIndex]),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontSize: 16,
@@ -210,51 +218,51 @@ class _HomeState extends State<Home> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white),
                             ),
-                            // InkWell(
-                            //   onTap: () {
-                            //     var cities = DatabaseManager
-                            //         .liveDatabase['country_cities'];
-                            //     if (cities == null || cities == "") return;
-                            //     for (var i = 0; i < cities.length; i++) {
-                            //       cities[i]['text'] = cities[i]['name'];
-                            //     }
-                            //     Alert.show(context, cities,
-                            //         type: AlertType.SELECT, onSelected: (item) {
-                            //       DatabaseManager.liveDatabase["city"] = item;
-                            //     });
-                            //   },
-                            //   child: Row(
-                            //     textDirection:
-                            //         LanguageManager.getTextDirection(),
-                            //     children: [
-                            //       Icon(
-                            //         FlutterIcons.location_on_mdi,
-                            //         size: 18,
-                            //         color: Colors.white,
-                            //       ),
-                            //       Container(
-                            //         width: 5,
-                            //       ),
-                            //       Text(
-                            //         DatabaseManager.liveDatabase["city"] != null
-                            //             ? DatabaseManager.liveDatabase["city"]
-                            //                     ["name"]
-                            //                 .toString()
-                            //             : "",
-                            //         style: TextStyle(
-                            //             fontSize: 14, color: Colors.white),
-                            //       ),
-                            //       Container(
-                            //         width: 5,
-                            //       ),
-                            //       Icon(
-                            //         FlutterIcons.chevron_down_ent,
-                            //         size: 18,
-                            //         color: Colors.white,
-                            //       )
-                            //     ],
-                            //   ),
-                            // )
+                            InkWell(
+                              onTap: () {
+                                var cities = DatabaseManager
+                                    .liveDatabase['country_cities'];
+                                if (cities == null || cities == "") return;
+                                for (var i = 0; i < cities.length; i++) {
+                                  cities[i]['text'] = cities[i]['name'];
+                                }
+                                Alert.show(context, cities,
+                                    type: AlertType.SELECT, onSelected: (item) {
+                                  DatabaseManager.liveDatabase["city"] = item;
+                                });
+                              },
+                              child: Row(
+                                textDirection:
+                                    LanguageManager.getTextDirection(),
+                                children: [
+                                  Icon(
+                                    FlutterIcons.location_on_mdi,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                  Container(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    DatabaseManager.liveDatabase["city"] != null
+                                        ? DatabaseManager.liveDatabase["city"]
+                                                ["name"]
+                                            .toString()
+                                        : "",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.white),
+                                  ),
+                                  Container(
+                                    width: 5,
+                                  ),
+                                  Icon(
+                                    FlutterIcons.chevron_down_ent,
+                                    size: 18,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              ),
+                            )
                           ],
                         ),
                 ),
@@ -262,63 +270,63 @@ class _HomeState extends State<Home> {
               Expanded(
                   child: [
                 MainScreen(homeSlider),
-                // ServicesScreen(homeSlider),
+                ServicesScreen(homeSlider),
                 NotificationsScreen(),
                 ProfileScreen(() {
                   setState(() {});
                 })
               ][iScreenIndex]),
-              // AnimatedContainer(
-              //     duration: Duration(milliseconds: 250),
-              //     height: isOpenMessage ? 50 : 0,
-              //     decoration:
-              //         BoxDecoration(color: Converter.hexToColor("#707070")),
-              //     child: ScrollConfiguration(
-              //         behavior: ScrollBehavior(),
-              //         child: SingleChildScrollView(
-              //             child: Container(
-              //           padding: EdgeInsets.all(12),
-              //           child: Row(
-              //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //               textDirection: LanguageManager.getTextDirection(),
-              //               crossAxisAlignment: CrossAxisAlignment.center,
-              //               children: [
-              //                 Text(
-              //                   LanguageManager.getText(41),
-              //                   style: TextStyle(
-              //                       color: Colors.white,
-              //                       fontSize: 14,
-              //                       fontWeight: FontWeight.w600),
-              //                 ),
-              //                 InkWell(
-              //                   onTap: () {
-              //                     Navigator.push(
-              //                         context,
-              //                         MaterialPageRoute(
-              //                             builder: (_) => Subscription()));
-              //                   },
-              //                   child: Text(
-              //                     LanguageManager.getText(42),
-              //                     style: TextStyle(
-              //                         color: Converter.hexToColor("#DBE208"),
-              //                         fontSize: 14,
-              //                         fontWeight: FontWeight.w600),
-              //                   ),
-              //                 ),
-              //                 InkWell(
-              //                   onTap: () {
-              //                     setState(() {
-              //                       isOpenMessage = false;
-              //                     });
-              //                   },
-              //                   child: Icon(
-              //                     FlutterIcons.close_ant,
-              //                     color: Colors.white,
-              //                     size: 22,
-              //                   ),
-              //                 )
-              //               ]),
-              //         )))),
+              AnimatedContainer(
+                  duration: Duration(milliseconds: 250),
+                  height: isOpenMessage ? 50 : 0,
+                  decoration:
+                      BoxDecoration(color: Converter.hexToColor("#707070")),
+                  child: ScrollConfiguration(
+                      behavior: ScrollBehavior(),
+                      child: SingleChildScrollView(
+                          child: Container(
+                        padding: EdgeInsets.all(12),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            textDirection: LanguageManager.getTextDirection(),
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                LanguageManager.getText(41),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => Subscription()));
+                                },
+                                child: Text(
+                                  LanguageManager.getText(42),
+                                  style: TextStyle(
+                                      color: Converter.hexToColor("#DBE208"),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    isOpenMessage = false;
+                                  });
+                                },
+                                child: Icon(
+                                  FlutterIcons.close_ant,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              )
+                            ]),
+                      )))),
               Container(
                 height: 70,
               )

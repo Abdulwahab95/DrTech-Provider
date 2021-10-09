@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'package:dr_tech/Pages/Register.dart';
-import 'package:vibration/vibration.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
@@ -10,9 +9,13 @@ import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/EnterCode.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:vibration/vibration.dart';
+
+import 'ExtraPages/Terms.dart';
 
 class Login extends StatefulWidget {
   const Login();
@@ -25,13 +28,13 @@ class _LoginState extends State<Login> {
   Map selectedCountrieCode = {}, body = {}, errors = {};
   double logoSize = 0.3;
   List countries = [];
+  bool accepted = true;
+
   @override
   void initState() {
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
-        setState(() {
-          logoSize = visible ? 0.2 : 0.3;
-        });
+        setState(() {logoSize = visible ? 0.2 : 0.3;});
       },
     );
     selectedCountrieCode["code"] = DatabaseManager.liveDatabase["country"];
@@ -48,9 +51,7 @@ class _LoginState extends State<Login> {
           "id": item["id"],
           "phone_code": item["country_code"],
           "text": item["name"],
-          "icon": Globals.baseUrl +
-              "storage/flags/" +
-              item["code"].toString().toLowerCase(),
+          "icon": Globals.baseUrl + "storage/flags/" + item["code"].toString().toLowerCase(),
         });
       }
     }
@@ -61,20 +62,20 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         centerTitle: true,
         toolbarHeight: 70,
         title: Container(
           margin: EdgeInsets.only(top: 15),
           child: Text(
-            LanguageManager.getText(30),
-            style: TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+            LanguageManager.getText(276), // أدخل رقم هاتفك
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         ),
         elevation: 1.5,
         backgroundColor: Converter.hexToColor("#2094cd"),
       ),
+
       body: Column(
         children: [
           AnimatedContainer(
@@ -88,16 +89,14 @@ class _LoginState extends State<Login> {
               child: Image.asset("assets/images/logo.png"),
             ),
           ),
+
           Expanded(
             child: Container(
-              padding: EdgeInsets.only(
-                  left: MediaQuery.of(context).size.width * 0.05,
-                  right: MediaQuery.of(context).size.width * 0.05),
+              padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
               child: ScrollConfiguration(
                 behavior: CustomBehavior(),
                 child: ListView(
-                  physics:
-                      logoSize > 0.15 ? NeverScrollableScrollPhysics() : null,
+                  // physics: logoSize > 0.15 ? NeverScrollableScrollPhysics() : null,
                   children: [
                     AnimatedContainer(
                         duration: Duration(milliseconds: 250),
@@ -120,9 +119,7 @@ class _LoginState extends State<Login> {
                                 child: TextField(
                               onChanged: (v) {
                                 body["phone"] = v;
-                                setState(() {
-                                  errors['phone'] = false;
-                                });
+                                setState(() {errors['phone'] = false;});
                               },
                               keyboardType: TextInputType.phone,
                               textDirection: LanguageManager.getTextDirection(),
@@ -132,17 +129,15 @@ class _LoginState extends State<Login> {
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintStyle: TextStyle(fontSize: 14),
-                                  hintText: LanguageManager.getText(6)),
+                                  hintText: LanguageManager.getText(6)), // رقم الهاتف
                             )),
                             InkWell(
                               onTap: () {
                                 hideKeyBoard();
-                                Alert.show(context, countries,
-                                    onSelected: (selcted) {
+                                Alert.show(context, countries, onSelected: (selcted) {
                                   setState(() {
                                     selectedCountrieCode = selcted;
-                                    body["country"] =
-                                        selectedCountrieCode["code"];
+                                    body["country"] = selectedCountrieCode["code"];
                                   });
                                 }, type: AlertType.SELECT);
                               },
@@ -181,54 +176,44 @@ class _LoginState extends State<Login> {
                                 ],
                               ),
                             ),
-                            Container(
-                              width: 12,
-                            )
+                            Container(width: 12)
                           ],
                         )),
-                    Container(
-                      height: 10,
+                    Container(height: MediaQuery.of(context).size.height * 0.02),
+
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      padding: EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                          color: Converter.hexToColor(errors['accepted'] == true
+                              ? "#ffd1ce"
+                              : "#ffffff00"),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Row(
+
+                        textDirection: LanguageManager.getTextDirection(),
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Checkbox(value: accepted, onChanged: (v) {setState(() {accepted = v;});}),
+                          Expanded(
+                              child: Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Text(
+                                  LanguageManager.getText(8),//من خلال النقر على التالي فإنك تقر بانك قد قرأت سياسة الخصوصية و توافق على شروط التطبيق
+                                  textDirection: LanguageManager.getTextDirection(),
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      height: 1.5,
+                                      color: Converter.hexToColor("#20313e")),
+                                ),
+                              ))
+                        ],
+                      ),
                     ),
-                    /*  AnimatedContainer(
-                        duration: Duration(milliseconds: 250),
-                        decoration: BoxDecoration(
-                            color: Converter.hexToColor(errors["email"] == true
-                                ? "#f59d97"
-                                : "#f2f2f2"),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Row(
-                          textDirection: LanguageManager.getTextDirection(),
-                          children: [
-                            Container(
-                              width: 45,
-                              alignment: Alignment.center,
-                              child: Icon(FlutterIcons.email_mdi,
-                                  size: 22,
-                                  color: Converter.hexToColor("#858585")),
-                            ),
-                            Expanded(
-                                child: TextField(
-                              onChanged: (v) {
-                                body["email"] = v;
-                                setState(() {
-                                  errors['email'] = false;
-                                });
-                              },
-                              keyboardType: TextInputType.emailAddress,
-                              textDirection: LanguageManager.getTextDirection(),
-                              textAlign: LanguageManager.getDirection()
-                                  ? TextAlign.right
-                                  : TextAlign.left,
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(fontSize: 14),
-                                  hintText: LanguageManager.getText(7)),
-                            )),
-                          ],
-                        )),*/
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.05,
-                    ),
+
+                    Container(height: MediaQuery.of(context).size.height * 0.02),
+
                     InkWell(
                       onTap: login,
                       child: Container(
@@ -238,7 +223,7 @@ class _LoginState extends State<Login> {
                             color: Converter.hexToColor("#344f64"),
                             borderRadius: BorderRadius.circular(12)),
                         child: Text(
-                          LanguageManager.getText(30),
+                          LanguageManager.getText(3), // التالي
                           style: TextStyle(
                               fontSize: 16,
                               color: Colors.white,
@@ -246,35 +231,19 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
+                    Container(height: logoSize > 0.15 ? MediaQuery.of(context).size.height * 0.20 : 20),
+
                     Container(
-                      height: logoSize > 0.15
-                          ? MediaQuery.of(context).size.height * 0.05
-                          : 20,
-                    ),
-                    Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        textDirection: LanguageManager.getTextDirection(),
-                        children: [
-                          Text(
-                            LanguageManager.getText(28),
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                          Container(
-                            width: 15,
-                          ),
-                          InkWell(
-                            onTap: goToRegister,
-                            child: Text(LanguageManager.getText(29),
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Converter.hexToColor("#344f64"))),
-                          )
-                        ],
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(vertical: 25),
+                      child: InkWell(
+                        onTap: goToTerms,
+                        child: Text(
+                            LanguageManager.getText(59),//سياسة الخصوصية
+                            style: TextStyle(fontSize: 14,color: Converter.hexToColor("#344f64")),
+                            textAlign: TextAlign.center
+                        ),
                       ),
-                    ),
-                    Container(
-                      height: 30,
                     )
                   ],
                 ),
@@ -286,20 +255,14 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void goToRegister() {
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (_) => Register()));
-  }
+  void goToTerms() {Navigator.push(context, MaterialPageRoute(builder: (_) => Terms()));}
 
   void login() {
     hideKeyBoard();
-    setState(() {
-      errors = {};
-    });
+    setState(() {errors = {};});
+
     if (body['phone'].toString().length < 9) {
-      setState(() {
-        errors['phone'] = true;
-      });
+      setState(() {errors['phone'] = true;});
     }
 
     if (errors.keys.length > 0) {
@@ -307,18 +270,30 @@ class _LoginState extends State<Login> {
       return;
     }
 
-    Alert.startLoading(context);
+    if (!accepted) {
+      errors['accepted'] = true;
+      Timer(Duration(milliseconds: 500), () {
+        if (errors.containsKey("accepted")) {
+          setState(() {errors.remove("accepted");});
+        }
+      });
+      vibrate();
+      return;
+    }
 
+    Alert.startLoading(context);
+    // sendSms();
+
+    body["type"] = 'ENGINEER';
     NetworkManager.httpPost(Globals.baseUrl + "user/login", (r) {
       Alert.endLoading();
       if (r['status'] == true) {
         DatabaseManager.liveDatabase[Globals.authoKey] = r['token'];
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (_) => EnterCode(r['code_send_type_key'] == "phone"
-                    ? CodeSendType.PHONE
-                    : CodeSendType.EMAIL)));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EnterCode()))
+            .then((value) {
+              print('heree: back_here $value');
+
+            });
       } else if (r['message'] != null) {
         Alert.show(context, Converter.getRealText(r['message']));
       }
@@ -337,4 +312,6 @@ class _LoginState extends State<Login> {
       Vibration.vibrate();
     }
   }
+
+
 }

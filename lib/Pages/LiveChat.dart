@@ -13,6 +13,7 @@ import 'package:dr_tech/Components/PaymentOptions.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/LocalNotifications.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+
+import 'Home.dart';
 
 class LiveChat extends StatefulWidget {
   final String id;
@@ -56,6 +59,7 @@ class _LiveChatState extends State<LiveChat> {
     LiveChat.callback = onReciveNotic;
     load();
     super.initState();
+    print('heree: reminderScreenNavigatorKey ${LocalNotifications.reminderScreenNavigatorKey.currentState}');
   }
 
   @override
@@ -153,11 +157,7 @@ class _LiveChatState extends State<LiveChat> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl +
-            "chat/load?conversation_id=" +
-            widget.id.toString() +
-            "&page=" +
-            page.toString(), (r) {
+        Globals.baseUrl + "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString(), (r) {
       try {
         if (r["status"] == true) {
           setState(() {
@@ -181,170 +181,171 @@ class _LiveChatState extends State<LiveChat> {
     }, cashable: true);
   }
 
+  int i=0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            Column(children: [
-              Container(
-                  decoration:
-                      BoxDecoration(color: Converter.hexToColor("#2094cd")),
-                  padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: EdgeInsets.only(
-                          left: 25, right: 25, bottom: 20, top: 25),
-                      child: Row(
-                        textDirection: LanguageManager.getTextDirection(),
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width: 20,
-                              child: Icon(
-                                LanguageManager.getDirection()
-                                    ? FlutterIcons.chevron_right_fea
-                                    : FlutterIcons.chevron_left_fea,
-                                color: Colors.white,
+    return
+      WillPopScope(
+      onWillPop: _close,
+      child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              Column(children: [
+                Container(
+                    decoration: BoxDecoration(color: Converter.hexToColor("#2094cd")),
+                    padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.only(
+                            left: 25, right: 25, bottom: 20, top: 25),
+                        child: Row(
+                          textDirection: LanguageManager.getTextDirection(),
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: _close,
+                              child: Container(
+                                width: 20,
+                                child: Icon(
+                                  LanguageManager.getDirection()
+                                      ? FlutterIcons.chevron_right_fea
+                                      : FlutterIcons.chevron_left_fea,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                          Text(
-                            isTyping
-                                ? LanguageManager.getText(84)
-                                : user.isNotEmpty
-                                    ? user["name"]
-                                    : "",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                          Row(
-                            textDirection: LanguageManager.getTextDirection(),
-                            children: [
-                              InkWell(
-                                onTap: phoneCall,
-                                child: Container(
-                                  width: 20,
-                                  child: Icon(
-                                    FlutterIcons.phone_faw,
-                                    size: 24,
-                                    color: Colors.white,
-                                    textDirection:
-                                        LanguageManager.getTextDirection(),
+                            Text(
+                              isTyping
+                                  ? LanguageManager.getText(84)
+                                  : user.isNotEmpty
+                                      ? user["name"]
+                                      : "",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                            Row(
+                              textDirection: LanguageManager.getTextDirection(),
+                              children: [
+                                InkWell(
+                                  onTap: phoneCall,
+                                  child: Container(
+                                    width: 20,
+                                    child: Icon(
+                                      FlutterIcons.phone_faw,
+                                      size: 24,
+                                      color: Colors.white,
+                                      textDirection:
+                                          LanguageManager.getTextDirection(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: showOptions,
-                                child: Container(
-                                  width: 20,
-                                  child: Icon(
-                                    FlutterIcons.dots_vertical_mco,
-                                    size: 28,
-                                    color: Colors.white,
-                                    textDirection:
-                                        LanguageManager.getTextDirection(),
+                                Container(
+                                  width: 10,
+                                ),
+                                InkWell(
+                                  onTap: showOptions,
+                                  child: Container(
+                                    width: 20,
+                                    child: Icon(
+                                      FlutterIcons.dots_vertical_mco,
+                                      size: 28,
+                                      color: Colors.white,
+                                      textDirection:
+                                          LanguageManager.getTextDirection(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ))),
-              Expanded(
-                  child: ScrollConfiguration(
-                      behavior: CustomBehavior(),
-                      child: ListView(
-                        reverse: true,
-                        controller: scroller,
-                        children: getChatMessages(),
-                      ))),
-              getChatInput()
-            ]),
-            visibleoptions
-                ? InkWell(
-                    onTap: showOptions,
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Container(
-                        padding: EdgeInsets.only(
-                            top: MediaQuery.of(context).padding.top + 30),
-                        alignment: !LanguageManager.getDirection()
-                            ? Alignment.topRight
-                            : Alignment.topLeft,
-                        child: Container(
-                          width: 200,
-                          decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withAlpha(20),
-                                    spreadRadius: 5,
-                                    blurRadius: 5)
                               ],
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(5)),
-                          margin: EdgeInsets.all(30),
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            textDirection: LanguageManager.getTextDirection(),
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              InkWell(
-                                onTap: () {},
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Text(
-                                    LanguageManager.getText(76),
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ))),
+                Expanded(
+                    child: ScrollConfiguration(
+                        behavior: CustomBehavior(),
+                        child: ListView(
+                          reverse: true,
+                          controller: scroller,
+                          children: getChatMessages(),
+                        ))),
+                getChatInput()
+              ]),
+              visibleoptions
+                  ? InkWell(
+                      onTap: showOptions,
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      child: Container(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).padding.top + 30),
+                          alignment: !LanguageManager.getDirection()
+                              ? Alignment.topRight
+                              : Alignment.topLeft,
+                          child: Container(
+                            width: 200,
+                            decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black.withAlpha(20),
+                                      spreadRadius: 5,
+                                      blurRadius: 5)
+                                ],
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(5)),
+                            margin: EdgeInsets.all(30),
+                            padding: EdgeInsets.all(10),
+                            child: Column(
+                              textDirection: LanguageManager.getTextDirection(),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: Text(
+                                      LanguageManager.getText(76),
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              InkWell(
-                                onTap: () {},
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Text(
-                                    LanguageManager.getText(77),
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.normal),
+                                InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: Text(
+                                      LanguageManager.getText(77),
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              InkWell(
-                                onTap: () {},
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Text(
-                                    LanguageManager.getText(78),
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.normal),
+                                InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: Text(
+                                      LanguageManager.getText(78),
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal),
+                                    ),
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                        )),
-                  )
-                : Container(),
-          ],
-        ));
+                                )
+                              ],
+                            ),
+                          )),
+                    )
+                  : Container(),
+            ],
+          )),
+    );
   }
 
   List<Widget> getChatMessages() {
@@ -2087,4 +2088,13 @@ class _LiveChatState extends State<LiveChat> {
         )),
         type: AlertType.WIDGET);
   }
+
+  Future<bool> _close() async{
+    if(Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return true;
+    } else
+      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(page: 1,)), (Route<dynamic> route) => false);
+  }
+
 }

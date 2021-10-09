@@ -2,13 +2,15 @@ import 'dart:io';
 
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Globals {
   static String deviceToken = "";
   static Map deviceInfo = {};
-  static const String version = "0.0.1";
+  static String version = "0.0.1";
+  static String buildNumber = "1";
   static var config;
   static String authoKey = "x-autho";
   static String baseUrl = "https://server.drtechapp.com/";
@@ -18,8 +20,25 @@ class Globals {
   static dynamic data = [];
   // Callbacks
   static Function updateInCartCount;
-
   static var settings;
+  // Chat + Notification
+  static String currentConversationId = '';
+  static bool isOpenFromNotification = false;
+  static bool isOpenFromTerminate = false;
+  static var pagesRouteFactories;
+
+
+  static void logNotification(String s, RemoteMessage message) {
+    print('---------------Start--logNotification-- $s --------------------');
+    if(message != null){
+      print("heree: ${message.messageId ?? ''}");
+      print("heree: ${message ?? ''}");
+      print("heree: notification: ${message.notification ?? ''}");
+      print("heree: data: ${message.data ?? ''}");
+    }
+    print('---------------End--logNotification---------------------------');
+  }
+
 
   static bool checkUpdate(){
     for (var item in settings) {
@@ -58,6 +77,7 @@ class Globals {
       authoKey: DatabaseManager.load(authoKey) ?? "",
       "x-os": kIsWeb ? "web" : (Platform.isIOS ? "ios" : "Android"),
       "x-app-version": version,
+      "x-build-number": buildNumber,
       "x-token": deviceToken
     };
     if (DatabaseManager.liveDatabase[Globals.authoKey] != null) {

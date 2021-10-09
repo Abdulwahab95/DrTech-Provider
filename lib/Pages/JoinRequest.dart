@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
@@ -105,8 +104,7 @@ class _JoinRequestState extends State<JoinRequest> {
       padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          color:
-              Converter.hexToColor(map[data['status']]["color"]).withAlpha(15)),
+          color: Converter.hexToColor(map[data['status']]["color"]).withAlpha(15)),
       child: Text(
         LanguageManager.getText(map[data['status']]["text"]),
         textDirection: LanguageManager.getTextDirection(),
@@ -123,17 +121,9 @@ class _JoinRequestState extends State<JoinRequest> {
     if (data != null) {
       return Column(
         children: [
-          Container(
-            height: 70,
-          ),
-          SvgPicture.asset(
-            "assets/illustration/join.svg",
-            width: 120,
-            height: 120,
-          ),
-          Container(
-            height: 10,
-          ),
+          Container(height: 70),
+          SvgPicture.asset("assets/illustration/join.svg", width: 120, height: 120),
+          Container(height: 10),
           Container(
             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
             child: Text(
@@ -145,9 +135,7 @@ class _JoinRequestState extends State<JoinRequest> {
                   color: Converter.hexToColor("#2094CD")),
             ),
           ),
-          Container(
-            height: 10,
-          ),
+          Container(height: 10),
           Container(
             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
             child: Row(
@@ -162,9 +150,7 @@ class _JoinRequestState extends State<JoinRequest> {
                       fontSize: 16,
                       color: Converter.hexToColor("#344F64")),
                 ),
-                Container(
-                  width: 10,
-                ),
+                Container(width: 10),
                 getStatusText(),
               ],
             ),
@@ -174,8 +160,7 @@ class _JoinRequestState extends State<JoinRequest> {
     }
     List<Widget> items = [];
 
-    items.add(
-        createSelectInput("service", 200, config['service'], onSelected: (v) {
+    items.add(createSelectInput("service", 200, config['service'], onSelected: (v) {
       setState(() {
         selectedTexts["service"] = v['name'];
         body["service"] = v['id'];
@@ -280,9 +265,7 @@ class _JoinRequestState extends State<JoinRequest> {
     ));
     return ScrollConfiguration(
       behavior: CustomBehavior(),
-      child: ListView(
-        children: items,
-      ),
+      child: ListView(children: items),
     );
   }
 
@@ -315,24 +298,15 @@ class _JoinRequestState extends State<JoinRequest> {
             mainAxisSize: MainAxisSize.min,
             textDirection: LanguageManager.getTextDirection(),
             children: [
-              Text(
-                item['name'],
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              ),
-              Container(
-                width: 10,
-              ),
+              Text(item['name'], style: TextStyle(fontSize: 16, color: Colors.black)),
+              Container(width: 10),
               InkWell(
                 onTap: () {
                   setState(() {
                     (slectedListOptions[key] as List).remove(item);
                   });
                 },
-                child: Icon(
-                  FlutterIcons.x_fea,
-                  color: Colors.red,
-                  size: 18,
-                ),
+                child: Icon(FlutterIcons.x_fea, color: Colors.red, size: 18),
               )
             ],
           ),
@@ -388,10 +362,7 @@ class _JoinRequestState extends State<JoinRequest> {
                               width: 24,
                               height: 24,
                               color: Colors.white,
-                              child: Icon(
-                                Icons.delete,
-                                size: 22,
-                              )),
+                              child: Icon(Icons.delete, size: 22,)),
                         ),
                       )
                     ],

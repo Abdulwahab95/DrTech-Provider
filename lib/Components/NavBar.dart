@@ -2,6 +2,7 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/parser.dart';
 
 class NavBar extends StatefulWidget {
   final onUpdate;
@@ -53,28 +54,24 @@ class _NavBarState extends State<NavBar> {
                 });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 0, isBig: true),
-              // createIcon("services", 44, () {
-              //   setState(() {
-              //     iSelectedIndex = 1;
-              //   });
-              //   widget.onUpdate(iSelectedIndex);
-              // }, iSelectedIndex == 1),
-              createIcon("bell", 45, () {
+              createIcon("services", 44, () {
                 setState(() {
-                  // iSelectedIndex = 2;
                   iSelectedIndex = 1;
                 });
                 widget.onUpdate(iSelectedIndex);
-              // }, iSelectedIndex == 2),
               }, iSelectedIndex == 1),
-              createIcon("menu", 46, () {
+              createIcon("bell", 45, () {
                 setState(() {
-                  // iSelectedIndex = 3;
                   iSelectedIndex = 2;
                 });
                 widget.onUpdate(iSelectedIndex);
-              // }, iSelectedIndex == 3),
               }, iSelectedIndex == 2),
+              createIcon("menu", 46, () {
+                setState(() {
+                  iSelectedIndex = 3;
+                });
+                widget.onUpdate(iSelectedIndex);
+              }, iSelectedIndex == 3),
             ],
           ),
         ),

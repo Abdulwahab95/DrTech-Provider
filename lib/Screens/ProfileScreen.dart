@@ -35,123 +35,121 @@ class _ProfileScreenState extends State<ProfileScreen> {
       behavior: CustomBehavior(),
       child: ListView(
         children: [
-          // getProfileHeader(),
-          // Container(height: 10,),
-          // UserManager.currentUser("type") != "ENGINEER"
-          //     ? Container()
-          //     : Container(
-          //         margin: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 5),
-          //         child: Row(
-          //           textDirection: LanguageManager.getTextDirection(),
-          //           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //           children: [
-          //             SvgPicture.asset(
-          //               "assets/icons/lang.svg",
-          //               fit: BoxFit.fill,
-          //               width: 30,
-          //               height: 30,
-          //             ),
-          //             Text(
-          //               LanguageManager.getText(268),
-          //               style: TextStyle(
-          //                   fontWeight: FontWeight.w600, fontSize: 16),
-          //             ),
-          //             Row(
-          //               textDirection: LanguageManager.getTextDirection(),
-          //               children: [
-          //                 Text(
-          //                   LanguageManager.getText(100),
-          //                   style: TextStyle(
-          //                       fontWeight: FontWeight.normal,
-          //                       color: Colors.blue),
-          //                 ),
-          //                 Switch(
-          //                     value: UserManager.currentUser("status") == "1",
-          //                     onChanged: (v) {
-          //                       setState(() {
-          //                         DatabaseManager.save("status", v ? "1" : "0");
-          //                         UserManager.update("status", v ? "1" : "0",
-          //                             (r) {
-          //                           setState(() {});
-          //                         });
-          //                       });
-          //                       widget.refrashState();
-          //                     }),
-          //                 Text(
-          //                   LanguageManager.getText(101),
-          //                   style: TextStyle(
-          //                       fontWeight: FontWeight.normal,
-          //                       color: Colors.blue),
-          //                 ),
-          //               ],
-          //             )
-          //           ],
-          //         ),
-          //       ),
-          // Container(
-          //   margin: EdgeInsets.only(top: 0, bottom: 10, left: 5, right: 5),
-          //   child: Row(
-          //     textDirection: LanguageManager.getTextDirection(),
-          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //     children: [
-          //       SvgPicture.asset(
-          //         "assets/icons/lang.svg",
-          //         fit: BoxFit.fill,
-          //         width: 30,
-          //         height: 30,
-          //       ),
-          //       Text(
-          //         LanguageManager.getText(48),
-          //         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          //       ),
-          //       Row(
-          //         textDirection: LanguageManager.getTextDirection(),
-          //         children: [
-          //           Text(
-          //             LanguageManager.getText(49),
-          //             style: TextStyle(
-          //                 fontWeight: FontWeight.normal, color: Colors.blue),
-          //           ),
-          //           Switch(
-          //               value: LanguageManager.getDirection(),
-          //               onChanged: (v) {
-          //                 setState(() {
-          //                   if (v) {
-          //                     LanguageManager.setLanguage("ar,SA");
-          //                   } else {
-          //                     LanguageManager.setLanguage("en,US");
-          //                   }
-          //                 });
-          //                 widget.refrashState();
-          //               }),
-          //           Text(
-          //             LanguageManager.getText(50),
-          //             style: TextStyle(
-          //                 fontWeight: FontWeight.normal, color: Colors.blue),
-          //           ),
-          //         ],
-          //       )
-          //     ],
-          //   ),
-          // ),
-          // getProfileItem(FlutterIcons.list_fea, 185, () {
-          //   Navigator.push(
-          //       context, MaterialPageRoute(builder: (_) => Transactions()));
-          // }),
+          getProfileHeader(),
+          Container(
+            height: 10,
+          ),
+          UserManager.currentUser("type") != "ENGINEER"
+              ? Container()
+              : Container(
+            margin: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 5),
+            child: Row(
+              textDirection: LanguageManager.getTextDirection(),
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                SvgPicture.asset(
+                  "assets/icons/lang.svg",
+                  fit: BoxFit.fill,
+                  width: 30,
+                  height: 30,
+                ),
+                Text(
+                  LanguageManager.getText(268),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                Row(
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [
+                    Text(
+                      LanguageManager.getText(100),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          color: Colors.blue),
+                    ),
+                    Switch(
+                        value: UserManager.currentUser("status") == "1",
+                        onChanged: (v) {
+                          setState(() {
+                            DatabaseManager.save("status", v ? "1" : "0");
+                            UserManager.update("status", v ? "1" : "0",
+                                    (r) {
+                                  setState(() {});
+                                });
+                          });
+                          widget.refrashState();
+                        }),
+                    Text(
+                      LanguageManager.getText(101),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          color: Colors.blue),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 0, bottom: 10, left: 5, right: 5),
+            child: Row(
+              textDirection: LanguageManager.getTextDirection(),
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                SvgPicture.asset(
+                  "assets/icons/lang.svg",
+                  fit: BoxFit.fill,
+                  width: 30,
+                  height: 30,
+                ),
+                Text(
+                  LanguageManager.getText(48),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                Row(
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [
+                    Text(
+                      LanguageManager.getText(49),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, color: Colors.blue),
+                    ),
+                    Switch(
+                        value: LanguageManager.getDirection(),
+                        onChanged: (v) {
+                          setState(() {
+                            if (v) {
+                              LanguageManager.setLanguage("ar,SA");
+                            } else {
+                              LanguageManager.setLanguage("en,US");
+                            }
+                          });
+                          widget.refrashState();
+                        }),
+                    Text(
+                      LanguageManager.getText(50),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, color: Colors.blue),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          getProfileItem(FlutterIcons.attach_money_mdi, 185, () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => Transactions()));
+          }),
           getProfileItem(FlutterIcons.list_fea, 59, () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => Terms()));
           }),
           getProfileItem(FlutterIcons.info_fea, 60, () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => About()));
           }),
-          // getProfileItem(FlutterIcons.server_fea, 61, () {
-          //   Navigator.push(
-          //       context, MaterialPageRoute(builder: (_) => JoinRequest()));
-          // }),
-          // getProfileItem(FlutterIcons.flag_fea, 62, () {
-          //   Navigator.push(context,
-          //       MaterialPageRoute(builder: (_) => FrequentlyAskedQuestions()));
-          // }),
+          getProfileItem(FlutterIcons.flag_fea, 62, () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => FrequentlyAskedQuestions()));
+          }),
           getProfileItem(FlutterIcons.headphones_fea, 63, () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => ContactUs()));
@@ -180,10 +178,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => RateApp()));
           }),
-          // getProfileItem(FlutterIcons.log_out_fea, 66, () {
-          //   UserManager.logout();
-          //   main();
-          // }, withArraw: false),
+          getProfileItem(FlutterIcons.account_off_mco, 278, () {
+            // Navigator.push(context, MaterialPageRoute(builder: (_) => RateApp()));
+            Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
+          }, withArraw: false),
+          getProfileItem(FlutterIcons.log_out_fea, 66, () {
+            UserManager.logout();
+            main();
+          }, withArraw: false),
         ],
       ),
     );
@@ -243,23 +245,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             Expanded(
                 child: Text(
-              LanguageManager.getText(title),
-              textDirection: LanguageManager.getTextDirection(),
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Converter.hexToColor("#707070")),
-            )),
+                  LanguageManager.getText(title),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Converter.hexToColor("#707070")),
+                )),
             Container(
               width: 10,
             ),
             withArraw
                 ? Icon(
-                    LanguageManager.getDirection()
-                        ? FlutterIcons.chevron_left_fea
-                        : FlutterIcons.chevron_left_fea,
-                    size: 18,
-                    color: Colors.blue,
-                  )
+              LanguageManager.getDirection()
+                  ? FlutterIcons.chevron_left_fea
+                  : FlutterIcons.chevron_left_fea,
+              size: 18,
+              color: Colors.blue,
+            )
                 : Container()
           ],
         ),
@@ -305,10 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 5,
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => ProfileEdit()));
-                  },
+                  onTap: () {_navigateAndDisplaySelection(context);},
                   child: Container(
                     alignment: !LanguageManager.getDirection()
                         ? Alignment.centerLeft
@@ -337,4 +336,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  getAlertDeleteAccount() {
+    return
+        Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            textDirection: LanguageManager.getTextDirection(),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(),
+                  InkWell(
+                    onTap: () {Navigator.pop(context);},
+                    child: Icon(FlutterIcons.x_fea, size: 24),
+                  )
+                ],
+              ),
+              Container(child: Icon(FlutterIcons.md_trash_ion, size: 50)),
+
+              Container(height: 5),
+
+              Text('   ' + LanguageManager.getText(280),
+                style: TextStyle(color: Converter.hexToColor("#707070"), fontWeight: FontWeight.bold)),
+
+              Container(height: 30),
+
+              Text(
+                LanguageManager.getText(279).replaceAll('\\n', '\n'),
+                style: TextStyle(
+                    color: Converter.hexToColor("#707070"),
+                    fontWeight: FontWeight.bold),
+              ),
+              Container(height: 30),
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  InkWell(
+                    onTap: () {Alert.publicClose();},
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(172),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), spreadRadius: 2, blurRadius: 2)],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#344f64")),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      // Navigator.pop(context);
+                      // cancelOrderConferm();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(169),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), spreadRadius: 2, blurRadius: 2)],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#FF0000")),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ));
+  }
+
+  void _navigateAndDisplaySelection(BuildContext context) async {
+
+    var oldImageUrl = UserManager.currentUser("image");
+    await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileEdit()));
+
+    var newImageUrl = UserManager.currentUser("image");
+    if(oldImageUrl != newImageUrl){ setState(() {});} // update image
+
+  }
+
 }
