@@ -15,8 +15,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddServices extends StatefulWidget {
-  final id;
-  AddServices({this.id});
+  final data;
+  AddServices({this.data});
 
   @override
   _AddServicesState createState() => _AddServicesState();
@@ -25,12 +25,13 @@ class AddServices extends StatefulWidget {
 class _AddServicesState extends State<AddServices>
     with TickerProviderStateMixin {
   Map<String, String> body = {}, selectedTexts = {}, errors = {};
-  Map selectOptions = {}, config, data;
+  Map selectOptions = {}, selectSubcategoriesOptions = {},  config, data;
   List images = [], removedImagesUpdate = [], removedOffers = [];
   Map<String, TextEditingController> controllers = {};
   Map<String, TabController> tabControllers = {};
-  bool isLoading = false;
+  bool isLoading = false, isHas3Child = false;
   List<Map> selectedFiles = [], offers = [];
+
   @override
   void initState() {
     loadConfig();
@@ -38,59 +39,161 @@ class _AddServicesState extends State<AddServices>
   }
 
   void loadConfig() {
-    setState(() {
-      isLoading = true;
-    });
-    NetworkManager.httpGet(Globals.baseUrl + "services/configuration", (r) {
-      if (r['status'] == true) {
+        // setState(() {
+
+          // config = {
+          //   "service": [
+          //     {
+          //       "id": "1",
+          //       "service_id": "1",
+          //       "name": "اصلاح الجولات",
+          //       "name_en": "",
+          //       "icon": "0",
+          //       "children": [
+          //         {
+          //           "id": "2",
+          //           "service_id": "0",
+          //           "name": "تغير الشاشة",
+          //           "name_en": "",
+          //           "icon": "0",
+          //         }
+          //       ]
+          //     }
+          //   ],
+          //   "unit": "ريال"
+          // };
+
+
+          // config = {
+          //   "service": [
+          //     {
+          //       "id": 2,
+          //       "name": "صيانة الكمبيوترات",
+          //       "status": 1,
+          //       "categories": []
+          //     },
+          //     {
+          //       "id": 3,
+          //       "name": "صيانة الماك",
+          //       "status": 1,
+          //       "categories": []
+          //     },
+          //     {
+          //       "id": 4,
+          //       "name": "الانظمة و التقنية",
+          //       "status": 1,
+          //       "categories": []
+          //     },
+          //     {
+          //       "id": 5,
+          //       "name": "المتجر",
+          //       "status": 1,
+          //       "categories": []
+          //     },
+          //     {
+          //       "id": 6,
+          //       "name": "خدمات الاعمال",
+          //       "status": 1,
+          //       "categories": []
+          //     },
+          //     {
+          //       "id": 7,
+          //       "name": "خدمات الصيانة",
+          //       "status": 1,
+          //       "categories": [
+          //         {
+          //           "id": 1,
+          //           "name": "صيانة الهواتف",
+          //           "status": 1,
+          //           "subcategories": [
+          //             {
+          //               "id": 1,
+          //               "name": "هواتف هواوي",
+          //               "status": 1
+          //             }
+          //           ]
+          //         },
+          //         {
+          //           "id": 2,
+          //           "name": "صيانة السيارات",
+          //           "status": 1,
+          //           "subcategories": []
+          //         }
+          //       ]
+          //     }
+          //   ],
+          //   "unit": "ريال"
+          // };
+
+        //   if (widget.id != null) {
+        //     load();
+        //   } else {
+        //     isLoading = false;
+        //   }
+        // });
+    setState(() { isLoading = true; });
+
+    NetworkManager.httpGet(Globals.baseUrl + "services",  context, (r) { // services/configuration
+      if (r['state'] == true) {
         setState(() {
           config = r['data'];
-          if (widget.id != null) {
+          if (widget.data != null) {
             load();
           } else {
             isLoading = false;
           }
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
+
   }
 
   void load() {
-    setState(() {
-      isLoading = true;
-    });
-    NetworkManager.httpGet(Globals.baseUrl + "user/service?id=${widget.id}",
-        (r) {
-      if (r['status'] == true) {
+    setState(() {isLoading = true;});
+    // NetworkManager.httpGet(Globals.baseUrl + "user/service?id=${widget.id}",  context, (r) {
+    //   if (r['state'] == true) {
         setState(() {
-          data = r['data'];
+          data = widget.data;
           initBodyData();
           isLoading = false;
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    }, cashable: true);
+    //   } else if (r['message'] != null) {
+    //     Alert.show(context, Converter.getRealText(r['message']));
+    //   }
+    // }, cashable: true);
   }
 
   void initBodyData() {
     offers = [];
     selectedFiles = [];
-    selectedTexts["service"] = data['service'];
-    selectedTexts["service_catigory"] = data['name'];
-    selectedTexts["about"] = data["about"];
 
-    body["service"] = data['service_id'];
-    body["service_catigory"] = data['service_catigory_id'];
-    body['about'] = data["about"];
+    // body["service_id"] = data['service_id']??'';
+    // body["service_categories_id"] = data['service_categories_id']??'';
+    // body["service_subcategories_id"] = data['service_subcategories_id']??'';
+    //
+    // selectOptions["categories"] = v['categories'];
+    // selectedTexts["service"] = v['name'];
+    // selectSubcategoriesOptions["subcategories"] = v['subcategories'];
+    // selectedTexts['categories'] = v['name'];
+    // selectedTexts["service_subcategories"] = v['name'];
+
+    body['title'] = data["name"];
+    body['description'] = data["about"];
     for (var item in data['offers']) {
       offers.add({"details": item['description'], "price": item['price']});
     }
-    for (var item in data['images']) {
-      selectedFiles.add({"id": item['id'], "url": item['name']});
+
+    for (var item in (data['images'] as String).split('||').toList() ) {
+      print('here_item: $item');
+      selectedFiles.add({"id": '1', "name": Globals.correctLink(item)});
     }
+
+    // for (var item in data['images']) {
+    //   selectedFiles.add({"id": item['id'], "name": item['name']});
+    // }
+
+    controllers['title'] = TextEditingController(text: body['title'] ?? "");
+    controllers['description'] = TextEditingController(text: body['description'] ?? "");
   }
 
   @override
@@ -121,7 +224,7 @@ class _AddServicesState extends State<AddServices>
                             size: 26,
                           )),
                       Text(
-                        LanguageManager.getText(widget.id == null ? 253 : 254),
+                        LanguageManager.getText(widget.data == null ? 253 : 254),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -145,24 +248,44 @@ class _AddServicesState extends State<AddServices>
 
   List<Widget> getFormInputs() {
     List<Widget> items = [];
-    items.add(
-        createSelectInput("service", 255, config['service'], onSelected: (v) {
+    items.add(createInput("title", 255, maxInput: 60, maxLines: 2));
+
+    if (widget.data == null)
+      items.add(createSelectInput("service", 283, config['service'], onSelected: (v) {
       setState(() {
-        selectOptions["service_catigories"] = v['children'];
+        selectOptions["categories"] = v['categories'];
         selectedTexts["service"] = v['name'];
-        body["service"] = v['id'];
-      });
-    }));
-    items.add(createSelectInput(
-        "service_catigory", 256, selectOptions["service_catigories"],
-        onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
-      setState(() {
-        selectedTexts['service_catigory'] = v['name'];
-        body["service_catigory"] = v['id'];
+        body["service_id"] = v['id'].toString();
+
+        selectedTexts['service_categories'] = null;
+        body["service_categories_id"] = null;
       });
     }));
 
-    items.add(createInput("about", 258, maxInput: 500, maxLines: 4));
+    if (widget.data == null)
+    items.add(createSelectInput("categories", 256, selectOptions["categories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+      setState(() {
+        selectSubcategoriesOptions["subcategories"] = v['subcategories'];
+        selectedTexts['categories'] = v['name'];
+        body["service_categories_id"] = v['id'].toString();
+
+        selectedTexts["service_subcategories"] = null;
+        body["service_subcategories_id"] = null;
+      });
+    }));
+
+    if (widget.data == null)
+    items.add(selectSubcategoriesOptions.containsKey("subcategories") && selectSubcategoriesOptions["subcategories"].length > 0 ?
+        createSelectInput("service_subcategories", 256, selectSubcategoriesOptions["subcategories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+            setState(() {
+              selectedTexts["service_subcategories"] = v['name'];
+              body["service_subcategories_id"] = v['id'].toString();
+            });
+          })
+        : Container());
+
+    items.add(createInput("description", 258, maxInput: 500, maxLines: 4));
+
 
     items.add(Container(
       padding: EdgeInsets.only(left: 10, right: 10, top: 10),
@@ -285,13 +408,13 @@ class _AddServicesState extends State<AddServices>
             ),
           ));
     items.add(InkWell(
-      onTap: send,
+      onTap: widget.data == null ? send : update,
       child: Container(
         margin: EdgeInsets.all(10),
         height: 45,
         alignment: Alignment.center,
         child: Text(
-          LanguageManager.getText(widget.id == null ? 262 : 254),
+          LanguageManager.getText(widget.data == null ? 262 : 254),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         decoration: BoxDecoration(
@@ -408,7 +531,7 @@ class _AddServicesState extends State<AddServices>
                 controller: tabControllers["images"],
                 children: selectedFiles.map((e) {
                   if (e["id"] != null) {
-                    return CachedNetworkImage(imageUrl: e["url"]);
+                    return CachedNetworkImage(imageUrl: e["name"]);
                   } else
                     return Image.memory(e["data"]);
                 }).toList(),
@@ -467,8 +590,7 @@ class _AddServicesState extends State<AddServices>
                             int index = tabControllers['images'].index;
                             if (selectedFiles.isNotEmpty) {
                               if (selectedFiles[index]['id'] != null)
-                                removedImagesUpdate
-                                    .add(selectedFiles[index]['id']);
+                                removedImagesUpdate.add(selectedFiles[index]['name']);
                               selectedFiles.removeAt(index);
                             }
                           });
@@ -523,9 +645,8 @@ class _AddServicesState extends State<AddServices>
                             onTap: () {
                               setState(() {
                                 images.remove(e);
-                                removedImagesUpdate.add(e["id"]);
-                                body["removed_images"] =
-                                    jsonEncode(removedImagesUpdate);
+                                removedImagesUpdate.add(e["name"]);
+                                body["removed_images"] = jsonEncode(removedImagesUpdate);
                               });
                             },
                             child: Container(
@@ -552,8 +673,7 @@ class _AddServicesState extends State<AddServices>
           Alert.show(context, onEmptyMessage);
           return;
         }
-        Alert.show(context, options,
-            type: AlertType.SELECT, onSelected: onSelected);
+        Alert.show(context, options, type: AlertType.SELECT, onSelected: onSelected);
       },
       child: Container(
         height: 50,
@@ -574,8 +694,7 @@ class _AddServicesState extends State<AddServices>
               textDirection: LanguageManager.getTextDirection(),
               style: TextStyle(
                   fontSize: 16,
-                  color:
-                      selectedTexts[key] != null ? Colors.black : Colors.grey),
+                  color: selectedTexts[key] != null ? Colors.black : Colors.grey),
             )),
             Icon(
               FlutterIcons.chevron_down_fea,
@@ -646,19 +765,22 @@ class _AddServicesState extends State<AddServices>
   }
 
   void send() {
-    setState(() {
-      errors = {};
-    });
-    List validateKeys = ["service", "service_catigory", "about"];
+    setState(() { errors = {}; });
+	
+    List validateKeys = ["title", "service_id","service_categories_id", "description"]; // ,"service"
+	
     for (var key in validateKeys) {
       if (body[key] == null || body[key].isEmpty)
         setState(() {
           errors[key] = "_";
         });
     }
+	
     if (selectedFiles.length == 0 && images.length == 0) {
       errors["images"] = "_";
     }
+
+    print('here_errors: $errors');
     if (errors.keys.length > 0) return;
 
     List files = [];
@@ -671,7 +793,60 @@ class _AddServicesState extends State<AddServices>
           "file": item['data'],
           "type_name": "image",
           "file_type": item['type'],
-          "file_name": "image"
+          "file_name": "${DateTime.now().toString().replaceAll(' ', '_')}.${item['type']}"
+        });
+        i++;
+      }
+    }
+    body["images_length"] = files.length.toString();
+
+    body['offers'] = jsonEncode(offers);
+
+    // body.containsValue(null);
+    body['service_subcategories_id'] == null? body.remove('service_subcategories_id') : null;
+
+    print('here_body: $body');
+    // Alert.startLoading(context);
+    NetworkManager().fileUpload(Globals.baseUrl + "provider/service/create", files, (p) {},  (r) { // services/add
+      Alert.endLoading();
+      if (r['state'] == true) {
+        Navigator.of(context).pop(true);
+      } else if (r["message"] != null) {
+        Alert.show(context, Converter.getRealText(r["message"]));
+      }
+    }, body: body);
+  }
+
+  void update() {
+    setState(() { errors = {}; });
+
+    List validateKeys = ["title"  , "description"]; // ,"service"
+
+    for (var key in validateKeys) {
+      if (body[key] == null || body[key].isEmpty)
+        setState(() {
+          errors[key] = "_";
+        });
+    }
+
+    if (selectedFiles.length == 0 && images.length == 0) {
+      errors["images"] = "_";
+    }
+
+    print('here_errors: $errors');
+    if (errors.keys.length > 0) return;
+
+    List files = [];
+
+    var i = 0;
+    for (var item in selectedFiles) {
+      if (item['id'] == null) {
+        files.add({
+          "name": "image_$i",
+          "file": item['data'],
+          "type_name": "image",
+          "file_type": item['type'],
+          "file_name": "${DateTime.now().toString().replaceAll(' ', '_')}.${item['type']}"
         });
         i++;
       }
@@ -680,14 +855,13 @@ class _AddServicesState extends State<AddServices>
 
     body['offers'] = jsonEncode(offers);
     body['removed_images'] = jsonEncode(removedImagesUpdate);
-    if (widget.id != null) {
-      body['id'] = widget.id.toString();
-    }
+    // if (widget.id != null) {
+    //   body['id'] = widget.id.toString();
+    // }
     Alert.startLoading(context);
-    NetworkManager().fileUpload(Globals.baseUrl + "services/add", files, (p) {},
-        (r) {
+    NetworkManager().fileUpload(Globals.baseUrl + "provider/service/update/${widget.data['id']}", files, (p) {},   (r) { // services/add
       Alert.endLoading();
-      if (r["status"] == true) {
+      if (r['state'] == true) {
         Navigator.of(context).pop(true);
       } else if (r["message"] != null) {
         Alert.show(context, Converter.getRealText(r["message"]));

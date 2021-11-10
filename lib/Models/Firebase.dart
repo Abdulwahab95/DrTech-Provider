@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'LocalNotifications.dart';
+import 'UserManager.dart';
 
 class MessageHandler extends StatefulWidget {
   final Widget child;
@@ -25,7 +27,7 @@ class MessageHandlerState extends State<MessageHandler> {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       Globals.logNotification('onMessage', message);
-      this.parse(message.data);
+      this.parse(message.data, message.notification);
     });
 
 
@@ -50,23 +52,91 @@ class MessageHandlerState extends State<MessageHandler> {
       }
     });
 
+    // Timer(Duration(seconds: 10), () {
+    //   print('here_timer: ');
+    //   RemoteMessage message =RemoteMessage.fromMap({
+    //     "to": "pGWIGoTDRlunHuhL-UTBRb:APA91bGoDrjEsT8uLq8AqGfCNWfpy2SBsFaiWjKwZrcanQVZWwiNVSPKVfySvsAH10wIBPpO7dFK1sPma9w71Lzbb3MLC8Sm-gyCII4pZjlNitGwoSnU5HRZwb1iasQ0VrFuCFm-xrJm",
+    //     "priority": "high",
+    //     "url": "",
+    //     "title": "title",
+    //     "body": "body",
+    //     "message": "مرحباً",
+    //     "type": "NOTIC",
+    //     "data": {
+    //       "title": "عبود الزبون",
+    //       "message_txt": "مرحباً",
+    //       "payload_target": "chat",
+    //       "priority": "high",
+    //       "screen": "LiveChat",
+    //       "content_available": true,
+    //       "click_action": "FLUTTER_NOTIFICATION_CLICK",
+    //       "conversation_id": "11",
+    //       "payload": {
+    //         "user_id": "11",
+    //         "provider_id": "3",
+    //         "send_by": "11",
+    //         "type": "text",
+    //         "message": "مرحباً",
+    //         "updated_at": "2021-11-06 15:44:15",
+    //         "created_at": "2021-11-06 15:44:15",
+    //         "id": 139
+    //       }
+    //     },
+    //     "notification": {
+    //       "title": "عبود الزبون",
+    //       "body": "مرحباً",
+    //       "icon": "ic_message_icon",
+    //       "sound": "default"
+    //     },
+    //     "android": {
+    //       "notification": {
+    //         "icon": "ic_logo_notifi",
+    //         "color": "#ffffff",
+    //         "channel_id": "high_importance_channel",
+    //         "content_available": true,
+    //         "priority": "high"
+    //       }
+    //     }
+    //   });
+    //   this.parse(message.data, message.notification);
+    //   // UserManager.updateSp('not_seen', 0);
+    //   // Globals.updateNotificationCount();
+    //
+    //   // Timer(Duration(seconds: 4), () {
+    //   //   print('here_timer: ');
+    //   //   UserManager.updateSp('not_seen', 1);
+    //   //   Globals.updateNotificationCount();
+    //   // });
+    //
+    // });
 
   }
 
-  void parse(Map<String, dynamic> paylaod) {
-    var data = paylaod;
-    Map dataa = json.decode(paylaod['payload']);
+  void parse(Map<String, dynamic> data, RemoteNotification notification) {
+    print('here_timer: data: $data');
+    Map payload = data['payload'].runtimeType == String? json.decode(data['payload']) : data['payload'];
     if (data["conversation_id"] != null) {
-      if (LiveChat.currentConversationId == data["conversation_id"]) {
+      print('here_timer: if 1');
+      if (LiveChat.currentConversationId == data["conversation_id"].toString()) {
+        print('here_timer: if 2');
         if (LiveChat.callback != null) {
+          print('here_timer: if 3');
           if (data['payload'].runtimeType == String)
             LiveChat.callback(data['payload_target'], jsonDecode(data['payload']));
           else
             LiveChat.callback(data['payload_target'], data['payload']);
         }
-      } else if (dataa != null && dataa.containsKey('id')) {
-        LocalNotifications.send('message', dataa['message'], dataa);
+      } else if (data != null && payload != null && payload['text'] != null && payload['text'] == 'USER_TYPING'){ // USER_TYPING
+        // USER_TYPING and user not on screen liveChat => don't show notification
+      } else if (data != null && payload != null && payload['type'] != null && payload['type'] == 'seen'){ // seen
+        // seen and user not on screen liveChat => don't show notification
+      } else if (data != null) {
+        print('here_timer: else 2');
+        LocalNotifications.send(data['title'],data['message_txt'], payload);
       }
+    }else {
+      print('here_timer: else 1');
+      LocalNotifications.send(notification.title, notification.body, payload);
     }
   }
 
@@ -84,7 +154,7 @@ class FirebaseClass {
 
   FirebaseClass(callBack) {
     LocalNotifications.init();
-    firebaseCloudMessagingListeners(callBack);
+    Globals.isLocal? callBack(): firebaseCloudMessagingListeners(callBack);
   }
 
   void firebaseCloudMessagingListeners(Function callBack) {

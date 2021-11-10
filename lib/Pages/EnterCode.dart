@@ -9,15 +9,16 @@ import 'package:dr_tech/Models/Parser.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/Home.dart';
+import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
-import 'package:intl/intl.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:vibration/vibration.dart';
 
 class EnterCode extends StatefulWidget {
-  EnterCode();
+  Map body;
+  String selectedCountrieCode;
+  EnterCode(this.body, this.selectedCountrieCode);
 
   @override
   _EnterCodeState createState() => _EnterCodeState();
@@ -65,7 +66,11 @@ class _EnterCodeState extends State<EnterCode> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       print('heree: addPostFrameCallback');
-      sendSms();
+      if(Globals.isLocal){
+        Alert.endLoading();
+        tick();
+      } else
+        sendSms();
     });
   }
 
@@ -269,23 +274,11 @@ class _EnterCodeState extends State<EnterCode> {
       return;
     }
 
-    sendSms();
-    // NetworkManager.httpPost(Globals.baseUrl + "user/resend", (r) {
-    //   Alert.endLoading();
-    //   if (r['status'] == true) {
-    //     setState(() {
-    //       resendTime = r['time'];
-    //       tick();
-    //     });
-    //     Alert.show(
-    //         context,
-    //         LanguageManager.getText(r['at'] == "PHONE" ? 24 : 25) + "\n" + r["to"] //تم ارسال رمز مكون من 6 ارقام للرقم الجوال التالي
-    //     );
-    //     // success
-    //   } else if (r['message'] != null) {
-    //     Alert.show(context, Converter.getRealText(r['message']));
-    //   }
-    // });
+    if(Globals.isLocal){
+      Alert.endLoading();
+      tick();
+    } else
+        sendSms();
   }
 
   Future<void> conferm() async {
@@ -298,8 +291,25 @@ class _EnterCodeState extends State<EnterCode> {
     }
 
     Alert.startLoading(context);
-    signIn(code.values.join(), context);
 
+    if(Globals.isLocal){
+      NetworkManager.httpPost(Globals.baseUrl + "users/login",  context, (r) { // user/login
+        Alert.endLoading();
+        if (r['state'] == true) {
+          DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
+          DatabaseManager.save(Globals.authoKey, r['data']['token']);
+          UserManager.proccess(r['data']['user']);
+
+          if(r['data']['user']['identity'] != null && r['data']['user']['identity'].toString().length>10){
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+          }else{
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => JoinRequest()));
+          }
+
+        }
+      }, body: widget.body);
+    } else
+      signIn(code.values.join(), context);
   }
 
   Future<void> signIn(String otp, BuildContext contextPage) async {
@@ -317,20 +327,26 @@ class _EnterCodeState extends State<EnterCode> {
             else
               Alert.show(contextPage, errorStr);
           } else if(value.runtimeType == UserCredential){
+
             print('heree: ${value.user.uid}');
-            // Navigator.pop(context, true);
-            NetworkManager.httpPost(Globals.baseUrl + "user/active", (r) {
+            Alert.startLoading(context);
+            NetworkManager.httpPost(Globals.baseUrl + "users/login",  context, (r) { // user/login
               Alert.endLoading();
-              if (r['status'] == true) {
-                DatabaseManager.save(Globals.authoKey, r['token']);
-                DatabaseManager.save('about', r['about']);
-                UserManager.proccess(r['user']);
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home()));
-                // success
-              } else if (r['message'] != null) {
-                Alert.show(context, Converter.getRealText(r['message']));
+              if (r['state'] == true) {
+                DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
+                DatabaseManager.save(Globals.authoKey, r['data']['token']);
+                UserManager.proccess(r['data']['user']);
+
+                if(r['data']['user']['identity'] != null && r['data']['user']['identity'].toString().length>10){
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+                }else{
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => JoinRequest()));
+                }
+
               }
-            }, body: {});
+            }, body: widget.body);
+
+
           }
     });
   }
@@ -349,12 +365,12 @@ class _EnterCodeState extends State<EnterCode> {
   }
 
   Future<void> sendSms() async {
-    print('heree: sendSms');
+    print('heree: sendSms ${widget.selectedCountrieCode + widget.body['number_phone']}');
 
     Alert.startLoading(context);
 
     await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: "+249965095703",
+      phoneNumber: widget.selectedCountrieCode + widget.body['number_phone'],// "+249965095703",
       forceResendingToken: _forceCodeResent,
       timeout: const Duration(seconds: duration),
       verificationCompleted: (PhoneAuthCredential  authCredential) {

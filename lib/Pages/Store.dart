@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
@@ -44,11 +43,11 @@ class _StoreState extends State<Store> {
       isConfigLoading = true;
     });
 
-    NetworkManager.httpGet(Globals.baseUrl + "store/configuration", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "store/configuration",  context, (r) {
       setState(() {
         isConfigLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           config = r;
           selectedCatigory = config['catigories'][0];
@@ -56,8 +55,6 @@ class _StoreState extends State<Store> {
           init();
           load();
         });
-      } else if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -90,11 +87,11 @@ class _StoreState extends State<Store> {
       "product_type_id": selectedSubCatigory['id'],
       "page": pageIndex.toString()
     };
-    NetworkManager.httpGet(Globals.baseUrl + "store/load", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "store/load",  context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           if (data[r['catigory_id']] == null) data[r['catigory_id']] = {};
           if (data[r['catigory_id']][r['product_type_id']] == null)
@@ -411,7 +408,7 @@ class _StoreState extends State<Store> {
         decoration: BoxDecoration(
             image: DecorationImage(
                 fit: BoxFit.fill,
-                image: CachedNetworkImageProvider(item['image']))),
+                image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
       ));
     }
     return sliders;

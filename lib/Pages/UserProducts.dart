@@ -34,17 +34,15 @@ class _UserProductsState extends State<UserProducts> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "product/load?page=$page&type=user", (r) {
+        Globals.baseUrl + "product/load?page=$page&type=user",  context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           page++;
           data[r['page']] = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -181,7 +179,7 @@ class _UserProductsState extends State<UserProducts> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image:
-                                CachedNetworkImageProvider(item['images'][0])),
+                                CachedNetworkImageProvider(Globals.correctLink(item['images'][0]))),
                         borderRadius: BorderRadius.circular(7),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -277,7 +275,7 @@ class _UserProductsState extends State<UserProducts> {
                         createInfoIcon(
                           FlutterIcons.smartphone_fea,
                           LanguageManager.getText(
-                              item['status'] == 'USED' ? 143 : 142),
+                              item['state'] == 'USED' ? 143 : 142),
                         ),
                         createInfoIcon(FlutterIcons.location_on_mdi,
                             item['location'].toString()),
@@ -530,14 +528,12 @@ class _UserProductsState extends State<UserProducts> {
   void deleteProductConferm(id, page, i) {
     Alert.startLoading(context);
     Map<String, String> body = {"id": id.toString()};
-    NetworkManager.httpPost(Globals.baseUrl + "product/delete", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "product/delete",  context, (r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data[page].removeAt(i);
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }

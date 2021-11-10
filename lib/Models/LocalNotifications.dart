@@ -1,5 +1,9 @@
 import 'dart:convert';
+
+import 'package:dr_tech/Config/Converter.dart';
+
 import 'package:dr_tech/Config/Globals.dart';
+import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -28,7 +32,7 @@ class LocalNotifications {
     var platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(0, title, message, platformChannelSpecifics, payload: json.encode(paylaod));
+    await flutterLocalNotificationsPlugin.show(0, title,  Converter.getRealText(message), platformChannelSpecifics, payload: json.encode(paylaod));
   }
 
   static Future<dynamic> onSelectReminderNotification([String payload]) async {
@@ -38,9 +42,13 @@ class LocalNotifications {
 
     Map valueMap = json.decode(payload);
 
-    Globals.currentConversationId = valueMap['conversation_id'];
-    Globals.isOpenFromNotification = true;
-    Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+    if(valueMap['send_by'] != null) {
+      Globals.currentConversationId = valueMap['send_by'].toString();
+      Globals.isOpenFromNotification = true;
+      Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+    }else{
+      Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("WelcomePage");
+    }
 
   }
 

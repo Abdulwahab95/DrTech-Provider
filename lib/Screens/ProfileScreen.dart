@@ -11,7 +11,6 @@ import 'package:dr_tech/Pages/ExtraPages/About.dart';
 import 'package:dr_tech/Pages/ExtraPages/RateApp.dart';
 import 'package:dr_tech/Pages/ExtraPages/Terms.dart';
 import 'package:dr_tech/Pages/FrequentlyAskedQuestions.dart';
-import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:dr_tech/Pages/ProfileEdit.dart';
 import 'package:dr_tech/Pages/Transactions.dart';
 import 'package:dr_tech/main.dart';
@@ -31,17 +30,14 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+
     return ScrollConfiguration(
       behavior: CustomBehavior(),
       child: ListView(
         children: [
           getProfileHeader(),
+          Container(height: 10,),
           Container(
-            height: 10,
-          ),
-          UserManager.currentUser("type") != "ENGINEER"
-              ? Container()
-              : Container(
             margin: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 5),
             child: Row(
               textDirection: LanguageManager.getTextDirection(),
@@ -68,12 +64,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Colors.blue),
                     ),
                     Switch(
-                        value: UserManager.currentUser("status") == "1",
+                        value: UserManager.currentUser("active") == "1",
                         onChanged: (v) {
                           setState(() {
-                            DatabaseManager.save("status", v ? "1" : "0");
-                            UserManager.update("status", v ? "1" : "0",
-                                    (r) {
+                            DatabaseManager.save("active", v ? "1" : "0");
+                            UserManager.update("active", v ? "1" : "0",  context, (r) {
                                   setState(() {});
                                 });
                           });
@@ -136,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          getProfileItem(FlutterIcons.attach_money_mdi, 185, () {
+          getProfileItem(FlutterIcons.attach_money_mdi, 301, () { // 185
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => Transactions()));
           }),
@@ -155,36 +150,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context, MaterialPageRoute(builder: (_) => ContactUs()));
           }),
           getProfileItem(FlutterIcons.share_fea, 64, () {
-            Alert.show(
-                context,
-                Container(
-                  child: Column(
+            Alert.show(context,
+                Container(child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         LanguageManager.getText(64),
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
                       ),
                       getShearinIcons(),
-                    ],
-                  ),
-                ),
+                    ])),
                 type: AlertType.WIDGET);
           }),
           getProfileItem(FlutterIcons.star_fea, 65, () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => RateApp()));
           }),
-          getProfileItem(FlutterIcons.account_off_mco, 278, () {
-            // Navigator.push(context, MaterialPageRoute(builder: (_) => RateApp()));
-            Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
-          }, withArraw: false),
+          // getProfileItem(FlutterIcons.account_off_mco, 278, () {
+          //   // Navigator.push(context, MaterialPageRoute(builder: (_) => RateApp()));
+          //   Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
+          // }, withArraw: false),
           getProfileItem(FlutterIcons.log_out_fea, 66, () {
-            UserManager.logout();
-            main();
+            Alert.startLoading(context);
+            UserManager.logout((){
+              Alert.endLoading();
+              main();
+            });
           }, withArraw: false),
         ],
       ),
@@ -193,8 +184,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget getShearinIcons() {
     List<Widget> shearIcons = [];
-    if (Globals.getConfig("shearing") != "")
-      for (var item in Globals.getConfig("shearing")) {
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
         shearIcons.add(GestureDetector(
           onTap: () async {
             launch(item['url']);
@@ -206,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.contain,
-                    image: CachedNetworkImageProvider(item["icon"]))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
           ),
         ));
       }
@@ -284,8 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(
-                        UserManager.currentUser("image"))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(UserManager.currentUser("avatar")))),
               )),
           Container(
             width: 20,
@@ -296,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  UserManager.currentUser("name"),
+                  UserManager.currentUser("username"),
                   textDirection: LanguageManager.getTextDirection(),
                   style: TextStyle(
                       fontSize: 18,
@@ -418,11 +408,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _navigateAndDisplaySelection(BuildContext context) async {
 
-    var oldImageUrl = UserManager.currentUser("image");
+    // var oldImageUrl = UserManager.currentUser("avatar");
     await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileEdit()));
-
-    var newImageUrl = UserManager.currentUser("image");
-    if(oldImageUrl != newImageUrl){ setState(() {});} // update image
+    setState(() {});
+    // var newImageUrl = UserManager.currentUser("avatar");
+    // if(oldImageUrl != newImageUrl){ setState(() {});} // update image
 
   }
 

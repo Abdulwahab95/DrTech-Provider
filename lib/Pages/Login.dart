@@ -7,9 +7,7 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
-import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/EnterCode.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -56,6 +54,7 @@ class _LoginState extends State<Login> {
       }
     }
     body["country"] = selectedCountrieCode["code"];
+    body["number_phone"] = '';
     super.initState();
   }
 
@@ -101,83 +100,81 @@ class _LoginState extends State<Login> {
                     AnimatedContainer(
                         duration: Duration(milliseconds: 250),
                         decoration: BoxDecoration(
-                            color: Converter.hexToColor(errors["phone"] == true
+                            color: Converter.hexToColor(errors["number_phone"] == true
                                 ? "#f59d97"
                                 : "#f2f2f2"),
                             borderRadius: BorderRadius.circular(10)),
-                        child: Row(
-                          textDirection: LanguageManager.getTextDirection(),
-                          children: [
-                            Container(
-                              width: 45,
-                              alignment: Alignment.center,
-                              child: Icon(FlutterIcons.phone_iphone_mdi,
-                                  size: 22,
-                                  color: Converter.hexToColor("#858585")),
-                            ),
-                            Expanded(
-                                child: TextField(
-                              onChanged: (v) {
-                                body["phone"] = v;
-                                setState(() {errors['phone'] = false;});
-                              },
-                              keyboardType: TextInputType.phone,
-                              textDirection: LanguageManager.getTextDirection(),
-                              textAlign: LanguageManager.getDirection()
-                                  ? TextAlign.right
-                                  : TextAlign.left,
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(fontSize: 14),
-                                  hintText: LanguageManager.getText(6)), // رقم الهاتف
-                            )),
-                            InkWell(
-                              onTap: () {
-                                hideKeyBoard();
-                                Alert.show(context, countries, onSelected: (selcted) {
-                                  setState(() {
-                                    selectedCountrieCode = selcted;
-                                    body["country"] = selectedCountrieCode["code"];
-                                  });
-                                }, type: AlertType.SELECT);
-                              },
-                              child: Row(
-                                textDirection:
-                                    LanguageManager.getTextDirection(),
-                                children: [
-                                  Container(
-                                    child: Text(
-                                        selectedCountrieCode["phone_code"]),
-                                  ),
-                                  Container(
-                                    width: 6,
-                                  ),
-                                  Container(
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.all(5),
-                                          width: 35,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(2),
-                                              image: DecorationImage(
-                                                  fit: BoxFit.cover,
-                                                  image: CachedNetworkImageProvider(
-                                                      Globals.baseUrl +
-                                                          "storage/flags/" +
-                                                          selectedCountrieCode[
-                                                              "code"]))),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                        child: Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Row(
+                            mainAxisAlignment : MainAxisAlignment.end,
+                            textDirection: TextDirection.rtl,
+                            children: [
+                              Container(
+                                width: 45,
+                                alignment: Alignment.center,
+                                child: Icon(FlutterIcons.phone_iphone_mdi,
+                                    size: 22,
+                                    color: Converter.hexToColor("#858585")),
                               ),
-                            ),
-                            Container(width: 12)
-                          ],
+                              Expanded(
+                                  child: TextField(
+                                    onChanged: (v) {
+                                      body["number_phone"] = v;
+                                      setState(() {errors['number_phone'] = false;});
+                                    },
+                                    keyboardType: TextInputType.phone,
+                                    textDirection: TextDirection.rtl,
+                                    textAlign: body["number_phone"].isNotEmpty?TextAlign.left:TextAlign.right,
+                                    decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintTextDirection: TextDirection.rtl,
+                                        hintStyle: TextStyle(fontSize: 14),
+                                        hintText: LanguageManager.getText(6)), // رقم الهاتف
+                                  )),
+                              InkWell(
+                                onTap: () {
+                                  hideKeyBoard();
+                                  Alert.show(context, countries, onSelected: (selcted) {
+                                    setState(() {
+                                      selectedCountrieCode = selcted;
+                                      body["country"] = selectedCountrieCode["code"];
+                                    });
+                                  }, type: AlertType.SELECT);
+                                },
+                                child: Row(
+                                  textDirection: TextDirection.rtl,
+                                  children: [
+                                    Container(width: 3),
+                                    Container(child: Text(selectedCountrieCode["phone_code"] , textDirection: TextDirection.ltr, style: TextStyle(fontSize: 16),)),
+                                    Container(width: 6),
+                                    Container(
+                                      child: Row(
+                                        textDirection: TextDirection.rtl,
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.all(5),
+                                            width: 35,
+                                            height: 24,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                BorderRadius.circular(2),
+                                                image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image: CachedNetworkImageProvider(
+                                                        Globals.baseUrl + "storage/flags/" + selectedCountrieCode["code"]))),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 12,
+                              )
+                            ],
+                          ),
                         )),
                     Container(height: MediaQuery.of(context).size.height * 0.02),
 
@@ -261,8 +258,8 @@ class _LoginState extends State<Login> {
     hideKeyBoard();
     setState(() {errors = {};});
 
-    if (body['phone'].toString().length < 9) {
-      setState(() {errors['phone'] = true;});
+    if (body['number_phone'].toString().length < 9) {
+      setState(() {errors['number_phone'] = true;});
     }
 
     if (errors.keys.length > 0) {
@@ -281,23 +278,9 @@ class _LoginState extends State<Login> {
       return;
     }
 
-    Alert.startLoading(context);
-    // sendSms();
+    body["role"] = 'provider';
+    Navigator.push(context, MaterialPageRoute(builder: (_) => EnterCode(body, selectedCountrieCode["phone_code"] )));
 
-    body["type"] = 'ENGINEER';
-    NetworkManager.httpPost(Globals.baseUrl + "user/login", (r) {
-      Alert.endLoading();
-      if (r['status'] == true) {
-        DatabaseManager.liveDatabase[Globals.authoKey] = r['token'];
-        Navigator.push(context, MaterialPageRoute(builder: (_) => EnterCode()))
-            .then((value) {
-              print('heree: back_here $value');
-
-            });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    }, body: body);
   }
 
   void hideKeyBoard() {
@@ -312,6 +295,5 @@ class _LoginState extends State<Login> {
       Vibration.vibrate();
     }
   }
-
 
 }

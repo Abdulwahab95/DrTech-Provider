@@ -1,4 +1,3 @@
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/BrokenPage.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
@@ -7,6 +6,7 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Config/IconsMap.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +22,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   bool isLoading = false;
   int page = 0;
   Map<int, List> data = {};
+
   @override
   void initState() {
     load();
@@ -37,22 +38,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       isLoading = true;
     });
     NetworkManager.httpPost(
-        Globals.baseUrl + "user/notifications?page=" + page.toString(), (r) {
+        Globals.baseUrl + "notifications",  context, (r) { // "user/notifications?page=" + page.toString()
       setState(() {
         isLoading = false;
       });
       try {
-        if (r["status"] == true) {
-          page++;
-          data[r['page']] = r['data'];
-        } else if (r['message'] != null) {
-          Alert.show(context, Converter.getRealText(r['message']));
+        if (r['state'] == true) {
+          // page++;
+          data[0] = r['data']; // data[r['page']] = r['data'];
+          seen();
         }
       } catch (e) {
         ui = BrokenPage(load);
       }
     });
   }
+
+  void seen() {
+    NetworkManager.httpPost(Globals.baseUrl + "notifications/seen",  context, (r) {
+        setState(() {});
+        if (r['state'] == true) {
+          UserManager.updateSp('not_seen', 0);
+          Globals.updateNotificationCount();
+        }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +175,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       onNotification: (n) {
         if (n is ScrollNotification) {
           if (n.metrics.pixels == n.metrics.maxScrollExtent) {
-            if (isLoading == false) load();
+            // if (isLoading == false) load();
           }
         }
         return true;

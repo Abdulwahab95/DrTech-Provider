@@ -191,8 +191,8 @@ class _OrderSetRatingState extends State<OrderSetRating> {
 
   Widget getShearinIcons() {
     List<Widget> shearIcons = [];
-    if (Globals.getConfig("shearing") != "")
-      for (var item in Globals.getConfig("shearing")) {
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
         shearIcons.add(GestureDetector(
           onTap: () async {
             launch(item['url']);
@@ -204,7 +204,7 @@ class _OrderSetRatingState extends State<OrderSetRating> {
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.contain,
-                    image: CachedNetworkImageProvider(item["icon"]))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
           ),
         ));
       }
@@ -225,13 +225,11 @@ class _OrderSetRatingState extends State<OrderSetRating> {
     }
     body["id"] = widget.id.toString();
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "orders/rate", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "orders/rate",  context, (r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.pop(context);
         Alert.show(context, Converter.getRealText(237));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }

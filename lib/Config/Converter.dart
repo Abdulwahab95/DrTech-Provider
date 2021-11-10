@@ -51,6 +51,9 @@ class Converter {
       String formatterPattron: "HH:mm:ss"}) {
     if (time == null) return "";
 
+    time = time.toString().replaceAll('T', ' ');
+    time = time.toString().replaceAll('.000000Z', ' ');
+
     a.DateFormat server = new a.DateFormat('yyyy-MM-dd HH:mm:ss');
     a.DateFormat formatter =
         new a.DateFormat('yyyy MMMM dd', LanguageManager.getLocalStr());
@@ -139,4 +142,14 @@ class Converter {
         ? LanguageManager.getText(item)
         : item.toString() ?? "";
   }
+
+  static String format(d){
+    if(d.toString().contains('.') && d.toString().length >d.toString().indexOf('.') + 2)
+      return d.toString().substring(0, d.toString().indexOf('.') + 1 );
+    else if(!d.toString().contains('.'))
+      return d.toString() + '.0';
+    else
+      return d.toString();
+  }
+
 }

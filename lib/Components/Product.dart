@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -44,8 +43,8 @@ class _ProductState extends State<Product> {
                   decoration: BoxDecoration(
                       image: DecorationImage(
                           fit: BoxFit.fitWidth,
-                          image: CachedNetworkImageProvider(
-                              widget.item['images'][0])),
+                          image: CachedNetworkImageProvider(Globals.correctLink(
+                              widget.item['images'][0]))),
                       borderRadius: BorderRadius.circular(5),
                       color: Converter.hexToColor("#F2F2F2")),
                 ),
@@ -64,14 +63,11 @@ class _ProductState extends State<Product> {
                           NetworkManager.httpGet(
                               Globals.baseUrl +
                                   "product/like?product_id=" +
-                                  widget.item["id"], (r) {
-                            if (r['status'] == true) {
+                                  widget.item["id"],  context, (r) {
+                            if (r['state'] == true) {
                               setState(() {
                                 widget.item['isLiked'] = r["data"];
                               });
-                            } else if (r['message'] != null) {
-                              Alert.show(
-                                  context, Converter.getRealText(r['message']));
                             }
                           });
                         },
@@ -89,7 +85,7 @@ class _ProductState extends State<Product> {
                         padding: EdgeInsets.all(5),
                         child: Text(
                           LanguageManager.getText(
-                              widget.item['status'] == "USED" ? 142 : 143),
+                              widget.item['state'] == "USED" ? 142 : 143),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),

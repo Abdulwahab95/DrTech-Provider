@@ -1,18 +1,20 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
-import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'Home.dart';
 
 class JoinRequest extends StatefulWidget {
   const JoinRequest();
@@ -30,22 +32,20 @@ class _JoinRequestState extends State<JoinRequest> {
   List<Map> selectedFiles = [];
   @override
   void initState() {
-    loadConfig();
+    // loadConfig();----------------------------------------------
     super.initState();
   }
 
   void loadConfig() {
-    NetworkManager.httpGet(Globals.baseUrl + "join/config", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "join/config",  context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           config = r["data"];
           data = r['old'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r["message"]));
       }
     }, cashable: true);
   }
@@ -66,19 +66,15 @@ class _JoinRequestState extends State<JoinRequest> {
                     textDirection: LanguageManager.getTextDirection(),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Icon(
+                      InkWell(onTap: () {Navigator.pop(context);}, child: Icon(
                             LanguageManager.getDirection()
                                 ? FlutterIcons.chevron_right_fea
                                 : FlutterIcons.chevron_left_fea,
-                            color: Colors.white,
+                            color: Colors.transparent,
                             size: 26,
                           )),
                       Text(
-                        LanguageManager.getText(175),
+                        LanguageManager.getText(175),// طلب اشتراك مزود خدمة
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -87,9 +83,7 @@ class _JoinRequestState extends State<JoinRequest> {
                       NotificationIcon(),
                     ],
                   ))),
-          Expanded(
-              child:
-                  isLoading ? Center(child: CustomLoading()) : getFormContent())
+          Expanded(child: getFormContent()) //          Expanded(child: isLoading ? Center(child: CustomLoading()) : getFormContent()) // -------------
         ]));
   }
 
@@ -104,20 +98,20 @@ class _JoinRequestState extends State<JoinRequest> {
       padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          color: Converter.hexToColor(map[data['status']]["color"]).withAlpha(15)),
+          color: Converter.hexToColor(map[data['state']]["color"]).withAlpha(15)),
       child: Text(
-        LanguageManager.getText(map[data['status']]["text"]),
+        LanguageManager.getText(map[data['state']]["text"]),
         textDirection: LanguageManager.getTextDirection(),
         style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Converter.hexToColor(map[data['status']]["color"])),
+            color: Converter.hexToColor(map[data['state']]["color"])),
       ),
     );
   }
 
   Widget getFormContent() {
-    if (config == null) return Container();
+    // if (config == null) return Container();
     if (data != null) {
       return Column(
         children: [
@@ -160,68 +154,67 @@ class _JoinRequestState extends State<JoinRequest> {
     }
     List<Widget> items = [];
 
-    items.add(createSelectInput("service", 200, config['service'], onSelected: (v) {
-      setState(() {
-        selectedTexts["service"] = v['name'];
-        body["service"] = v['id'];
-        selectOptions["service_catigories"] = v['catigories'];
-        selectOptions["devices"] = v['devices'];
+    // items.add(createSelectInput("service", 200, config['service'], onSelected: (v) {
+    //   setState(() {
+    //     selectedTexts["service"] = v['name'];
+    //     body["service"] = v['id'];
+    //     selectOptions["service_catigories"] = v['catigories'];
+    //     selectOptions["devices"] = v['devices'];
+    //
+    //     // clear
+    //     selectedTexts["service_catigory"] = null;
+    //     body["service_catigory"] = null;
+    //     body["device"] = null;
+    //   });
+    // }));
 
-        // clear
-        selectedTexts["service_catigory"] = null;
-        body["service_catigory"] = null;
-        body["device"] = null;
-      });
-    }));
-
-    items.add(createSelectInput(
-        "service_catigory", 201, selectOptions['service_catigories'],
-        onSelected: (v) {
-      setState(() {
-        selectOptions["sub_service_catigory"] = v['children'];
-        selectedTexts["service_catigory"] = v['name'];
-        body["service_catigory"] = v['id'];
-      });
-    }, onEmptyMessage: LanguageManager.getText(204)));
-
-    items.add(createSelectInput("device", 202, selectOptions['devices'],
-        onSelected: (v) {
-      var key = "device";
-      setState(() {
-        if (slectedListOptions[key] == null) {
-          slectedListOptions[key] = [];
-        }
-        if ((slectedListOptions[key] as List).contains(v)) {
-          int index = (slectedListOptions[key] as List).indexOf(v);
-          slectedListOptions[key][index]["fucsed"] = true;
-        } else
-          slectedListOptions[key].add(v);
-      });
-    }, onEmptyMessage: LanguageManager.getText(204)));
-
-    items.add(getSelectedOptionList("device"));
-
-    items.add(createSelectInput(
-        "sub_service_catigory", 203, selectOptions['sub_service_catigory'],
-        onSelected: (v) {
-      var key = "sub_service_catigory";
-      setState(() {
-        if (slectedListOptions[key] == null) {
-          slectedListOptions[key] = [];
-        }
-        if ((slectedListOptions[key] as List).contains(v)) {
-          int index = (slectedListOptions[key] as List).indexOf(v);
-          slectedListOptions[key][index]["fucsed"] = true;
-        } else
-          slectedListOptions[key].add(v);
-      });
-    }, onEmptyMessage: LanguageManager.getText(205)));
-    items.add(getSelectedOptionList("sub_service_catigory"));
+    // items.add(createSelectInput(
+    //     "service_catigory", 201, selectOptions['service_catigories'],
+    //     onSelected: (v) {
+    //   setState(() {
+    //     selectOptions["sub_service_catigory"] = v['children'];
+    //     selectedTexts["service_catigory"] = v['name'];
+    //     body["service_catigory"] = v['id'];
+    //   });
+    // }, onEmptyMessage: LanguageManager.getText(204)));
+    //
+    // items.add(createSelectInput("device", 202, selectOptions['devices'], onSelected: (v) {
+    //   var key = "device";
+    //   setState(() {
+    //     if (slectedListOptions[key] == null) {
+    //       slectedListOptions[key] = [];
+    //     }
+    //     if ((slectedListOptions[key] as List).contains(v)) {
+    //       int index = (slectedListOptions[key] as List).indexOf(v);
+    //       slectedListOptions[key][index]["fucsed"] = true;
+    //     } else
+    //       slectedListOptions[key].add(v);
+    //   });
+    // }, onEmptyMessage: LanguageManager.getText(204)));
+    //
+    // items.add(getSelectedOptionList("device"));
+    //
+    // items.add(createSelectInput(
+    //     "sub_service_catigory", 203, selectOptions['sub_service_catigory'],
+    //     onSelected: (v) {
+    //   var key = "sub_service_catigory";
+    //   setState(() {
+    //     if (slectedListOptions[key] == null) {
+    //       slectedListOptions[key] = [];
+    //     }
+    //     if ((slectedListOptions[key] as List).contains(v)) {
+    //       int index = (slectedListOptions[key] as List).indexOf(v);
+    //       slectedListOptions[key][index]["fucsed"] = true;
+    //     } else
+    //       slectedListOptions[key].add(v);
+    //   });
+    // }, onEmptyMessage: LanguageManager.getText(205)));
+    // items.add(getSelectedOptionList("sub_service_catigory"));
     items.add(createInput("first_name", 206));
-    items.add(createInput("middel_name", 207));
+    items.add(createInput("second_name", 207));
     items.add(createInput("last_name", 208));
-    items.add(
-        createInput("connection_phone", 209, textType: TextInputType.number));
+    items.add(createInput("email", 246));
+    items.add(createInput("friend_number", 209, textType: TextInputType.number));
     items.add(Container(
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       child: Text(
@@ -471,11 +464,12 @@ class _JoinRequestState extends State<JoinRequest> {
       errors = {};
     });
     List validateKeys = [
-      "service",
-      "service_catigory",
+      // "service",
+      // "service_catigory",
       "first_name",
-      "middel_name",
-      "last_name"
+      "second_name",
+      "last_name",
+      "email"
     ];
 
     for (var key in validateKeys) {
@@ -485,42 +479,53 @@ class _JoinRequestState extends State<JoinRequest> {
         });
     }
 
-    for (var key in ['device', 'sub_service_catigory']) {
-      if (slectedListOptions[key] == null || slectedListOptions[key].isEmpty)
-        errors[key] = "_";
-      else
-        body[key] = jsonEncode(slectedListOptions[key]);
-    }
+    // for (var key in ['device', 'sub_service_catigory']) {
+    //   if (slectedListOptions[key] == null || slectedListOptions[key].isEmpty)
+    //     errors[key] = "_";
+    //   else
+    //     body[key] = jsonEncode(slectedListOptions[key]);
+    // }
     if (selectedFiles.length == 0) {
       errors["images"] = "_";
     }
-    if (errors.keys.length > 0) return;
 
-    List files = [];
-    body["images_length"] = selectedFiles.length.toString();
+    print('heree: $errors');
+
+    // if (errors.keys.length > 0) return;
+
+    // body['username'] = body['first_name'] + " "+body['last_name'];
+
+    var files = [];
+    // print('heree: ${selectedFiles[0]}');
+    // selectedFiles[0].keys.forEach((key) {
+    //   print('heree: ' + key);
+    // });
+    body["identity"] = selectedFiles.length.toString(); // '1.' + selectedFiles[0]['type'];
 
     for (var i = 0; i < selectedFiles.length; i++) {
       var item = selectedFiles[i];
       files.add({
-        "name": "image_$i",
+        "name": "image_$i",//"identity",
+        "size": "0",
         "file": item['data'],
         "type_name": "image",
         "file_type": item['type'],
-        "file_name": "image"
+        "file_name": "${DateTime.now().toString().replaceAll(' ', '_')}.${item['type']}" //"file_name": "image"
       });
     }
 
+    print('heree_files: $files');
+
     Alert.startLoading(context);
-    NetworkManager().fileUpload(Globals.baseUrl + "join/set", files, (p) {},
-        (r) {
+    NetworkManager().fileUpload(Globals.baseUrl + "provider/create", files, (p) {}, (r) { // join/set
       Alert.endLoading();
-      if (r["status"] == true) {
-        Navigator.pop(context);
-        Alert.show(context, LanguageManager.getText(213));
-      } else if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r["message"]));
+      if (r['state'] == true) {
+        UserManager.proccess(r['data']);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home()));
+        // Navigator.pop(context);
+        // Alert.show(context, LanguageManager.getText(213));
       }
-    }, body: body);
+    }, body: body, context: context);
   }
 
   void pickImage(ImageSource source) async {

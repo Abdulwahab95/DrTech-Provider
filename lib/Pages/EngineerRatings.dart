@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
@@ -30,26 +29,47 @@ class _EngineerRatingsState extends State<EngineerRatings> {
   }
 
   void load() {
+    //   setState(() {isLoading = false;});
+    //   setState(() {
+    //       data[0] = [
+    //     {
+    //         "name": "مزود خدمة",
+    //         "image": "https://server.drtechapp.com/storage/images/60daf872ea0f0.jpg",
+    //         "created_at": "2021-07-06 10:31:47",
+    //         "comment": "شخص متعاون و خلوق . شكرا",
+    //         "stars": "1"
+    //     },
+    //     {
+    //         "name": "هاني القحطاني",
+    //         "image": "https://server.drtechapp.com/storage/images/default.jpg",
+    //         "created_at": "2021-07-27 09:56:28",
+    //         "comment": "dvsdvsdv",
+    //         "stars": "5"
+    //     },
+    //     {
+    //         "name": "hani",
+    //         "image": "https://server.drtechapp.com/storage/images/612929053654d.jpg",
+    //         "created_at": "2021-08-27 22:26:30",
+    //         "comment": "ممتاز جدا",
+    //         "stars": "5"
+    //     }
+    // ];
+    //   });
     if (isLoading) return;
     setState(() {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "user/ratings?id=${widget.id}&page$page", (r) {
+        Globals.baseUrl + "provider/service/ratings/${widget.id}" ,  context, (r) { // user/ratings?id=${widget.id}&page$page
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           page++;
           data[r["pgae"]] = r['data'];
         });
       } else {
-        if (r['message'] != null) {
-          Alert.show(context, Converter.getRealText(r['message']), onYes: () {
-            Navigator.pop(context);
-          });
-        } else
           Navigator.pop(context);
       }
     });
@@ -135,7 +155,7 @@ class _EngineerRatingsState extends State<EngineerRatings> {
                         borderRadius: BorderRadius.circular(60),
                         color: Colors.grey,
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(item['image']))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
                   ),
                   Container(
                     width: 10,
@@ -147,11 +167,11 @@ class _EngineerRatingsState extends State<EngineerRatings> {
                         textDirection: LanguageManager.getTextDirection(),
                         children: [
                           Icon(
-                            int.tryParse(item['stars']) > 2
+                            item['stars'] > 2
                                 ? FlutterIcons.like_fou
                                 : FlutterIcons.dislike_fou,
-                            color: Colors.grey,
-                            size: 24,
+                            color: item['stars'] > 2 ? Colors.orange : Colors.grey ,
+                            size: 20,
                           ),
                           Container(
                             width: 5,
@@ -194,13 +214,16 @@ class _EngineerRatingsState extends State<EngineerRatings> {
                   )
                 ],
               ),
-              Text(
-                item['comment'].toString(),
-                textDirection: LanguageManager.getTextDirection(),
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Converter.hexToColor("#727272")),
+              Container(
+                margin: EdgeInsets.only(top: 15, left: 15, right: 10, bottom: 10),
+                child: Text(
+                  item['comment'].toString(),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Converter.hexToColor("#727272")),
+                ),
               )
             ],
           ),

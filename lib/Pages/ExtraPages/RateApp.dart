@@ -8,7 +8,6 @@ import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RateApp extends StatefulWidget {
@@ -19,7 +18,7 @@ class RateApp extends StatefulWidget {
 }
 
 class _RateAppState extends State<RateApp> {
-  Map<String, String> body = {};
+  Map<String, String> body = {'stars':'5'};
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +31,7 @@ class _RateAppState extends State<RateApp> {
               child: Container(
                   width: MediaQuery.of(context).size.width,
                   padding:
-                      EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
+                  EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
                   child: Row(
                     textDirection: LanguageManager.getTextDirection(),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -75,7 +74,7 @@ class _RateAppState extends State<RateApp> {
                   color: Converter.hexToColor("#8D8C8E")),
             ),
           ),
-          RateStars(30, spacing: 0.5, onUpdate: (stars) {
+          RateStars(30, spacing: 0.5, stars: 5,onUpdate: (stars) {
             body["stars"] = stars.toString();
           }),
           Container(
@@ -95,32 +94,32 @@ class _RateAppState extends State<RateApp> {
               onChanged: (t) {
                 body["comment"] = t;
               },
-              textDirection: LanguageManager.getTextDirection(),
-              decoration: InputDecoration(border: InputBorder.none),
+              textDirection: LanguageManager.getTextDirection(), // 'صف لنا تجربتك (إختيارية)'
+              decoration: InputDecoration(border: InputBorder.none, hintText: LanguageManager.getText(291), hintTextDirection: LanguageManager.getTextDirection()),
               maxLines: 4,
             ),
           ),
           Expanded(
               child: Container(
-            alignment: Alignment.bottomCenter,
-            child: InkWell(
-              onTap: send,
-              child: Container(
-                width: 320,
-                height: 56,
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(bottom: 10),
-                child: Text(
-                  LanguageManager.getText(70),
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.normal),
+                alignment: Alignment.bottomCenter,
+                child: InkWell(
+                  onTap: send,
+                  child: Container(
+                    width: 320,
+                    height: 56,
+                    alignment: Alignment.center,
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      LanguageManager.getText(70),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.normal),
+                    ),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Converter.hexToColor("#344F64")),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Converter.hexToColor("#344F64")),
-              ),
-            ),
-          ))
+              ))
         ],
       ),
     );
@@ -133,9 +132,9 @@ class _RateAppState extends State<RateApp> {
     }
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/app", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "application/rate/create", context ,(r) { // user/app
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.pop(context);
         Alert.show(
             context,
@@ -166,19 +165,19 @@ class _RateAppState extends State<RateApp> {
             ),
             type: AlertType.WIDGET);
       }
-      if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
     }, body: body);
   }
 
   Widget getShearinIcons() {
     List<Widget> shearIcons = [];
-    if (Globals.getConfig("shearing") != "")
-      for (var item in Globals.getConfig("shearing")) {
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
         shearIcons.add(GestureDetector(
           onTap: () async {
-            launch(item['url']);
+            await launch(item['url']) ;
+            // void _launchURL() async =>
+            // item['url']= 'https://api.whatsapp.com/';
+            //     await canLaunch(item['url']) ? await launch(item['url']) : throw 'Could not launch ${item['url']}';
           },
           child: Container(
             width: 40,
@@ -187,7 +186,7 @@ class _RateAppState extends State<RateApp> {
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.contain,
-                    image: CachedNetworkImageProvider(item["icon"]))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
           ),
         ));
       }

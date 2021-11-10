@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
@@ -32,17 +31,15 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "product/load?page=$page&type=favorit", (r) {
+        Globals.baseUrl + "product/load?page=$page&type=favorit",  context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           page++;
           data[r['page']] = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -150,7 +147,7 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
                 margin: EdgeInsets.only(left: 15, right: 15),
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: CachedNetworkImageProvider(item['images'][0])),
+                        image: CachedNetworkImageProvider(Globals.correctLink(item['images'][0]))),
                     borderRadius: BorderRadius.circular(7),
                     color: Converter.hexToColor("#F2F2F2")),
               ),
@@ -161,13 +158,11 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
                   });
                   NetworkManager.httpGet(
                       Globals.baseUrl + "product/like?product_id=" + item["id"],
-                      (r) {
-                    if (r['status'] == true) {
+                       context, (r) {
+                    if (r['state'] == true) {
                       setState(() {
                         data[page].removeAt(i);
                       });
-                    } else if (r['message'] != null) {
-                      Alert.show(context, Converter.getRealText(r['message']));
                     }
                   });
                 },
@@ -212,7 +207,7 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
                       alignment: Alignment.center,
                       child: Text(
                         LanguageManager.getText(
-                            item['status'] == 'USED' ? 143 : 142),
+                            item['state'] == 'USED' ? 143 : 142),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,

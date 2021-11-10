@@ -42,8 +42,8 @@ class _AddProductState extends State<AddProduct> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "product/configuration", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpGet(Globals.baseUrl + "product/configuration",  context, (r) {
+      if (r['state'] == true) {
         setState(() {
           config = r;
           if (widget.id != null) {
@@ -52,23 +52,19 @@ class _AddProductState extends State<AddProduct> {
             isLoading = false;
           }
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
 
   void load() {
     NetworkManager.httpGet(Globals.baseUrl + "product/get?id=${widget.id}",
-        (r) {
-      if (r["status"] == true) {
+         context, (r) {
+      if (r['state'] == true) {
         setState(() {
           isLoading = false;
 
           fillData(r['data']);
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -211,12 +207,10 @@ class _AddProductState extends State<AddProduct> {
   void deleteProductConferm() {
     Alert.startLoading(context);
     Map<String, String> body = {"id": widget.id.toString()};
-    NetworkManager.httpPost(Globals.baseUrl + "product/delete", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "product/delete",  context, (r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.pop(context);
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }
@@ -260,10 +254,9 @@ class _AddProductState extends State<AddProduct> {
       });
     }
     Alert.startLoading(context);
-    NetworkManager().fileUpload(Globals.baseUrl + "product/add", files, (p) {},
-        (r) {
+    NetworkManager().fileUpload(Globals.baseUrl + "product/add", files, (p) {}, (r) {
       Alert.endLoading();
-      if (r["status"] == true) {
+      if (r['state'] == true) {
         Navigator.pop(context);
       } else if (r["message"] != null) {
         Alert.show(context, Converter.getRealText(r["message"]));

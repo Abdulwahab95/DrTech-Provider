@@ -28,7 +28,7 @@ class _AboutState extends State<About> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "information/about", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "about",  context, (r) { // information/about
       setState(() {
         isLoading = false;
         data = r['data'];

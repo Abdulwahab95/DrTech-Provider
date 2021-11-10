@@ -6,6 +6,7 @@ import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
+import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:flutter/material.dart';
 
 import 'Home.dart';
@@ -257,7 +258,7 @@ class _WelcomeState extends State<Welcome> {
               borderRadius: BorderRadius.circular(size * 0.12),
               color: Colors.white,
               image: DecorationImage(
-                  image: CachedNetworkImageProvider(item['image']))),
+                  image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
         ),
       ));
     }
@@ -276,6 +277,7 @@ class _WelcomeState extends State<Welcome> {
 
   void close() {
     DatabaseManager.save("welcome", true);
+    print('heree: identity ${UserManager.currentUser("identity")}');
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -284,7 +286,9 @@ class _WelcomeState extends State<Welcome> {
                     ? WebBrowser(Globals.getWebViewUrl(), '')
                     :
                 UserManager.currentUser("id").isNotEmpty
-                    ? Globals.isOpenFromNotification? LiveChat(Globals.currentConversationId) : Home()
-                    : Login()));
+                    ?  UserManager.currentUser("identity").isEmpty? JoinRequest() //
+                    : Globals.isOpenFromNotification? LiveChat(Globals.currentConversationId) : Home()
+                    : Login())
+    );
   }
 }

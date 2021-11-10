@@ -36,7 +36,7 @@ class DatabaseManager {
   }
 
   static String getUserSettings(key) {
-    print('getUserSettings: ${DatabaseManager.load("settings_" + key)}');
+    // print('getUserSettings: ${DatabaseManager.load("settings_" + key)}');
     return DatabaseManager.load("settings_" + key);
   }
 

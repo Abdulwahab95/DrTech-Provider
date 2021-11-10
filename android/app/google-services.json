@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "499525300846-lvtfejdej9us3t2k5l3o1qfr4a5rutj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.android.doctortecapp.com",
+            "certificate_hash": "c85ee404beb69199e425d29f3f16449c4b4a7b5c"
+          }
+        },
+        {
           "client_id": "499525300846-vo9f8kra1lo8b5rat1ar97p96o6893am.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
@@ -34,16 +33,14 @@ class _OnlineServicesState extends State<OnlineServices> {
     });
 
     NetworkManager.httpGet(
-        Globals.baseUrl + "/services/loadSubCatigories?search=$search", (r) {
+        Globals.baseUrl + "/services/loadSubCatigories?search=$search",  context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -158,7 +155,7 @@ class _OnlineServicesState extends State<OnlineServices> {
               ],
               image: DecorationImage(
                   fit: BoxFit.cover,
-                  image: CachedNetworkImageProvider(item['image']))),
+                  image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
           child: Container(
             margin: EdgeInsets.all(10),
             child: Text(

@@ -28,13 +28,11 @@ class _PaymentOptionsState extends State<PaymentOptions> {
   }
 
   void load() {
-    NetworkManager.httpGet(Globals.baseUrl + "payment/load", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpGet(Globals.baseUrl + "payment/load",  context, (r) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -233,17 +231,15 @@ class _PaymentOptionsState extends State<PaymentOptions> {
       "token": paymentToken
     };
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "orders/set", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "orders/set",  context, (r) {
       Alert.endLoading();
-      onResponce(r);
+      onResponce (r);
     }, body: body);
   }
 
-  void onResponce(r) {
-    if (r['status'] == true) {
+  void onResponce  (r) {
+    if (r['state'] == true) {
       Navigator.of(context).pop(true);
-    } else if (r['message'] != null) {
-      Alert.show(context, Converter.getRealText(r['message']));
     }
   }
 }

@@ -29,11 +29,11 @@ class _FrequentlyAskedQuestionsState extends State<FrequentlyAskedQuestions> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "information/FrequentlyAskedQuestions", (r) {
+        Globals.baseUrl + "faq",  context, (r) {//information/FrequentlyAskedQuestions
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
         });
@@ -133,7 +133,7 @@ class _FrequentlyAskedQuestionsState extends State<FrequentlyAskedQuestions> {
               ? Container(
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: Text(
-                    item['body'],
+                    item['content'],
                     textDirection: LanguageManager.getTextDirection(),
                     style: TextStyle(
                         fontSize: 14,

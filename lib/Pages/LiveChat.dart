@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
+
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
@@ -16,12 +16,12 @@ import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/LocalNotifications.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'Home.dart';
 
@@ -57,6 +57,7 @@ class _LiveChatState extends State<LiveChat> {
   @override
   void initState() {
     LiveChat.callback = onReciveNotic;
+    loadConfig();
     load();
     super.initState();
     print('heree: reminderScreenNavigatorKey ${LocalNotifications.reminderScreenNavigatorKey.currentState}');
@@ -83,12 +84,17 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   void infoDataNotic(payload) {
+    print('here_timer: type: ${payload['type']}, payload: $payload');
     switch (payload['type']) {
       case "offer":
+        print('here_timer: case offer');
         for (var page in data.keys) {
           for (var i = 0; i < data[page].length; i++) {
             if (data[page][i]["id"].toString() == payload["message_id"]) {
+              print('here_timer: if 1');
               if (data[page][i]["message"].runtimeType != String)
+                print('here_timer: if 2');
+                print('here_timer: ${data[page][i]}');
                 setState(() {
                   data[page][i]["message"]['status'] = payload["status"];
                 });
@@ -98,32 +104,32 @@ class _LiveChatState extends State<LiveChat> {
         }
         break;
       case "seen":
-        if (payload['id'] == "all") {
+        // if (payload['id'] == "all") {
           for (var i = 0; i < data[data.keys.last].length; i++) {
-            if (data[data.keys.last][i]["user_id"].toString() ==
+            if (data[data.keys.last][i]["send_by"].toString() ==
                 UserManager.currentUser("id").toString()) {
               setState(() {
-                data[data.keys.last][i]["seen"] = true;
+                data[data.keys.last][i]["seen"] = 1;
               });
             }
           }
-        } else
-          for (var i = 0; i < data[data.keys.last].length; i++) {
-            if (data[data.keys.last][i]["id"].toString() ==
-                payload['id'].toString()) {
-              setState(() {
-                data[data.keys.last][i]["seen"] = true;
-              });
-              break;
-            }
-          }
+        // } else
+        //   for (var i = 0; i < data[data.keys.last].length; i++) {
+        //     if (data[data.keys.last][i]["id"].toString() ==
+        //         payload['id'].toString()) {
+        //       setState(() {
+        //         data[data.keys.last][i]["seen"] = 1;
+        //       });
+        //       break;
+        //     }
+        //   }
         break;
       default:
     }
   }
 
   void chatDataNotic(paylaod) {
-    if (paylaod['message'] == 'USER_TYPING') {
+    if (paylaod['text'] == 'USER_TYPING') {
       setState(() {
         isTyping = true;
       });
@@ -142,7 +148,7 @@ class _LiveChatState extends State<LiveChat> {
       isTyping = false;
       data.values.last.add(paylaod);
       scrollDown();
-      sendSeenFlag(paylaod['id'].toString());
+      sendSeenFlag();// sendSeenFlag(paylaod['id'].toString());
     });
   }
 
@@ -156,18 +162,17 @@ class _LiveChatState extends State<LiveChat> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(
-        Globals.baseUrl + "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString(), (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "convertation",  context, (r) { // "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString()
       try {
-        if (r["status"] == true) {
+        if (r['state'] == true) {
           setState(() {
             isLoading = false;
-            data[r['page']] = r['data'];
-            user = r['sender'];
+            data['0'] = r['data']['convertation']; // r['page']
+            user = r['data']['with'];
           });
+          sendSeenFlag();
         } else if (r['message'] != null) {
           Navigator.pop(context);
-          Alert.show(context, Converter.getRealText(r['message']));
         } else {
           setState(() {
             ui = BrokenPage(load);
@@ -178,7 +183,7 @@ class _LiveChatState extends State<LiveChat> {
           ui = BrokenPage(load);
         });
       }
-    }, cashable: true);
+    }, cachable: true, body: {"user_id":widget.id.toString() ,"provider_id": UserManager.currentUser('id')});
   }
 
   int i=0;
@@ -201,7 +206,7 @@ class _LiveChatState extends State<LiveChat> {
                             left: 25, right: 25, bottom: 20, top: 25),
                         child: Row(
                           textDirection: LanguageManager.getTextDirection(),
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
                               onTap: _close,
@@ -215,11 +220,12 @@ class _LiveChatState extends State<LiveChat> {
                                 ),
                               ),
                             ),
+                            Container(width: 25),
                             Text(
                               isTyping
                                   ? LanguageManager.getText(84)
                                   : user.isNotEmpty
-                                      ? user["name"]
+                                      ? user["username"]
                                       : "",
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -231,13 +237,14 @@ class _LiveChatState extends State<LiveChat> {
                               textDirection: LanguageManager.getTextDirection(),
                               children: [
                                 InkWell(
-                                  onTap: phoneCall,
+                                  // onTap: phoneCall,
                                   child: Container(
                                     width: 20,
                                     child: Icon(
                                       FlutterIcons.phone_faw,
                                       size: 24,
-                                      color: Colors.white,
+                                      color: Colors.transparent,
+                                      // color: Colors.white,
                                       textDirection:
                                           LanguageManager.getTextDirection(),
                                     ),
@@ -247,13 +254,14 @@ class _LiveChatState extends State<LiveChat> {
                                   width: 10,
                                 ),
                                 InkWell(
-                                  onTap: showOptions,
+                                  // onTap: showOptions,
                                   child: Container(
                                     width: 20,
                                     child: Icon(
                                       FlutterIcons.dots_vertical_mco,
                                       size: 28,
-                                      color: Colors.white,
+                                      color: Colors.transparent,
+                                      // color: Colors.white,
                                       textDirection:
                                           LanguageManager.getTextDirection(),
                                     ),
@@ -461,47 +469,7 @@ class _LiveChatState extends State<LiveChat> {
                             ),
                           ),
                         ),
-                        user['isEngineer'] == true
-                            ? InkWell(
-                                onTap: addPromoCode,
-                                child: Container(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 50,
-                                        height: 50,
-                                        padding: EdgeInsets.all(3),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.white, width: 2),
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                            borderRadius:
-                                                BorderRadius.circular(40)),
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          child: Icon(
-                                            FlutterIcons.tag_ant,
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                          ),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40),
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Text(
-                                        LanguageManager.getText(82),
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : InkWell(
+                        InkWell(
                                 onTap: addOffer,
                                 child: Container(
                                   child: Column(
@@ -580,38 +548,38 @@ class _LiveChatState extends State<LiveChat> {
                           ),
                         ),
                         // Location
-                        Container(
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                padding: EdgeInsets.all(3),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.white, width: 2),
-                                    color: Converter.hexToColor("#344F64"),
-                                    borderRadius: BorderRadius.circular(40)),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  child: Icon(
-                                    Icons.location_pin,
-                                    color: Converter.hexToColor("#344F64"),
-                                  ),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      color: Colors.white),
-                                ),
-                              ),
-                              Text(
-                                LanguageManager.getText(80),
-                                style: TextStyle(color: Colors.white),
-                              )
-                            ],
-                          ),
-                        )
+                        // Container(
+                        //   child: Column(
+                        //     children: [
+                        //       Container(
+                        //         width: 50,
+                        //         height: 50,
+                        //         padding: EdgeInsets.all(3),
+                        //         alignment: Alignment.center,
+                        //         decoration: BoxDecoration(
+                        //             border: Border.all(
+                        //                 color: Colors.white, width: 2),
+                        //             color: Converter.hexToColor("#344F64"),
+                        //             borderRadius: BorderRadius.circular(40)),
+                        //         child: Container(
+                        //           width: 40,
+                        //           height: 40,
+                        //           child: Icon(
+                        //             Icons.location_pin,
+                        //             color: Converter.hexToColor("#344F64"),
+                        //           ),
+                        //           decoration: BoxDecoration(
+                        //               borderRadius: BorderRadius.circular(40),
+                        //               color: Colors.white),
+                        //         ),
+                        //       ),
+                        //       Text(
+                        //         LanguageManager.getText(80),
+                        //         style: TextStyle(color: Colors.white),
+                        //       )
+                        //     ],
+                        //   ),
+                        // )
                       ],
                     ),
                   ),
@@ -624,7 +592,7 @@ class _LiveChatState extends State<LiveChat> {
           color: Converter.hexToColor("#F3F3F3"),
           padding: EdgeInsets.only(left: 15, right: 15),
           child: Row(
-            textDirection: LanguageManager.getTextDirection(),
+            textDirection: TextDirection.rtl,
             children: [
               Container(
                 width: 40,
@@ -661,7 +629,7 @@ class _LiveChatState extends State<LiveChat> {
                         sendTypingNotifyer();
                       }
                       typingNotifyer = v.isNotEmpty;
-                      body['message'] = v;
+                      body['text'] = v;
                     },
                     controller: controller,
                     keyboardType: TextInputType.multiline,
@@ -739,7 +707,12 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatMessageUI(item, page, index) {
-    switch (item["type"]) {
+    if(item['type'] == 'offer' && item['message'] == null) {
+      item['type'] = 'TEXT';
+    }
+
+    if(item.toString().length > 0 )
+    switch (item["type"].toString().toUpperCase()) {
       case "TEXT":
         return getChatTextMessageUI(item);
         break;
@@ -781,7 +754,7 @@ class _LiveChatState extends State<LiveChat> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: CachedNetworkImageProvider(
-                                UserManager.currentUser("image"))),
+                                Globals.correctLink(UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -867,9 +840,8 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatOfferMessageUi(item, page, index) {
-    bool isFromSender = item["user_id"] == user["id"];
-    TextDirection direction =
-        isFromSender ? TextDirection.ltr : TextDirection.rtl;
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
+    TextDirection direction = isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
       margin: EdgeInsets.all(10),
       child: Row(
@@ -886,9 +858,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -939,16 +911,12 @@ class _LiveChatState extends State<LiveChat> {
                                               ),
                                             ),
                                             Text(
-                                              item['message']['price']
-                                                  .toString(),
+                                              item['message']['price'].toString(),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
-                                                  decoration: item["message"]
-                                                              ["status"] ==
-                                                          "REJECTED"
-                                                      ? TextDecoration
-                                                          .lineThrough
+                                                  decoration: item["message"]["status"] == "REJECTED"
+                                                      ? TextDecoration.lineThrough
                                                       : TextDecoration.none,
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 16,
@@ -959,8 +927,7 @@ class _LiveChatState extends State<LiveChat> {
                                               width: 5,
                                             ),
                                             Text(
-                                              item['message']['unit']
-                                                  .toString(),
+                                                item["message"]['unit'].toString(),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
@@ -978,14 +945,11 @@ class _LiveChatState extends State<LiveChat> {
                                           ],
                                         ),
                                         Text(
-                                          item['message']['description']
-                                              .toString(),
+                                          item['message']['description'].toString(),
                                           textDirection: LanguageManager
                                               .getTextDirection(),
                                           style: TextStyle(
-                                              decoration: item["message"]
-                                                          ["status"] ==
-                                                      "REJECTED"
+                                              decoration: item["message"]["status"] == "REJECTED"
                                                   ? TextDecoration.lineThrough
                                                   : TextDecoration.none,
                                               fontWeight: FontWeight.w600,
@@ -995,8 +959,7 @@ class _LiveChatState extends State<LiveChat> {
                                       ],
                                     ),
                                   ),
-                                  getOfferOptions(
-                                      item, page, index, isFromSender)
+                                  getOfferOptions(item, page, index, isFromSender)
                                 ],
                               ),
                               decoration: BoxDecoration(
@@ -1011,7 +974,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1084,9 +1047,6 @@ class _LiveChatState extends State<LiveChat> {
         Expanded(
           child: InkWell(
             onTap: () {
-              if (isFromSender)
-                rejectOffer(item["id"], item["message"]['id'], page, index);
-              else
                 cancelOffer(item["id"], item["message"]['id'], page, index);
             },
             child: Container(
@@ -1141,7 +1101,7 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatFileMessageUI(item) {
-    bool isFromSender = item["user_id"] == user["id"];
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -1160,9 +1120,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1186,7 +1146,7 @@ class _LiveChatState extends State<LiveChat> {
                                 children: [
                                   InkWell(
                                       onTap: () {
-                                        launch(item["download_url"]);
+                                        launch(item["message"]);
                                       },
                                       child: Container(
                                         width: 40,
@@ -1206,7 +1166,7 @@ class _LiveChatState extends State<LiveChat> {
                                   Expanded(
                                     child: Container(
                                       child: Text(
-                                        item["message"]["name"],
+                                        item["message"].toString().split('file/')[1],// item["message"]["name"],
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -1236,7 +1196,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1284,8 +1244,8 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(
-                                UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(
+                                UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1359,7 +1319,7 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatImageMessageUI(item) {
-    bool isFromSender = item["user_id"] == user["id"];
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -1378,9 +1338,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1402,7 +1362,7 @@ class _LiveChatState extends State<LiveChat> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
                                 child: CachedNetworkImage(
-                                    imageUrl: item['image'].toString()),
+                                    imageUrl: item['message'].toString()),
                               ),
                               padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(
@@ -1419,7 +1379,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1451,7 +1411,8 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatTextMessageUI(item) {
-    bool isFromSender = item["user_id"] == user["id"];
+    // print('here_getChatTextMessageUI: ${item['seen']}');
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -1470,9 +1431,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1518,7 +1479,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1633,20 +1594,28 @@ class _LiveChatState extends State<LiveChat> {
   void sendTypingNotifyer() {
     typingNotifyer = true;
     Map<String, String> body = {};
+
     body['message'] = "USER_TYPING";
     body['type'] = "TEXT";
     body['id'] = widget.id.toString();
-    NetworkManager.httpPost(Globals.baseUrl + "chat/send", (r) {}, body: body);
+
+    body['send_to'] = widget.id.toString();
+    body['send_by'] = UserManager.currentUser("id").toString();
+
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/typing",  context, (r) {}, body: body);
   }
 
-  void sendSeenFlag(id) {
+  void sendSeenFlag() { // id
     Map<String, String> body = {};
-    body['message_id'] = id;
-    body['id'] = widget.id.toString();
-    NetworkManager.httpPost(Globals.baseUrl + "chat/seen", (r) {}, body: body);
+    // body['message_id'] = id;
+    // body['id'] = widget.id.toString();
+    body['provider_id'] = widget.id.toString();
+    body['user_id'] = UserManager.currentUser("id").toString();
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/seen",  context, (r) {}, body: body); // chat/seen
   }
 
   void sendFile(PlatformFile fileData) {
+
     File file = File(fileData.path);
     if (file == null) return;
     int id = files.length;
@@ -1660,23 +1629,23 @@ class _LiveChatState extends State<LiveChat> {
     scrollDown();
 
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    NetworkManager().fileUpload(
-        Globals.baseUrl + "chat/file",
+    NetworkManager().fileUpload(Globals.baseUrl + "convertation/create", // chat/file
         [
           {
             "name": "file",
             "file": file.readAsBytesSync(),
             "type_name": "file",
             "file_type": "any",
-            "file_name": "aplication"
+            "file_name":  fileData.name//"aplication"
           }
         ],
         (p) {}, (r) {
-      if (r["status"] == true) {
+            if (r["state"] == true) {
         setState(() {
-          data[r["page"]][int.parse(r["index"])] = r["message"];
-          int tempId = int.parse(r["temp_id"]);
+          data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
+          int tempId = id; // int tempId = int.parse(r["temp_id"]);
           files[tempId] = null;
+
         });
       } else {
         setState(() {
@@ -1688,7 +1657,11 @@ class _LiveChatState extends State<LiveChat> {
       "index": index.toString(),
       "page": page,
       "file_name": fileData.name,
-      "temp_id": id.toString()
+      "temp_id": id.toString(),
+      'type': "FILE".toLowerCase(),
+      'user_id': widget.id.toString(),
+      'provider_id': UserManager.currentUser("id").toString(),
+      'send_by': UserManager.currentUser("id").toString(),
     });
   }
 
@@ -1710,21 +1683,21 @@ class _LiveChatState extends State<LiveChat> {
     scrollDown();
 
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    NetworkManager().fileUpload(Globals.baseUrl + "chat/image", [
+    NetworkManager().fileUpload(Globals.baseUrl + "convertation/create", [ // chat/image
       {
         "name": "image",
         "file": images[id],
         "type_name": "image",
         "file_type": "png",
-        "file_name": "image"
+        "file_name": "${DateTime.now().toString().replaceAll(' ', '_').replaceAll(':', '').replaceAll('-', '')}.png" ///"image"
       }
     ], (p) {
       setState(() {});
     }, (r) {
-      if (r["status"] == true) {
+      if (r['state'] == true) {
         setState(() {
-          data[r["page"]][int.parse(r["index"])] = r["message"];
-          int tempId = int.parse(r["temp_id"]);
+          data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
+          int tempId = id; //int tempId = int.parse(r["temp_id"]);
           images[tempId] = null;
         });
       } else {
@@ -1736,15 +1709,19 @@ class _LiveChatState extends State<LiveChat> {
       "id": widget.id,
       "index": index.toString(),
       "page": page,
-      "temp_id": id.toString()
+      "temp_id": id.toString(),
+      'type': "IMAGE".toLowerCase(),
+      'user_id': widget.id.toString(),
+      'provider_id': UserManager.currentUser("id").toString(),
+      'send_by': UserManager.currentUser("id").toString(),
     });
   }
 
   void sendPromoCode() {
     if (promoCode.isEmpty) return;
     Map<String, String> body = {"code": promoCode};
-    NetworkManager.httpPost(Globals.baseUrl + "chat/promo", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpPost(Globals.baseUrl + "chat/promo",  context, (r) {
+      if (r['state'] == true) {
         setState(() {
           data.values.last.add(r['message']);
         });
@@ -1757,11 +1734,18 @@ class _LiveChatState extends State<LiveChat> {
   void sendOffer() {
     Alert.publicClose();
     if (offer.isEmpty || offer["price"] == null) return;
-    offer['id'] = widget.id;
-    NetworkManager.httpPost(Globals.baseUrl + "chat/offer", (r) {
-      if (r['status'] == true) {
+    // offer['id'] = widget.id;
+
+    offer['type'] = "OFFER".toLowerCase();
+    offer['user_id'] = widget.id.toString();
+    offer['provider_id'] = UserManager.currentUser("id").toString();
+    offer['send_by'] = UserManager.currentUser("id").toString();
+    offer['provider_service_id'] = '1';
+
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) {// chat/offer
+      if (r['state'] == true) {
         setState(() {
-          data.values.last.add(r['message']);
+          data.values.last.add(r['data'][0]);
         });
       }
     }, body: offer);
@@ -1773,12 +1757,15 @@ class _LiveChatState extends State<LiveChat> {
     typingNotifyer = false;
     if (body.keys.length == 0) return;
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    body['type'] = "TEXT";
-    body['id'] = widget.id.toString();
-    NetworkManager.httpPost(Globals.baseUrl + "chat/send", (r) {
-      if (r['status'] == true) {
+    body['type'] = "TEXT".toLowerCase();
+    body['user_id'] = widget.id.toString();
+    body['provider_id'] = UserManager.currentUser("id").toString();
+    body['send_by'] = UserManager.currentUser("id").toString();
+
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) { // chat/send
+      if (r['state'] == true) {
         setState(() {
-          data.values.last.add(r['message']);
+          data.values.last.add(r['data'][0]); // r['message']
         });
       }
     }, body: body);
@@ -1793,47 +1780,26 @@ class _LiveChatState extends State<LiveChat> {
       data[page][index]["message"]["status"] = "LOADING";
     });
     Map body = {
-      "id": id,
-      "page": page,
-      "index": index.toString(),
-      "message_id": messageId.toString()
-    };
-    NetworkManager.httpPost(Globals.baseUrl + "chat/cancelOffer", (r) {
-      if (r['status'] == true) {
-        setState(() {
-          data[r['page']][r['index']]["message"]["status"] = r['data'];
-        });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    }, body: body);
-  }
-
-  void rejectOffer(messageId, id, page, index) {
-    setState(() {
-      data[page][index]["message"]["status"] = "LOADING";
-    });
-    Map body = {
       "id": id.toString(),
       "page": page.toString(),
       "index": index.toString(),
-      "message_id": messageId.toString()
+      "message_id": messageId.toString(),
+      "status": "CANCELED",
+      'send_to' : widget.id.toString()
     };
-    NetworkManager.httpPost(Globals.baseUrl + "chat/rejectOffer", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpPost(Globals.baseUrl + "offer/status/$id",  context, (r) { // chat/cancelOffer
+      if (r['state'] == true) {
         setState(() {
-          data[r['page']][r['index']]["message"]["status"] = r['data'];
+          data[body['page']][index]["message"]["status"] = r['data']['status'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }
 
   void pickFile() async {
     FilePickerResult result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'mp4', 'pdf', 'doc', 'zip'],
+      type: FileType.any,
+      // allowedExtensions: ['jpg', 'mp4', 'pdf', 'doc', 'zip'],
     );
     if (result != null) {
       setState(() {
@@ -1857,13 +1823,17 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   void addOffer() {
+    offer = {};
     setState(() {
       isOpenPicks = false;
     });
-    Alert.show(
-        context,
-        Container(
-            child: Column(
+    Alert.staticContent = getOfferWidget();
+    Alert.show(context, Alert.staticContent, type: AlertType.WIDGET);
+  }
+
+  getOfferWidget () {
+    return Container(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
@@ -1893,6 +1863,26 @@ class _LiveChatState extends State<LiveChat> {
                 ],
               ),
             ),
+
+            config != null ?createSelectInput("service", 283, config, onSelected: (v) { // config['service']
+              print('here_service: $v');
+
+              setState(() {
+                // Alert.alertSetState();
+                selectedTexts["service"] = v['title'];
+                offer['provider_service_id'] = v['id'].toString();
+              });
+
+              Timer(Duration(milliseconds: 250), () {
+                Alert.publicClose();
+
+                Timer(Duration(milliseconds: 250), () {
+                  Alert.publicClose();
+                  addOffer();
+                });
+              });
+
+            }): Container(),
             Container(
               margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
               padding: EdgeInsets.all(5),
@@ -1931,7 +1921,10 @@ class _LiveChatState extends State<LiveChat> {
                   Expanded(
                     child: TextField(
                       onChanged: (v) {
-                        offer["price"] = v;
+                          offer["price"] = v;
+                          Alert.staticContent = getOfferWidget();
+                          Alert.setStateCall = () {};
+                          Alert.callSetState();
                       },
                       textDirection: LanguageManager.getTextDirection(),
                       keyboardType: TextInputType.number,
@@ -1944,15 +1937,32 @@ class _LiveChatState extends State<LiveChat> {
                     ),
                   ),
                   Text(
-                    Converter.getRealText(UserManager.currentUser("unit")),
+                    Converter.getRealText(UserManager.currentUser("unit")) ,
                     style: TextStyle(fontSize: 15),
                   )
                 ],
               ),
             ),
             Container(
-              height: 10,
+              width: double.infinity,
+              margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+              child: Row(
+                textDirection: LanguageManager.getTextDirection(),
+                children: [ // #translae
+                  Text( // صافي المبيع  // بعد خصم
+                    LanguageManager.getText(306) + ' ' + getDisCount() + ' ' + Converter.getRealText(UserManager.currentUser("unit")) + ' ' + LanguageManager.getText(307) + ' ',
+                    style: TextStyle(fontSize: 13),
+                    textDirection: LanguageManager.getTextDirection(),
+                  ),
+                  Text(// عمولة دكتورتك.
+                    ' ' + LanguageManager.getText(308),
+                    style: TextStyle(fontSize: 12, color: Colors.blue),
+                    textDirection: LanguageManager.getTextDirection(),
+                  ),
+                ],
+              ),
             ),
+            Container(height: 10),
             InkWell(
               onTap: sendOffer,
               child: Container(
@@ -1980,8 +1990,7 @@ class _LiveChatState extends State<LiveChat> {
               height: 10,
             ),
           ],
-        )),
-        type: AlertType.WIDGET);
+        ));
   }
 
   void addPromoCode() {
@@ -2089,12 +2098,84 @@ class _LiveChatState extends State<LiveChat> {
         type: AlertType.WIDGET);
   }
 
+  Map<String, String> selectedTexts = {};
+  List config;
+
+  Widget createSelectInput(key, titel, options, {onEmptyMessage, onSelected}) {
+    print('here_selectedTexts: ${selectedTexts[key]}');
+    return GestureDetector(
+      onTap: () {
+        if (options == null) {
+          Alert.show(context, onEmptyMessage);
+          return;
+        }
+        Alert.publicClose();
+        var con = context;
+        Timer(Duration(milliseconds: 500), () {
+          Alert.show(con, options, type: AlertType.SELECT, onSelected: onSelected);
+        });
+      },
+      child: Container(
+        height: 50,
+        margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+        padding: EdgeInsets.only(left: 7, right: 7),
+        decoration: BoxDecoration(
+            color: Converter.hexToColor("#F2F2F2"),// errors[key] != null ? "#E9B3B3" : "#F2F2F2"
+            borderRadius: BorderRadius.circular(12)),
+        child: Row(
+          textDirection: LanguageManager.getTextDirection(),
+          children: [
+            Expanded(
+                child: Text(
+                  selectedTexts[key] != null
+                      ? selectedTexts[key]
+                      : LanguageManager.getText(titel),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: selectedTexts[key] != null ? Colors.black : Colors.grey),
+                )),
+            Icon(
+              FlutterIcons.chevron_down_fea,
+              color: Converter.hexToColor("#727272"),
+              size: 22,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<bool> _close() async{
     if(Navigator.canPop(context)) {
       Navigator.pop(context);
       return true;
     } else
       return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(page: 1,)), (Route<dynamic> route) => false);
+  }
+
+  void loadConfig() {
+    // NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // services/configuration
+    //   if (r['state'] == true) {
+    //     setState(() {
+    //       config = r['data'];
+    //     });
+    //   }
+    // }, cashable: true);
+  }
+
+  String getDisCount() {
+    // print('here_getDefaultCommission: ${Globals.getDefaultCommission()}');
+    try {
+      double d = double.parse(offer["price"]);
+      // if(d <= 80 )
+      //   d *= 0.8;
+      // else
+        d -= Globals.getDefaultCommission() ;
+      return d.toString().substring(0, d.toString().indexOf('.') + 2 );
+    } catch(e){
+      return '0';
+    }
   }
 
 }

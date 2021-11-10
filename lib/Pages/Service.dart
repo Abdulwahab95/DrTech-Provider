@@ -1,20 +1,16 @@
-import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
-import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Components/RateStars.dart';
 import 'package:dr_tech/Components/Recycler.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
-import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/ShareManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:dr_tech/Pages/EngineerPage.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -48,13 +44,11 @@ class _ServiceState extends State<Service> {
 
   void getConfig() {
     NetworkManager.httpGet(
-        Globals.baseUrl + "services/filters?target=${widget.target}", (r) {
-      if (r['status'] == true) {
+        Globals.baseUrl + "services/filters?target=${widget.target}",  context, (r) {
+      if (r['state'] == true) {
         setState(() {
           configFilters = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['messahe']));
       }
     }, cashable: true);
   }
@@ -67,16 +61,14 @@ class _ServiceState extends State<Service> {
 
     NetworkManager.httpGet(
         Globals.baseUrl + "services/load?target=${widget.target}&page$page",
-        (r) {
+         context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data[r['page']] = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: filters, cashable: true);
   }
@@ -84,13 +76,11 @@ class _ServiceState extends State<Service> {
   void startNewConversation(id) {
     Alert.startLoading(context);
     NetworkManager.httpGet(
-        Globals.baseUrl + "chat/add?id=$id&service_id=${widget.target}", (r) {
+        Globals.baseUrl + "chat/add?id=$id&service_id=${widget.target}",  context, (r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     });
   }
@@ -480,7 +470,7 @@ class _ServiceState extends State<Service> {
                         : Container(),
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(item['image'])),
+                            image: CachedNetworkImageProvider(Globals.correctLink(item['image']))),
                         borderRadius: BorderRadius.circular(10),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -618,7 +608,7 @@ class _ServiceState extends State<Service> {
                         onLongPress: () async {
                           // if (Platform.isIOS) {
                           // iOS
-                          var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                          var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.currentUser("name")}\nأريد...";
                           var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
                           var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
                           whatsappUrl = Uri.encodeFull(whatsappUrl);
@@ -626,7 +616,7 @@ class _ServiceState extends State<Service> {
 
 
 
-                          //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                          //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.currentUser("name")}\nأريد...";
                           //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
                                   var txtControll = TextEditingController();
                                 Alert.show(
@@ -643,7 +633,7 @@ class _ServiceState extends State<Service> {
                                                 color: Converter.hexToColor("#F2F2F2")),
                                             child: TextField(
                                               controller: txtControll,
-                                              onChanged: (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
+                                              onChanged:  (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
                                               textDirection: LanguageManager.getTextDirection(),
                                               textAlign: LanguageManager.getDirection()
                                                   ? TextAlign.right
@@ -700,7 +690,7 @@ class _ServiceState extends State<Service> {
                             // if (Platform.isIOS) {
                               // iOS
                                 var url = 'http://maps.apple.com/';
-                                var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
+                                var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.currentUser("name")}\nأريد...";
                                 var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
                                 var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
                                 whatsappUrl = Uri.encodeFull(whatsappUrl);

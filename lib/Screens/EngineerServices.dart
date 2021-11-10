@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/RateStars.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/AddServices.dart';
 import 'package:dr_tech/Pages/ServicePage.dart';
@@ -29,19 +29,18 @@ class _EngineerServicesState extends State<EngineerServices> {
   }
 
   void load() {
+    if(isLoading) return;
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "user/services", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // user/services
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -96,7 +95,7 @@ class _EngineerServicesState extends State<EngineerServices> {
         ),
         Container(
             padding: EdgeInsets.all(10),
-            alignment: Alignment.bottomLeft,
+            alignment: Globals.isRtl()?Alignment.bottomLeft:Alignment.bottomRight,
             child: getAddButton()),
       ],
     );
@@ -105,9 +104,13 @@ class _EngineerServicesState extends State<EngineerServices> {
   Widget getServiceItem(item) {
     double size = MediaQuery.of(context).size.width * 0.5;
     return InkWell(
-      onTap: () {
-        Navigator.push(context,
+      onTap: () async{
+        var results = await Navigator.push(context,
             MaterialPageRoute(builder: (_) => ServicePage(item["id"])));
+        print('here_WillPopScope: $results');
+        if (results == true) {
+          load();
+        }
       },
       child: Container(
         width: size,
@@ -121,13 +124,15 @@ class _EngineerServicesState extends State<EngineerServices> {
                 margin: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: CachedNetworkImageProvider(item["image"])),
+                        image: CachedNetworkImageProvider(Globals.correctLink(item["thumbnail"]))//image
+                    ),
                     color: Colors.black.withAlpha(20),
                     borderRadius: BorderRadius.circular(10)),
               ),
               Text(
-                item['name'].toString(),
+                item['title'].toString(), // name
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Converter.hexToColor("#2094CD"),
                     fontWeight: FontWeight.bold),
@@ -137,15 +142,12 @@ class _EngineerServicesState extends State<EngineerServices> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  RateStars(
-                    15,
-                    stars: item['rate'],
-                  ),
-                  Container(
-                    width: 10,
-                  ),
+                  item['status']!=null?getStatusService(item):Container(),
+                  Container(width: 10),
+                  RateStars(15, stars: item['stars']?? 5,), // rate
+                  Container(width: 10),
                   Text(
-                    item['rate'].toString(),
+                    item['stars'].toString()?? '5',//rate
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   )
                 ],
@@ -192,5 +194,35 @@ class _EngineerServicesState extends State<EngineerServices> {
             color: Converter.hexToColor("#344F64")),
       ),
     );
+  }
+
+  Widget getStatusService(item) {
+    var map = {
+      'PENDING': {"text": 217, "color": "#EDF25A"}, // 216, #000000
+      'PROCESSING': {"text": 217, "color": "#DFC100"},
+      'ACCEPTED': {"text": 218, "color": "#21CD20"},
+      'REJECTED': {"text": 219, "color": "#F00000"}
+    };
+    return Container(
+        alignment: Alignment.center,
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Converter.hexToColor(map[item['status']]["color"])),
+        child: Text(' '),
+      );
+    // Container(
+    //   padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+    //   decoration: BoxDecoration(
+    //       borderRadius: BorderRadius.circular(15),
+    //       color: Converter.hexToColor(map[item['status']]["color"]).withAlpha(15)),
+    //   child: Text(
+    //     LanguageManager.getText(map[item['status']]["text"]),
+    //     textDirection: LanguageManager.getTextDirection(),
+    //     style: TextStyle(
+    //         fontWeight: FontWeight.w600,
+    //         fontSize: 16,
+    //         color: Converter.hexToColor(map[item['status']]["color"])),
+    //   ),
+    // );
   }
 }

@@ -3,13 +3,19 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Config/Converter.dart';
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class Alert extends StatefulWidget {
+
   static Function publicClose;
+  static Function setStateCall;
+  static Function callSetState;
+
+  static var staticContent;
   static bool currentLoader = false;
   static BuildContext currentLoaderContext;
   final type,
@@ -18,9 +24,11 @@ class Alert extends StatefulWidget {
       onYes,
       premieryText,
       secondaryText,
-      isDismissible;
+      isDismissible,
+      onYesShowSecondBtn;
+
   const Alert(this.content, this.onSelected, this.onYes, this.premieryText,
-      this.secondaryText, this.type, this.isDismissible);
+      this.secondaryText, this.type, this.isDismissible, this.onYesShowSecondBtn);
 
   @override
   _AlertState createState() => _AlertState();
@@ -31,11 +39,12 @@ class Alert extends StatefulWidget {
       premieryText,
       secondaryText,
       type = AlertType.TEXT,
-      isDismissible: true}) {
+      isDismissible: true,
+        onYesShowSecondBtn : true}) {
     showDialog(
         context: context,
         builder: (c) => Alert(content, onSelected, onYes, premieryText,
-            secondaryText, type, isDismissible));
+            secondaryText, type, isDismissible, onYesShowSecondBtn));
   }
 
   static void startLoading(context) {
@@ -72,23 +81,33 @@ class Alert extends StatefulWidget {
         }).then((value) {
       currentLoader = false;
       publicClose = null;
+      setStateCall = null;
+      callSetState = null;
+      staticContent = null;
     });
   }
 
   static void endLoading() {
     if (!currentLoader) return;
-
     currentLoader = false;
     Navigator.pop(currentLoaderContext);
   }
+
 }
 
 class _AlertState extends State<Alert> {
+
   ScrollController controller = ScrollController();
+
   bool visible = false;
+
   @override
   void initState() {
+
     Alert.publicClose = close;
+
+    if(setStateCallBack != null) Alert.callSetState = setStateCallBack;
+
     super.initState();
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
@@ -112,6 +131,8 @@ class _AlertState extends State<Alert> {
       });
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +193,7 @@ class _AlertState extends State<Alert> {
         ),
       );
     }
-    if (widget.type == AlertType.WIDGET) return widget.content;
+    if (widget.type == AlertType.WIDGET) return Alert.staticContent != null? Alert.staticContent: widget.content;
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -234,7 +255,7 @@ class _AlertState extends State<Alert> {
                   width: 10,
                 ),
                 Expanded(
-                    child: widget.onYes != null
+                    child: widget.onYes != null && widget.onYesShowSecondBtn
                         ? InkWell(
                             onTap: close,
                             child: Container(
@@ -291,7 +312,7 @@ class _AlertState extends State<Alert> {
                       decoration: BoxDecoration(
                           image: DecorationImage(
                               fit: BoxFit.contain,
-                              image: CachedNetworkImageProvider(item['icon']))),
+                              image: CachedNetworkImageProvider(Globals.correctLink(item['icon'])))),
                     )
                   : Container(),
               Container(
@@ -299,7 +320,9 @@ class _AlertState extends State<Alert> {
               ),
               Text(
                 Converter.getRealText(
-                    item['name'] != null ? item['name'] : item['text']),
+                    item['name'] != null ? item['name']
+                        : item['title'] != null ? item['title']
+                        : item['text']),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               )
             ],
@@ -311,6 +334,15 @@ class _AlertState extends State<Alert> {
     return contents;
   }
 
+  void setStateCallBack() {
+    if (mounted)
+      setState(() {
+        print('here_setStateCallBack');
+        // isBlack = !isBlack;
+        Alert.setStateCall();
+      });
+  }
+
   void close() {
     Timer(Duration(milliseconds: 250), () {
       Navigator.pop(context);
@@ -318,6 +350,7 @@ class _AlertState extends State<Alert> {
     controller.animateTo(0,
         duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
   }
+
 }
 
 enum AlertType { SELECT, TEXT, WIDGET }

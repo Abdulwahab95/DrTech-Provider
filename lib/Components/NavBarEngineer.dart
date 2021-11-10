@@ -1,7 +1,9 @@
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dr_tech/Config/Globals.dart';
 
 class NavBarEngineer extends StatefulWidget {
   final onUpdate;
@@ -16,12 +18,21 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
   Color activeColor;
   int iSelectedIndex = 0;
   double homeIconSize;
+  int countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
   @override
   void initState() {
     activeColor = Converter.hexToColor("#2094CD");
     if(widget.page != null) iSelectedIndex = widget.page;
+    Globals.updateNotificationCount = ()
+    {
+      if(mounted)
+        setState(() {
+          countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
+        });
+    };
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,36 +60,23 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // Home
-              createIcon("services", 249, () {
-                setState(() {
-                  iSelectedIndex = 0;
-                });
+              createIcon("services", 249, () { setState(() { iSelectedIndex = 0; });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 0, isBig: true),
 
-              createIcon("chat", 250, () {
-                setState(() {
-                  iSelectedIndex = 1;
-                });
+              createIcon("chat", 250, () { setState(() { iSelectedIndex = 1; });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 1),
 
-              createIcon("checklist", 35, () {
-                setState(() {
-                  iSelectedIndex = 2;
-                });
+              createIcon("checklist", 35, () { setState(() { iSelectedIndex = 2; });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 2),
-              createIcon("bell", 45, () {
-                setState(() {
-                  iSelectedIndex = 3;
-                });
+
+              createIcon("bell", 45, () { setState(() { iSelectedIndex = 3; });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 3),
-              createIcon("menu", 46, () {
-                setState(() {
-                  iSelectedIndex = 4;
-                });
+
+              createIcon("menu", 46, () { setState(() { iSelectedIndex = 4; });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 4),
             ],
@@ -93,18 +91,38 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
       return InkWell(
           onTap: onTap,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-                width: homeIconSize * 0.15,
-                height: homeIconSize * 0.15,
-                child: SvgPicture.asset(
-                  "assets/icons/$icon.svg",
-                  color: isActive ? activeColor : Colors.grey,
-                  fit: BoxFit.contain,
-                )),
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                Container(
+                  padding: text == 45? EdgeInsets.only(top: 2): EdgeInsets.zero,
+                    width: homeIconSize * (text != 45? 0.15: 0.20), // 20.2
+                    height: homeIconSize * (text != 45? 0.15: 0.16), // 17.7
+                    child: SvgPicture.asset(
+                      "assets/icons/$icon.svg",
+                      color: isActive ? activeColor : Colors.grey,
+                      fit: BoxFit.contain,
+                    )),
+                text == 45 && countNotSeen > 0
+                ? Container(
+                  alignment: Alignment.center,
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.red),
+                  child: Text(
+                    countNotSeen > 99 ? '99+' : countNotSeen.toString(),
+                    style: TextStyle(fontSize: 6, color: Colors.white,fontWeight: FontWeight.w900 ),
+                  textAlign: TextAlign.center,),
+                )
+                : Container(),
+              ],
+            ),
             Container(
               margin: EdgeInsets.only(bottom: 5),
               child: Text(
                 LanguageManager.getText(text),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: isActive ? activeColor : Colors.grey,
                     fontSize: 14,
@@ -137,7 +155,9 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
                   Container(
                     margin: EdgeInsets.only(bottom: 5),
                     child: Text(
-                      LanguageManager.getText(text),
+                      LanguageManager.getText(text).replaceAll('My', '').trim(),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Config/initialization.dart';
@@ -10,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'Config/Globals.dart';
 import 'Models/Firebase.dart';
 import 'Models/LocalNotifications.dart';
