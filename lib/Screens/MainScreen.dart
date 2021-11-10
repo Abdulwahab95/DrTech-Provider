@@ -3,9 +3,6 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Pages/Conversations.dart';
 import 'package:dr_tech/Pages/Orders.dart';
-import 'package:dr_tech/Pages/Subscription.dart';
-import 'package:dr_tech/Pages/UserFavoritProducts.dart';
-import 'package:dr_tech/Pages/UserProducts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -44,19 +41,19 @@ class _MainScreenState extends State<MainScreen> {
       Navigator.push(
           context, MaterialPageRoute(builder: (_) => Conversations()));
     }));
-    items.add(createServices("product", 37, () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (_) => UserProducts()));
-    }));
-    items.add(createServices("star", 38, () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (_) => UserFavoritProducts()));
-    }));
-    items.add(createServices("sharing", 39, () {}));
-    items.add(createServices("info", 40, () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (_) => Subscription()));
-    }));
+    // items.add(createServices("product", 37, () {
+    //   Navigator.push(
+    //       context, MaterialPageRoute(builder: (_) => UserProducts()));
+    // }));
+    // items.add(createServices("star", 38, () {
+    //   Navigator.push(
+    //       context, MaterialPageRoute(builder: (_) => UserFavoritProducts()));
+    // }));
+    // items.add(createServices("sharing", 39, () {}));
+    // // items.add(createServices("info", 40, () {
+    // //   Navigator.push(
+    // //       context, MaterialPageRoute(builder: (_) => Subscription()));
+    // // }));
 
     items.add(Container(
       height: 10,

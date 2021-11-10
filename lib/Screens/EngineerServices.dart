@@ -32,16 +32,14 @@ class _EngineerServicesState extends State<EngineerServices> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "user/services", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "user/services", context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -121,7 +119,7 @@ class _EngineerServicesState extends State<EngineerServices> {
                 margin: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: CachedNetworkImageProvider(item["image"])),
+                        image: CachedNetworkImageProvider(Globals.correctLink(item["image"]))),
                     color: Colors.black.withAlpha(20),
                     borderRadius: BorderRadius.circular(10)),
               ),

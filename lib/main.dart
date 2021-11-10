@@ -63,9 +63,7 @@ class _LoadingState extends State<Loading> {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: ThemeData(primarySwatch: Colors.blue),
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate

@@ -3,15 +3,12 @@ import 'dart:async';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/HomeSlider.dart';
 import 'package:dr_tech/Components/NavBar.dart';
-import 'package:dr_tech/Components/NavBarEngineer.dart';
 import 'package:dr_tech/Config/Converter.dart';
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
-import 'package:dr_tech/Pages/Conversations.dart';
-import 'package:dr_tech/Pages/Orders.dart';
 import 'package:dr_tech/Pages/Subscription.dart';
-import 'package:dr_tech/Screens/EngineerServices.dart';
 import 'package:dr_tech/Screens/MainScreen.dart';
 import 'package:dr_tech/Screens/NotificationsScreen.dart';
 import 'package:dr_tech/Screens/ProfileScreen.dart';
@@ -24,80 +21,31 @@ class Home extends StatefulWidget {
   const Home({this.page});
 
   @override
-  State<Home> createState() => UserManager.currentUser("type") == "ENGINEER"
-      ? _HomeEngineerState()
-      : _HomeState();
-}
-
-class _HomeEngineerState extends State<Home> {
-  int iScreenIndex = 0;
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(color: Converter.hexToColor("#2094cd")),
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-            child: Container(
-                width: MediaQuery.of(context).size.width,
-                padding:
-                EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
-                child: Text(
-                  LanguageManager.getText(
-                      [249, 250, 35, 45, 46][iScreenIndex]),
-                  // [249, 250, 35, 45, 46][iScreenIndex]),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                )),
-          ),
-          Expanded(
-              child: [
-                EngineerServices(),
-                Conversations(noheader: true),
-                Orders(noheader: true),
-                NotificationsScreen(),
-                ProfileScreen(() {
-                  setState(() {});
-                })
-              ][iScreenIndex]),
-          Container(
-            alignment: Alignment.bottomCenter,
-            child: NavBarEngineer(onUpdate: (index) {
-              setState(() {
-                iScreenIndex = index;
-              });
-            }),
-          )
-        ],
-      ),
-    );
-  }
+  State<Home> createState() =>  _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  String name = "", email = "",nameUserTxt = UserManager.nameUser("name").split(" ")[0];
+  String nameUserTxt = UserManager.currentUser("username").split(" ")[0];
   int iScreenIndex = 0;
   bool isOpenMessage = false;
+  Map<String, String> body = {};
 
   HomeSlider homeSlider = HomeSlider();
   @override
   void initState() {
     if (widget.page != null) iScreenIndex = widget.page;
-    Timer(Duration(seconds: 3), () {
-      setState(() {
-        isOpenMessage = true;
-      });
-    });
-    Timer(Duration(seconds: 10), () {
-      setState(() {
-        isOpenMessage = false;
-      });
-    });
-    if (UserManager.nameUser("name") == "") {
+    // Timer(Duration(seconds: 3), () {
+    //   setState(() {
+    //     isOpenMessage = true;
+    //   });
+    // });
+    // Timer(Duration(seconds: 10), () {
+    //   setState(() {
+    //     isOpenMessage = false;
+    //   });
+    // });
+    if (UserManager.currentUser("id").isNotEmpty &&
+        (UserManager.currentUser("username") == "" || UserManager.currentUser("email") == "")) {
       Timer(Duration(milliseconds: 200), () {
         Alert.show(
             context,
@@ -106,6 +54,7 @@ class _HomeState extends State<Home> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  UserManager.currentUser("username") == "" ?
                   Container(
                     padding: EdgeInsets.only(left: 10, right: 10),
                     decoration: BoxDecoration(
@@ -113,7 +62,7 @@ class _HomeState extends State<Home> {
                         color: Converter.hexToColor("#F2F2F2")),
                     child: TextField(
                       onChanged: (r) {
-                        name = r;
+                        body['username'] = r;
                       },
                       textDirection: LanguageManager.getTextDirection(),
                       textAlign: LanguageManager.getDirection()
@@ -123,10 +72,9 @@ class _HomeState extends State<Home> {
                           border: InputBorder.none,
                           hintText: LanguageManager.getText(33)),
                     ),
-                  ),
-                  Container(
-                    height: 15,
-                  ),
+                  ):Container(),
+                  UserManager.currentUser("username") == "" ?Container(height: 15):Container(),
+                  UserManager.currentUser("email") == "" ?
                   Container(
                     padding: EdgeInsets.only(left: 10, right: 10),
                     decoration: BoxDecoration(
@@ -134,7 +82,7 @@ class _HomeState extends State<Home> {
                         color: Converter.hexToColor("#F2F2F2")),
                     child: TextField(
                       onChanged: (r) {
-                        email = r;
+                        body['email'] = r;
                       },
                       textDirection: LanguageManager.getTextDirection(),
                       textAlign: LanguageManager.getDirection()
@@ -144,25 +92,28 @@ class _HomeState extends State<Home> {
                           border: InputBorder.none,
                           hintText: LanguageManager.getText(282)),
                     ),
-                  ),
+                  ):Container(),
                   Container(
                     height: 15,
                   ),
                   InkWell(
                     onTap: () {
-                      if (name.length < 3) return;
-                      if(email.length < 3) return;
-                      Navigator.pop(context);
+                      if (UserManager.currentUser("username") == ""  && (body['username'] == null || (body['username'] != null && body['username'].length < 3))) return;
+                      if (UserManager.currentUser("email") == ""  &&  (body['email'] == null || (body['email'] != null && body['email'].length < 3))) return;
+                      // Navigator.pop(context);
                       Alert.startLoading(context);
-                      UserManager.update("name", name, (status) {
-                        DatabaseManager.save("name", name);
+                      UserManager.update("username", body['username'], context ,(status) {
+                        // DatabaseManager.save("name", name);
                         Alert.endLoading();
                         if (status == true) {
+                          Navigator.pop(context);
+                          DatabaseManager.save("username", body['username']);
+                          DatabaseManager.save("email", body['email']);
                           setState(() {
-                            nameUserTxt = name;
+                            nameUserTxt = body['username'].split(" ")[0];
                           });
                         }
-                      });
+                      }, mapBody: body);
                     },
                     child: Container(
                       height: 45,
@@ -224,58 +175,57 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        LanguageManager.getText(32) +
+                          (Globals.isPM()? LanguageManager.getText(292): LanguageManager.getText(32)) +
                             " - " + nameUserTxt,
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
                       ),
-                      InkWell(
-                        onTap: () {
-                          var cities = DatabaseManager
-                              .liveDatabase['country_cities'];
-                          if (cities == null || cities == "") return;
-                          for (var i = 0; i < cities.length; i++) {
-                            cities[i]['text'] = cities[i]['name'];
-                          }
-                          Alert.show(context, cities,
-                              type: AlertType.SELECT, onSelected: (item) {
-                                DatabaseManager.liveDatabase["city"] = item;
-                              });
-                        },
-                        child: Row(
-                          textDirection:
-                          LanguageManager.getTextDirection(),
-                          children: [
-                            Icon(
-                              FlutterIcons.location_on_mdi,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                            Container(
-                              width: 5,
-                            ),
-                            Text(
-                              DatabaseManager.liveDatabase["city"] != null
-                                  ? DatabaseManager.liveDatabase["city"]
-                              ["name"]
-                                  .toString()
-                                  : "",
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.white),
-                            ),
-                            Container(
-                              width: 5,
-                            ),
-                            Icon(
-                              FlutterIcons.chevron_down_ent,
-                              size: 18,
-                              color: Colors.white,
-                            )
-                          ],
-                        ),
-                      )
+                      // InkWell(
+                      //   onTap: () {
+                      //     var cities = DatabaseManager.liveDatabase['country_cities'];
+                      //     if (cities == null || cities == "") return;
+                      //     for (var i = 0; i < cities.length; i++) {
+                      //       cities[i]['text'] = cities[i]['name'];
+                      //     }
+                      //     Alert.show(context, cities,
+                      //         type: AlertType.SELECT, onSelected: (item) {
+                      //           DatabaseManager.liveDatabase["city"] = item;
+                      //         });
+                      //   },
+                      //   child: Row(
+                      //     textDirection:
+                      //     LanguageManager.getTextDirection(),
+                      //     children: [
+                      //       Icon(
+                      //         FlutterIcons.location_on_mdi,
+                      //         size: 18,
+                      //         color: Colors.white,
+                      //       ),
+                      //       Container(
+                      //         width: 5,
+                      //       ),
+                      //       Text(
+                      //         DatabaseManager.liveDatabase["city"] != null
+                      //             ? DatabaseManager.liveDatabase["city"]
+                      //         ["username"]
+                      //             .toString()
+                      //             : "",
+                      //         style: TextStyle(
+                      //             fontSize: 14, color: Colors.white),
+                      //       ),
+                      //       Container(
+                      //         width: 5,
+                      //       ),
+                      //       Icon(
+                      //         FlutterIcons.chevron_down_ent,
+                      //         size: 18,
+                      //         color: Colors.white,
+                      //       )
+                      //     ],
+                      //   ),
+                      // )
                     ],
                   ),
                 ),
@@ -351,7 +301,7 @@ class _HomeState extends State<Home> {
               setState(() {
                 iScreenIndex = index;
               });
-            }),
+            }, page: iScreenIndex),
           )
         ],
       ),

@@ -9,13 +9,15 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/ShareManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'EngineerPage.dart';
+import 'Login.dart';
+import 'ServicePage.dart';
 
 class Service extends StatefulWidget {
   final target, title;
@@ -37,58 +39,81 @@ class _ServiceState extends State<Service> {
 
   @override
   void initState() {
-    getConfig();
+    // getConfig();
     load();
     super.initState();
   }
 
-  void getConfig() {
-    NetworkManager.httpGet(
-        Globals.baseUrl + "services/filters?target=${widget.target}", (r) {
-      if (r['status'] == true) {
-        setState(() {
-          configFilters = r['data'];
-        });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['messahe']));
-      }
-    }, cashable: true);
-  }
+  // void getConfig() {
+  //   NetworkManager.httpGet(
+  //       Globals.baseUrl + "services/filters?target=${widget.target}", context, (r) {
+  //     if (r['state'] == true) {
+  //       setState(() {
+  //         configFilters = r['data'];
+  //       });
+  //     } else if (r['message'] != null) {
+  //       Alert.show(context, Converter.getRealText(r['messahe']));
+  //     }
+  //   }, cashable: true);
+  // }
 
   void load() {
+    // var r = {
+    //   "data": [
+    //     {
+    //       "id": "1",
+    //       "provider_name": "عبدالوهاب عبدالهادي",
+    //       "thumbnail": "https://drtech.takiddine.co/images/avatars/2021-10-16_12:58:21.956758.jpeg",
+    //       "phone": "965095703",
+    //       "provider_services_title": "سوفت وير لكل الهواتف	",
+    //       "city_id": "8363",
+    //       "street_id": "633",
+    //       "stars": 5,
+    //       "city_name": "مكة",
+    //       "street_name": "الرياض",
+    //       "verified": true,
+    //       "available": true
+    //     }
+    //   ]
+    // };
+    //       setState(() {
+    //         data[0] = r['data'];
+    //       });
+    //----------------------
+
     if (isLoading) return;
     setState(() {
       isLoading = true;
     });
-
-    NetworkManager.httpGet(
-        Globals.baseUrl + "services/load?target=${widget.target}&page$page",
-        (r) {
-      setState(() {
-        isLoading = false;
-      });
-      if (r['status'] == true) {
+    NetworkManager.httpGet(   // services/load?target=${widget.target}&page$page
+        Globals.baseUrl + "services/details/${widget.target}", context, (r) {
+      if (r['state'] == true) {
         setState(() {
-          data[r['page']] = r['data'];
+          isLoading = false;
+          data[0] = r['data']; // r['page']
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: filters, cashable: true);
   }
 
   void startNewConversation(id) {
-    Alert.startLoading(context);
-    NetworkManager.httpGet(
-        Globals.baseUrl + "chat/add?id=$id&service_id=${widget.target}", (r) {
-      Alert.endLoading();
-      if (r['status'] == true) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    });
+    UserManager.currentUser("id").isNotEmpty
+        ? Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(id.toString())))
+        : Alert.show(context, LanguageManager.getText(298),
+              premieryText: LanguageManager.getText(30),
+              onYes: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => Login()));
+              }, onYesShowSecondBtn: false);
+    // Alert.startLoading(context);
+    // NetworkManager.httpGet(
+    //     Globals.baseUrl + "chat/add?id=$id&service_id=${widget.target}", context, (r) { //
+    //   Alert.endLoading();
+    //   if (r['state'] == true) {
+    //     Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
+    //   } else if (r['message'] != null) {
+    //     Alert.show(context, Converter.getRealText(r['message']));
+    //   }
+    // });
   }
 
   @override
@@ -137,7 +162,8 @@ class _ServiceState extends State<Service> {
                       ))),
               getSearchAndFilter(),
               Expanded(
-                child: getEngineersList(),
+                child:
+                isLoading? Center(child: CustomLoading()) : getEngineersList()
               )
             ],
           ),
@@ -399,6 +425,37 @@ class _ServiceState extends State<Service> {
   }
 
   Widget getEngineersList() {
+    // print('here_getEngineersList: ${data[0].length}');
+    if(data[0].length == 0){
+      return Column(children: [
+        Expanded(
+          flex: 10,
+          child: Container(
+            width: 300,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/images/soon.png"))),
+          ),
+        ),
+        Spacer(flex: 1,),
+        Expanded(
+          flex: 9,
+          child: Container(
+            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
+            child: Text(
+              LanguageManager.getText(293), // قريباً...
+              textDirection: LanguageManager.getTextDirection(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Converter.hexToColor("#303030")),
+            ),
+          ),
+        )
+
+      ],);
+    }
     List<Widget> items = [];
 
     for (var page in data.keys) {
@@ -423,7 +480,9 @@ class _ServiceState extends State<Service> {
     // }));
 
     // widget.target == '2' || widget.target == '3'?Center(child: Text('قريبا...', textDirection: TextDirection.rtl,)):
-    return Recycler(onScrollDown: load, children: items,);
+    return Recycler(
+      onScrollDown: null,
+      children: items,);
   }
 
   Widget getEngineerUi(item) {
@@ -438,8 +497,7 @@ class _ServiceState extends State<Service> {
         onTap: () {
           Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (_) => EngineerPage(item['id'], widget.target)));
+              MaterialPageRoute(builder: (_) => ServicePage(item['id']))); // EngineerPage(item['id'], widget.target)
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -458,7 +516,7 @@ class _ServiceState extends State<Service> {
                     alignment: !LanguageManager.getDirection()
                         ? Alignment.bottomRight
                         : Alignment.bottomLeft,
-                    child: item['verified'] == true
+                    child: item['profile_verified'] == true
                         ? Container(
                             width: 20,
                             height: 20,
@@ -474,14 +532,14 @@ class _ServiceState extends State<Service> {
                         : Container(),
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(item['image'])),
+                            image: CachedNetworkImageProvider(Globals.correctLink(item['thumbnail']))),
                         borderRadius: BorderRadius.circular(10),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
                   Container(
-                    height: 30,
+                    height: 15,
                   ),
-                  item['available'] == true
+                  item['active'] == true
                       ? Text(
                           LanguageManager.getText(100),
                           style: TextStyle(
@@ -512,38 +570,39 @@ class _ServiceState extends State<Service> {
                   children: [
                     Expanded(
                         child: Text(
-                      item['name'],
+                      item['provider_services_title'],
                       textDirection: LanguageManager.getTextDirection(),
                       style: TextStyle(
                           color: Converter.hexToColor("#2094CD"),
-                          fontSize: 16,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.bold),
                     )),
                     InkWell(
                       onTap: () {
                         ShareManager.shearEngineer(
-                            item['id'], item['name'], item['service_name']);
+                            item['id'], item['provider_name'], item['provider_services_title']);
                       },
-                      child: Icon(
-                        FlutterIcons.share_2_fea,
-                        color: Converter.hexToColor("#344F64"),
+                      child: Container(
+                        // margin: EdgeInsets.only(top: 10),
+                        child: Icon(
+                          FlutterIcons.share_2_fea,
+                          color: Converter.hexToColor("#344F64"),
+                        ),
                       ),
                     )
                   ],
                 ),
-                Text(
-                  LanguageManager.getText(98) +
-                      " " +
-                      item['service_name'].toString(),
-                  textDirection: LanguageManager.getTextDirection(),
-                  style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
-                ),
-                Container(
-                  height: 5,
-                ),
+                // Text(
+                //   LanguageManager.getText(98) +
+                //       " " +
+                //       item['service_name'].toString(),
+                //   textDirection: LanguageManager.getTextDirection(),
+                //   style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
+                // ),
+                Container(height: 5),
                 RateStars(
                   13,
-                  stars: item['rating'].toInt(),
+                  stars: item['stars'].toInt(),
                 ),
                 Container(
                   height: 5,
@@ -564,9 +623,9 @@ class _ServiceState extends State<Service> {
                       child: Container(
                         padding: EdgeInsets.only(bottom: 5),
                         child: Text(
-                          LanguageManager.getText(99) +
-                              " " +
-                              item['service_name'].toString(),
+                          // LanguageManager.getText(99) +
+                          //     " " +
+                              item['provider_name'].toString(),
                           textDirection: LanguageManager.getTextDirection(),
                           style: TextStyle(
                               fontWeight: FontWeight.normal, fontSize: 12),
@@ -609,105 +668,7 @@ class _ServiceState extends State<Service> {
                   children: [
                     // Expanded(
                     //   child: InkWell(
-                    //     onLongPress: () async {
-                    //       // if (Platform.isIOS) {
-                    //       // iOS
-                    //       var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
-                    //       var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
-                    //       var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                    //       whatsappUrl = Uri.encodeFull(whatsappUrl);
-                    //       whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
-                    //
-                    //
-                    //
-                    //       //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
-                    //       //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                    //               var txtControll = TextEditingController();
-                    //             Alert.show(
-                    //                 context,
-                    //                 Container(
-                    //                   padding: EdgeInsets.all(5),
-                    //                   child: Column(
-                    //                     mainAxisSize: MainAxisSize.min,
-                    //                     children: [
-                    //                       Container(
-                    //                         padding: EdgeInsets.only(left: 10, right: 10),
-                    //                         decoration: BoxDecoration(
-                    //                             borderRadius: BorderRadius.circular(10),
-                    //                             color: Converter.hexToColor("#F2F2F2")),
-                    //                         child: TextField(
-                    //                           controller: txtControll,
-                    //                           onChanged: (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
-                    //                           textDirection: LanguageManager.getTextDirection(),
-                    //                           textAlign: LanguageManager.getDirection()
-                    //                               ? TextAlign.right
-                    //                               : TextAlign.left,
-                    //                           decoration: InputDecoration(
-                    //                               border: InputBorder.none,
-                    //                               hintText: LanguageManager.getText(33)),
-                    //
-                    //                         ),
-                    //                       ),
-                    //                       Container(height: 15,),
-                    //                       InkWell(
-                    //                         onTap: () async{
-                    //                           if(txtControll.text.isEmpty)
-                    //                             txtControll.text= whatsappUrl;
-                    //                           else if(txtControll.text == "aaa")
-                    //                             txtControll.text = whatsappUrl2;
-                    //                           else {
-                    //                         Navigator.pop(context);
-                    //                         await canLaunch(whatsappUrl)
-                    //                             ? launch(whatsappUrl)
-                    //                             : await canLaunch(whatsappUrl2)
-                    //                             ? launch(whatsappUrl2)
-                    //                             : Alert.show(context,
-                    //                             "تعذر الوصول إلى تطبيق الواتس أب");
-                    //                       }
-                    //                     },
-                    //                         child: Container(
-                    //                           height: 45,
-                    //                           alignment: Alignment.center,
-                    //                           child: Text(
-                    //                             LanguageManager.getText(34),
-                    //                             style: TextStyle(color: Colors.white),
-                    //                           ),
-                    //                           decoration: BoxDecoration(
-                    //                               boxShadow: [
-                    //                                 BoxShadow(
-                    //                                     color: Colors.black.withAlpha(15),
-                    //                                     spreadRadius: 2,
-                    //                                     blurRadius: 2)
-                    //                               ],
-                    //                               borderRadius: BorderRadius.circular(8),
-                    //                               color: Converter.hexToColor("#344f64")),
-                    //                         ),
-                    //                       ),
-                    //                     ],
-                    //                   ),
-                    //                 ),
-                    //                 type: AlertType.WIDGET);
-                    //
-                    //
-                    //     },
-                    //     onTap: () async {
-                    //         // if (Platform.isIOS) {
-                    //           // iOS
-                    //             var url = 'http://maps.apple.com/';
-                    //             var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.nameUser("name")}\nأريد...";
-                    //             var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
-                    //             var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
-                    //             whatsappUrl = Uri.encodeFull(whatsappUrl);
-                    //             whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
-                    //             await canLaunch(whatsappUrl)
-                    //           ? launch(whatsappUrl)
-                    //           : await canLaunch(whatsappUrl2)
-                    //               ? launch(whatsappUrl2)
-                    //               : Alert.show(context,
-                    //                   "تعذر الوصول إلى تطبيق الواتس أب");
-                    //
-                    //
-                    //       },
+                    //     onTap: () {},
                     //     child: Container(
                     //       height: 40,
                     //       alignment: Alignment.center,
@@ -716,14 +677,14 @@ class _ServiceState extends State<Service> {
                     //         textDirection: LanguageManager.getTextDirection(),
                     //         children: [
                     //           Icon(
-                    //             FlutterIcons.whatsapp_faw,
+                    //             FlutterIcons.phone_faw,
                     //             color: Colors.white,
                     //           ),
                     //           Container(
                     //             width: 5,
                     //           ),
                     //           Text(
-                    //             LanguageManager.getText(117),
+                    //             LanguageManager.getText(96),
                     //             style: TextStyle(
                     //                 color: Colors.white,
                     //                 fontSize: 15,
@@ -736,58 +697,20 @@ class _ServiceState extends State<Service> {
                     //             BoxShadow(
                     //                 color: Colors.black.withAlpha(15),
                     //                 spreadRadius: 2,
-                    //                 blurRadius: 2)
-                    //           ],
+                    //                 blurRadius: 2)],
                     //           borderRadius: BorderRadius.circular(12),
-                    //           color: Colors.green),
+                    //           color: Converter.hexToColor("#344f64")
+                    //       ),
                     //     ),
                     //   ),
                     // ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {},
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            textDirection: LanguageManager.getTextDirection(),
-                            children: [
-                              Icon(
-                                FlutterIcons.phone_faw,
-                                color: Colors.white,
-                              ),
-                              Container(
-                                width: 5,
-                              ),
-                              Text(
-                                LanguageManager.getText(96),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withAlpha(15),
-                                    spreadRadius: 2,
-                                    blurRadius: 2)
-                              ],
-                              borderRadius: BorderRadius.circular(12),
-                              color: Converter.hexToColor("#344f64")),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 10,
-                    ),
+                    // Container(
+                    //   width: 10,
+                    // ),
                     Expanded(
                       child: InkWell(
                         onTap: () {
-                          startNewConversation(item['id']);
+                          startNewConversation(item['provider_id']);
                         },
                         child: Container(
                           height: 40,

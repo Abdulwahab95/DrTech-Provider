@@ -23,7 +23,7 @@ class _WebParserState extends State<WebParser> {
                           onMessageReceived: (JavascriptMessage e) {
                             try {
                               var reponce = json.decode(e.message);
-                              if (reponce['status'] == true)
+                              if (reponce['state'] == true)
                                 Navigator.of(context).pop(reponce['token']);
                             } catch (e) {
                               // error

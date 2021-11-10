@@ -257,7 +257,7 @@ class _WelcomeState extends State<Welcome> {
               borderRadius: BorderRadius.circular(size * 0.12),
               color: Colors.white,
               image: DecorationImage(
-                  image: CachedNetworkImageProvider(item['image']))),
+                  image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
         ),
       ));
     }
@@ -283,8 +283,10 @@ class _WelcomeState extends State<Welcome> {
             Globals.checkUpdate() && Globals.getWebViewUrl().isNotEmpty
                 ? WebBrowser(Globals.getWebViewUrl(), '')
                 :
-            UserManager.currentUser("id").isNotEmpty
-                ? Globals.isOpenFromNotification? LiveChat(Globals.currentConversationId) : Home()
-                : Login()));
+            // UserManager.currentUser("id").isNotEmpty?
+            Globals.isOpenFromNotification
+                ? LiveChat(Globals.currentConversationId)
+                : Home(page: UserManager.currentUser("id").isNotEmpty ? 0 : 1)));
+                // : Login()));
   }
 }

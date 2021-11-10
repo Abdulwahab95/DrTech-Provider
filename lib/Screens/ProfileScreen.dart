@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ListView(
         padding: EdgeInsets.only(top: 25),
         children: [
-          getProfileHeader(),
+          UserManager.currentUser("id").isNotEmpty? getProfileHeader() : Container(),
           Container(
             height: 10,
           ),
@@ -72,8 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onChanged: (v) {
                           setState(() {
                             DatabaseManager.save("status", v ? "1" : "0");
-                            UserManager.update("status", v ? "1" : "0",
-                                    (r) {
+                            UserManager.update("status", v ? "1" : "0", context ,(r) {
                                   setState(() {});
                                 });
                           });
@@ -150,10 +149,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(context,
                 MaterialPageRoute(builder: (_) => FrequentlyAskedQuestions()));
           }),
-          getProfileItem(FlutterIcons.headphones_fea, 63, () {
+          UserManager.currentUser("id").isNotEmpty?
+          getProfileItem(FlutterIcons.headphones_fea, 63, () { // الدعم والمسنادة
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => ContactUs()));
-          }),
+          })
+          :Container(),
           getProfileItem(FlutterIcons.share_fea, 64, () {
             Alert.show(
                 context,
@@ -174,14 +175,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 type: AlertType.WIDGET);
           }),
+          UserManager.currentUser("id").isNotEmpty?
           getProfileItem(FlutterIcons.star_fea, 65, () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => RateApp()));
-          }),
+          })
+          :Container(),
+          UserManager.currentUser("id").isNotEmpty?
           getProfileItem(FlutterIcons.log_out_fea, 66, () {
-            UserManager.logout();
-            main();
-          }, withArraw: false),
+            Alert.startLoading(context);
+            UserManager.logout((){
+              Alert.endLoading();
+              main();
+            });
+          }, withArraw: false)
+          :Container(),
         ],
       ),
     );
@@ -189,8 +197,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget getShearinIcons() {
     List<Widget> shearIcons = [];
-    if (Globals.getConfig("shearing") != "")
-      for (var item in Globals.getConfig("shearing")) {
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
         shearIcons.add(GestureDetector(
           onTap: () async {
             launch(item['url']);
@@ -202,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.contain,
-                    image: CachedNetworkImageProvider(item["icon"]))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
           ),
         ));
       }
@@ -280,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(UserManager.currentUser("image"))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(UserManager.currentUser("avatar")))),
               )),
           Container(width: 20),
           Expanded(
@@ -289,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  UserManager.currentUser("name"),
+                  UserManager.currentUser("username"),
                   textDirection: LanguageManager.getTextDirection(),
                   style: TextStyle(
                       fontSize: 18,
@@ -332,15 +340,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   void _navigateAndDisplaySelection(BuildContext context) async {
-    var oldImageUrl = UserManager.currentUser("image");
+    // var oldImageUrl = UserManager.currentUser("image");
     // Navigator.push returns a Future that completes after calling
     // Navigator.pop on the Selection Screen.
     final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileEdit()));
 
-    var newImageUrl = UserManager.currentUser("image");
-    if(oldImageUrl != newImageUrl){ // update image
+    // var newImageUrl = UserManager.currentUser("image");
+    // if(oldImageUrl != newImageUrl){ // update image
       setState(() {});
-    }
+    // }
 
     // After the Selection Screen returns a result, hide any previous snackbars
     // and show the new result.

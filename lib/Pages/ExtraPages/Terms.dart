@@ -27,7 +27,7 @@ class _TermsState extends State<Terms> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "information/terms", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "privacy/policy", context, (r) { // information/terms
       setState(() {
         isLoading = false;
         data = r['data'];

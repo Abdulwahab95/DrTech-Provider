@@ -261,17 +261,15 @@ class _EnterCodeWithdrawalState extends State<EnterCodeWithdrawal> {
     }
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawalRequisite", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawalRequisite", context ,(r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           resendTime = r['time'];
           tick();
         });
         Alert.show(context, LanguageManager.getText(25) + "\n" + r["to"]);
         // success
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     });
   }
@@ -292,9 +290,9 @@ class _EnterCodeWithdrawalState extends State<EnterCodeWithdrawal> {
     body["code"] = code.values.join();
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawal", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawal", context ,(r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -302,8 +300,6 @@ class _EnterCodeWithdrawalState extends State<EnterCodeWithdrawal> {
                       page: 3,
                     )));
         // success
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }

@@ -51,6 +51,9 @@ class Converter {
       String formatterPattron: "HH:mm:ss"}) {
     if (time == null) return "";
 
+    time = time.toString().replaceAll('T', ' ');
+    time = time.toString().replaceAll('.000000Z', ' ');
+
     a.DateFormat server = new a.DateFormat('yyyy-MM-dd HH:mm:ss');
     a.DateFormat formatter =
         new a.DateFormat('yyyy MMMM dd', LanguageManager.getLocalStr());

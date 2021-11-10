@@ -30,17 +30,17 @@ class Initialization {
     Map<String, String> body = {
       "code": DatabaseManager.liveDatabase["code"].toString()
     };
-    NetworkManager.httpPost(Globals.baseUrl + "main/configuration", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "config", Globals.contextLoading,(r) { // main/configuration
       // print('settings: ${r['config'].r['settings']}');
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         // read configs
-        Globals.config = r['config'];
+        Globals.config = r['data']['config'];
         Globals.settings = Globals.getConfig('settings');
-        LanguageManager.init(r['localisation']);
+        LanguageManager.init(r['data']['localisation']);
         dataSetup();
         callback();
       }
-    }, body: body, cachable: true);
+    }, body: body, cachable: true );
   }
 
   void dataSetup() {

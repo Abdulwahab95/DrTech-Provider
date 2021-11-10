@@ -43,17 +43,15 @@ class _SubscriptionState extends State<Subscription> {
       isLoading = true;
     });
 
-    NetworkManager.httpGet(Globals.baseUrl + "subscription/Config", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "subscription/Config", context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           config = r['data'];
           selectedPlan = config['subscriptions_plans'][r['selected_plan'] ?? 0];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -64,16 +62,14 @@ class _SubscriptionState extends State<Subscription> {
     });
 
     NetworkManager.httpGet(Globals.baseUrl + "subscription/userSubscriptions",
-        (r) {
+        context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -92,8 +88,7 @@ class _SubscriptionState extends State<Subscription> {
     hideKeyBoard();
     Map<String, String> body = {"code": code.toString()};
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "subscription/checkPromoCode",
-        (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "subscription/checkPromoCode", context ,(r) {
       Alert.endLoading();
       if (r['status']) {
         if (r['valid'] == true) {
@@ -107,8 +102,6 @@ class _SubscriptionState extends State<Subscription> {
         } else {
           Alert.show(context, LanguageManager.getText(226));
         }
-      } else if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }

@@ -6,6 +6,7 @@ import 'package:dr_tech/Components/RateStars.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -143,7 +144,7 @@ class _OrderSetRatingState extends State<OrderSetRating> {
                             borderRadius: BorderRadius.circular(12)),
                         child: TextField(
                           onChanged: (t) {
-                            body["note"] = t.toString();
+                            body["content"] = t.toString();
                           },
                           keyboardType: TextInputType.text,
                           maxLines: 4,
@@ -191,8 +192,8 @@ class _OrderSetRatingState extends State<OrderSetRating> {
 
   Widget getShearinIcons() {
     List<Widget> shearIcons = [];
-    if (Globals.getConfig("shearing") != "")
-      for (var item in Globals.getConfig("shearing")) {
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
         shearIcons.add(GestureDetector(
           onTap: () async {
             launch(item['url']);
@@ -204,7 +205,7 @@ class _OrderSetRatingState extends State<OrderSetRating> {
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.contain,
-                    image: CachedNetworkImageProvider(item["icon"]))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
           ),
         ));
       }
@@ -223,15 +224,23 @@ class _OrderSetRatingState extends State<OrderSetRating> {
       Alert.show(context, LanguageManager.getText(236));
       return;
     }
-    body["id"] = widget.id.toString();
+    try{
+      body["rate"] =
+          ((int.parse(body["exp"] ) +
+            int.parse(body["pref"]) +
+            int.parse(body["time"]) ) / 3)
+              .toString();
+    }catch(e){
+      body["rate"] = body["exp"];
+      print('ratings_create_error: $e');
+    }
+    body["order_id"] = widget.id.toString();
+    body["rated_by"] = UserManager.currentUser("id");
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "orders/rate", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "ratings/create", context ,(r) { // orders/rate
       Alert.endLoading();
-      if (r['status'] == true) {
-        Navigator.pop(context);
-        Alert.show(context, Converter.getRealText(237));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
+      if (r['state'] == true) {
+        Navigator.of(context).pop(true);
       }
     }, body: body);
   }

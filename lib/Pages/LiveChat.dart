@@ -96,32 +96,32 @@ class _LiveChatState extends State<LiveChat> {
         }
         break;
       case "seen":
-        if (payload['id'] == "all") {
+        // if (payload['id'] == "all") {
           for (var i = 0; i < data[data.keys.last].length; i++) {
-            if (data[data.keys.last][i]["user_id"].toString() ==
+            if (data[data.keys.last][i]["send_by"].toString() ==
                 UserManager.currentUser("id").toString()) {
               setState(() {
-                data[data.keys.last][i]["seen"] = true;
+                data[data.keys.last][i]["seen"] = 1;
               });
             }
           }
-        } else
-          for (var i = 0; i < data[data.keys.last].length; i++) {
-            if (data[data.keys.last][i]["id"].toString() ==
-                payload['id'].toString()) {
-              setState(() {
-                data[data.keys.last][i]["seen"] = true;
-              });
-              break;
-            }
-          }
+        // } else
+        //   for (var i = 0; i < data[data.keys.last].length; i++) {
+        //     if (data[data.keys.last][i]["id"].toString() ==
+        //         payload['id'].toString()) {
+        //       setState(() {
+        //         data[data.keys.last][i]["seen"] = 1;
+        //       });
+        //       break;
+        //     }
+        //   }
         break;
       default:
     }
   }
 
   void chatDataNotic(paylaod) {
-    if (paylaod['message'] == 'USER_TYPING') {
+    if (paylaod['text'] == 'USER_TYPING') {
       setState(() {
         isTyping = true;
       });
@@ -140,7 +140,7 @@ class _LiveChatState extends State<LiveChat> {
       isTyping = false;
       data.values.last.add(paylaod);
       scrollDown();
-      sendSeenFlag(paylaod['id'].toString());
+      sendSeenFlag();// sendSeenFlag(paylaod['id'].toString());
     });
   }
 
@@ -154,18 +154,39 @@ class _LiveChatState extends State<LiveChat> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(
-        Globals.baseUrl + "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString(), (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "convertation", context ,(r) { // "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString()
       try {
-        if (r["status"] == true) {
+        if (r["state"] == true) {
           setState(() {
             isLoading = false;
-            data[r['page']] = r['data'];
-            user = r['sender'];
+
+            print('here_convertation: ${r['data']['convertation']}');
+            print('here_with: ${r['data']['with']}');
+
+            data['0'] = r['data']['convertation']; // r['page']
+            user = r['data']['with'];
+    //         {
+    //     "validation": true,
+    //     "id": "25",
+    //     "phone": "965095703",
+    //     "country": "206",
+    //     "email": "abdulwahab.abdulhadi.95@gmail.com",
+    //     "name": "عبدالوهاب",
+    //     "phone_confirmed": "0",
+    //     "email_confirmed": "0",
+    //     "verified": "0",
+    //     "image": "https://server.drtechapp.com/storage/images/default.jpg",
+    //     "type": "USER",
+    //     "status": "1",
+    //     "created_at": "2021-09-25 16:56:40",
+    //     "unit": "ر.س",
+    //     "validSubscriptions": "",
+    //     "isEngineer": false
+    // } ;//r['sender'];
           });
+          sendSeenFlag();
         } else if (r['message'] != null) {
           Navigator.pop(context);
-          Alert.show(context, Converter.getRealText(r['message']));
         } else {
           setState(() {
             ui = BrokenPage(load);
@@ -176,7 +197,7 @@ class _LiveChatState extends State<LiveChat> {
           ui = BrokenPage(load);
         });
       }
-    }, cashable: true);
+    }, cachable: true, body: {"user_id":UserManager.currentUser('id'),"provider_id":widget.id.toString() });
   }
 
   @override
@@ -189,8 +210,7 @@ class _LiveChatState extends State<LiveChat> {
             children: [
               Column(children: [
                 Container(
-                    decoration:
-                        BoxDecoration(color: Converter.hexToColor("#2094cd")),
+                    decoration: BoxDecoration(color: Converter.hexToColor("#2094cd")),
                     padding:
                         EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                     child: Container(
@@ -199,7 +219,7 @@ class _LiveChatState extends State<LiveChat> {
                             left: 25, right: 25, bottom: 20, top: 25),
                         child: Row(
                           textDirection: LanguageManager.getTextDirection(),
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
                               onTap: _close,
@@ -213,11 +233,12 @@ class _LiveChatState extends State<LiveChat> {
                                 ),
                               ),
                             ),
+                            Container(width: 25),
                             Text(
                               isTyping
                                   ? LanguageManager.getText(84)
                                   : user.isNotEmpty
-                                      ? user["name"]
+                                      ? user["username"]??''
                                       : "",
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -229,15 +250,15 @@ class _LiveChatState extends State<LiveChat> {
                               textDirection: LanguageManager.getTextDirection(),
                               children: [
                                 InkWell(
-                                  onTap: phoneCall,
+                                  // onTap: phoneCall,
                                   child: Container(
                                     width: 20,
                                     child: Icon(
                                       FlutterIcons.phone_faw,
                                       size: 24,
-                                      color: Colors.white,
-                                      textDirection:
-                                          LanguageManager.getTextDirection(),
+                                      // color: Colors.white,
+                                      color: Colors.transparent,
+                                      textDirection: LanguageManager.getTextDirection(),
                                     ),
                                   ),
                                 ),
@@ -245,15 +266,15 @@ class _LiveChatState extends State<LiveChat> {
                                   width: 10,
                                 ),
                                 InkWell(
-                                  onTap: showOptions,
+                                  // onTap: showOptions,
                                   child: Container(
                                     width: 20,
                                     child: Icon(
                                       FlutterIcons.dots_vertical_mco,
                                       size: 28,
-                                      color: Colors.white,
-                                      textDirection:
-                                          LanguageManager.getTextDirection(),
+                                      // color: Colors.white,
+                                      color: Colors.transparent,
+                                      textDirection: LanguageManager.getTextDirection(),
                                     ),
                                   ),
                                 ),
@@ -459,85 +480,45 @@ class _LiveChatState extends State<LiveChat> {
                             ),
                           ),
                         ),
-                        user['isEngineer'] == true
-                            ? InkWell(
-                                onTap: addPromoCode,
-                                child: Container(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 50,
-                                        height: 50,
-                                        padding: EdgeInsets.all(3),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.white, width: 2),
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                            borderRadius:
-                                                BorderRadius.circular(40)),
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          child: Icon(
-                                            FlutterIcons.tag_ant,
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                          ),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40),
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Text(
-                                        LanguageManager.getText(82),
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : InkWell(
-                                onTap: addOffer,
-                                child: Container(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 50,
-                                        height: 50,
-                                        padding: EdgeInsets.all(3),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.white, width: 2),
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                            borderRadius:
-                                                BorderRadius.circular(40)),
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          child: Icon(
-                                            FlutterIcons.gift_faw,
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                          ),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40),
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Text(
-                                        LanguageManager.getText(125),
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
+                      // InkWell(
+                      //           onTap: addPromoCode,
+                      //           child: Container(
+                      //             child: Column(
+                      //               children: [
+                      //                 Container(
+                      //                   width: 50,
+                      //                   height: 50,
+                      //                   padding: EdgeInsets.all(3),
+                      //                   alignment: Alignment.center,
+                      //                   decoration: BoxDecoration(
+                      //                       border: Border.all(
+                      //                           color: Colors.white, width: 2),
+                      //                       color:
+                      //                           Converter.hexToColor("#344F64"),
+                      //                       borderRadius:
+                      //                           BorderRadius.circular(40)),
+                      //                   child: Container(
+                      //                     width: 40,
+                      //                     height: 40,
+                      //                     child: Icon(
+                      //                       FlutterIcons.tag_ant,
+                      //                       color:
+                      //                           Converter.hexToColor("#344F64"),
+                      //                     ),
+                      //                     decoration: BoxDecoration(
+                      //                         borderRadius:
+                      //                             BorderRadius.circular(40),
+                      //                         color: Colors.white),
+                      //                   ),
+                      //                 ),
+                      //                 Text(
+                      //                   LanguageManager.getText(82),
+                      //                   style: TextStyle(color: Colors.white),
+                      //                 )
+                      //               ],
+                      //             ),
+                      //           ),
+                      //         ),
                         // File
                         InkWell(
                           onTap: () {
@@ -578,38 +559,38 @@ class _LiveChatState extends State<LiveChat> {
                           ),
                         ),
                         // Location
-                        Container(
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                padding: EdgeInsets.all(3),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.white, width: 2),
-                                    color: Converter.hexToColor("#344F64"),
-                                    borderRadius: BorderRadius.circular(40)),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  child: Icon(
-                                    Icons.location_pin,
-                                    color: Converter.hexToColor("#344F64"),
-                                  ),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      color: Colors.white),
-                                ),
-                              ),
-                              Text(
-                                LanguageManager.getText(80),
-                                style: TextStyle(color: Colors.white),
-                              )
-                            ],
-                          ),
-                        )
+                        // Container(
+                        //   child: Column(
+                        //     children: [
+                        //       Container(
+                        //         width: 50,
+                        //         height: 50,
+                        //         padding: EdgeInsets.all(3),
+                        //         alignment: Alignment.center,
+                        //         decoration: BoxDecoration(
+                        //             border: Border.all(
+                        //                 color: Colors.white, width: 2),
+                        //             color: Converter.hexToColor("#344F64"),
+                        //             borderRadius: BorderRadius.circular(40)),
+                        //         child: Container(
+                        //           width: 40,
+                        //           height: 40,
+                        //           child: Icon(
+                        //             Icons.location_pin,
+                        //             color: Converter.hexToColor("#344F64"),
+                        //           ),
+                        //           decoration: BoxDecoration(
+                        //               borderRadius: BorderRadius.circular(40),
+                        //               color: Colors.white),
+                        //         ),
+                        //       ),
+                        //       Text(
+                        //         LanguageManager.getText(80),
+                        //         style: TextStyle(color: Colors.white),
+                        //       )
+                        //     ],
+                        //   ),
+                        // )
                       ],
                     ),
                   ),
@@ -622,7 +603,7 @@ class _LiveChatState extends State<LiveChat> {
           color: Converter.hexToColor("#F3F3F3"),
           padding: EdgeInsets.only(left: 15, right: 15),
           child: Row(
-            textDirection: LanguageManager.getTextDirection(),
+            textDirection: TextDirection.rtl,
             children: [
               Container(
                 width: 40,
@@ -659,7 +640,7 @@ class _LiveChatState extends State<LiveChat> {
                         sendTypingNotifyer();
                       }
                       typingNotifyer = v.isNotEmpty;
-                      body['message'] = v;
+                      body['text'] = v;
                     },
                     controller: controller,
                     keyboardType: TextInputType.multiline,
@@ -737,7 +718,13 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatMessageUI(item, page, index) {
-    switch (item["type"]) {
+    // print('here_getChatMessageUI: item: $item, page: $page, index: $index');
+    if(item['type'] == 'offer' && item['message'] == null) {
+      item['type'] = 'TEXT';
+    }
+
+    if(item.toString().length>0)
+    switch (item["type"].toString().toUpperCase()) {
       case "TEXT":
         return getChatTextMessageUI(item);
         break;
@@ -762,6 +749,7 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatFileUploadMessageUI(item) {
+    print('here_getChatFileUploadMessageUI: item: $item');
     return Container(
       margin: EdgeInsets.all(10),
       child: Row(
@@ -779,7 +767,7 @@ class _LiveChatState extends State<LiveChat> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: CachedNetworkImageProvider(
-                                UserManager.currentUser("image"))),
+                                Globals.correctLink(UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -865,7 +853,7 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatOfferMessageUi(item, page, index) {
-    bool isFromSender = item["user_id"] == user["id"];
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -884,9 +872,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -932,8 +920,7 @@ class _LiveChatState extends State<LiveChat> {
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 14,
-                                                    color: Converter.hexToColor(
-                                                        "#344F64")),
+                                                    color: Converter.hexToColor("#344F64")),
                                               ),
                                             ),
                                             Text(
@@ -1009,7 +996,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1082,10 +1069,7 @@ class _LiveChatState extends State<LiveChat> {
         Expanded(
           child: InkWell(
             onTap: () {
-              if (isFromSender)
                 rejectOffer(item["id"], item["message"]['id'], page, index);
-              else
-                cancelOffer(item["id"], item["message"]['id'], page, index);
             },
             child: Container(
               height: 40,
@@ -1113,7 +1097,7 @@ class _LiveChatState extends State<LiveChat> {
                 child: InkWell(
                   onTap: () {
                     Alert.show(context,
-                        PaymentOptions(item["message"]['id'], item["id"]),
+                        PaymentOptions(item["message"]['id'], item["id"], context),
                         type: AlertType.WIDGET, isDismissible: false);
                   },
                   child: Container(
@@ -1139,7 +1123,8 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatFileMessageUI(item) {
-    bool isFromSender = item["user_id"] == user["id"];
+    // print('here_getChatFileMessageUI: $item');
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -1158,9 +1143,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1184,7 +1169,7 @@ class _LiveChatState extends State<LiveChat> {
                                 children: [
                                   InkWell(
                                       onTap: () {
-                                        launch(item["download_url"]);
+                                        launch(item["message"]);
                                       },
                                       child: Container(
                                         width: 40,
@@ -1204,7 +1189,7 @@ class _LiveChatState extends State<LiveChat> {
                                   Expanded(
                                     child: Container(
                                       child: Text(
-                                        item["message"]["name"],
+                                        item["message"].toString().split('file/')[1],
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -1234,7 +1219,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1266,6 +1251,7 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatImageUploadMessageUI(item) {
+    print('here_getChatImageUploadMessageUI: item: $item, images: $images');
     return Container(
       margin: EdgeInsets.all(10),
       child: Row(
@@ -1283,7 +1269,7 @@ class _LiveChatState extends State<LiveChat> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: CachedNetworkImageProvider(
-                                UserManager.currentUser("image"))),
+                                Globals.correctLink(UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1357,7 +1343,8 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatImageMessageUI(item) {
-    bool isFromSender = item["user_id"] == user["id"];
+    // print('here_getChatImageUploadMessageUI: item: $item, images: $images');
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -1376,9 +1363,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1400,7 +1387,7 @@ class _LiveChatState extends State<LiveChat> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
                                 child: CachedNetworkImage(
-                                    imageUrl: item['image'].toString()),
+                                    imageUrl: item['message'].toString()),
                               ),
                               padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(
@@ -1417,7 +1404,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1449,7 +1436,7 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   Widget getChatTextMessageUI(item) {
-    bool isFromSender = item["user_id"] == user["id"];
+    bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
@@ -1468,9 +1455,9 @@ class _LiveChatState extends State<LiveChat> {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(isFromSender
-                                ? user["image"]
-                                : UserManager.currentUser("image"))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                ? user["avatar"]
+                                : UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1516,7 +1503,7 @@ class _LiveChatState extends State<LiveChat> {
                             !isFromSender
                                 ? SvgPicture.asset(
                                     "assets/icons/double_check.svg",
-                                    color: item["seen"] == true
+                                    color: item["seen"] == 1
                                         ? Colors.blue
                                         : Colors.grey,
                                   )
@@ -1631,17 +1618,24 @@ class _LiveChatState extends State<LiveChat> {
   void sendTypingNotifyer() {
     typingNotifyer = true;
     Map<String, String> body = {};
+
     body['message'] = "USER_TYPING";
     body['type'] = "TEXT";
     body['id'] = widget.id.toString();
-    NetworkManager.httpPost(Globals.baseUrl + "chat/send", (r) {}, body: body);
+
+    body['send_to'] = widget.id.toString();
+    body['send_by'] = UserManager.currentUser("id").toString();
+
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/typing",  context, (r) {}, body: body);
   }
 
-  void sendSeenFlag(id) {
+  void sendSeenFlag() { // id
     Map<String, String> body = {};
-    body['message_id'] = id;
-    body['id'] = widget.id.toString();
-    NetworkManager.httpPost(Globals.baseUrl + "chat/seen", (r) {}, body: body);
+    // body['message_id'] = id;
+    // body['id'] = widget.id.toString();
+    body['provider_id'] = widget.id.toString();
+    body['user_id'] = UserManager.currentUser("id").toString();
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/seen", context ,(r) {}, body: body); // chat/seen
   }
 
   void sendFile(PlatformFile fileData) {
@@ -1658,22 +1652,21 @@ class _LiveChatState extends State<LiveChat> {
     scrollDown();
 
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    NetworkManager().fileUpload(
-        Globals.baseUrl + "chat/file",
+    NetworkManager().fileUpload( Globals.baseUrl + "convertation/create", // chat/file
         [
           {
             "name": "file",
             "file": file.readAsBytesSync(),
             "type_name": "file",
             "file_type": "any",
-            "file_name": "aplication"
+            "file_name": fileData.name//"aplication"
           }
         ],
         (p) {}, (r) {
-      if (r["status"] == true) {
+      if (r["state"] == true) {
         setState(() {
-          data[r["page"]][int.parse(r["index"])] = r["message"];
-          int tempId = int.parse(r["temp_id"]);
+          data[page][index] = r['data'][0];
+          int tempId = id;
           files[tempId] = null;
         });
       } else {
@@ -1686,7 +1679,11 @@ class _LiveChatState extends State<LiveChat> {
       "index": index.toString(),
       "page": page,
       "file_name": fileData.name,
-      "temp_id": id.toString()
+      "temp_id": id.toString(),
+      'type': "FILE".toLowerCase(),
+      'provider_id': widget.id.toString(),
+      'user_id': UserManager.currentUser("id").toString(),
+      'send_by': UserManager.currentUser("id").toString(),
     });
   }
 
@@ -1697,32 +1694,31 @@ class _LiveChatState extends State<LiveChat> {
     });
 
     int id = images.length;
-    String page = data.keys.last;
+    String page = '0';//data.keys.last;
     int index = data[data.keys.last].length;
     images[id] = File(imageFile.path).readAsBytesSync();
     setState(() {
-      data[data.keys.last]
-          .add({"type": "IMAGE_UPLOAD", "source": id, "prograss": 0});
+      data[data.keys.last].add({"type": "IMAGE_UPLOAD", "source": id, "prograss": 0});
     });
 
     scrollDown();
 
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    NetworkManager().fileUpload(Globals.baseUrl + "chat/image", [
+    NetworkManager().fileUpload(Globals.baseUrl + "convertation/create", [ // chat/image
       {
         "name": "image",
         "file": images[id],
         "type_name": "image",
         "file_type": "png",
-        "file_name": "image"
+        "file_name": "${DateTime.now().toString().replaceAll(' ', '_').replaceAll(':', '').replaceAll('-', '')}.png"
       }
     ], (p) {
       setState(() {});
     }, (r) {
-      if (r["status"] == true) {
+      if (r["state"] == true) {
         setState(() {
-          data[r["page"]][int.parse(r["index"])] = r["message"];
-          int tempId = int.parse(r["temp_id"]);
+          data[page][index] = r['data'][0];//r["message"];
+          int tempId = id;//int.parse(r["temp_id"]);
           images[tempId] = null;
         });
       } else {
@@ -1734,15 +1730,19 @@ class _LiveChatState extends State<LiveChat> {
       "id": widget.id,
       "index": index.toString(),
       "page": page,
-      "temp_id": id.toString()
+      "temp_id": id.toString(),
+      'type': "IMAGE".toLowerCase(),
+      'provider_id': widget.id.toString(),
+      'user_id': UserManager.currentUser("id").toString(),
+      'send_by': UserManager.currentUser("id").toString(),
     });
   }
 
   void sendPromoCode() {
     if (promoCode.isEmpty) return;
     Map<String, String> body = {"code": promoCode};
-    NetworkManager.httpPost(Globals.baseUrl + "chat/promo", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpPost(Globals.baseUrl + "chat/promo", context ,(r) {
+      if (r['state'] == true) {
         setState(() {
           data.values.last.add(r['message']);
         });
@@ -1756,8 +1756,8 @@ class _LiveChatState extends State<LiveChat> {
     Alert.publicClose();
     if (offer.isEmpty || offer["price"] == null) return;
     offer['id'] = widget.id;
-    NetworkManager.httpPost(Globals.baseUrl + "chat/offer", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpPost(Globals.baseUrl + "chat/offer", context ,(r) {
+      if (r['state'] == true) {
         setState(() {
           data.values.last.add(r['message']);
         });
@@ -1771,13 +1771,15 @@ class _LiveChatState extends State<LiveChat> {
     typingNotifyer = false;
     if (body.keys.length == 0) return;
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    body['type'] = "TEXT";
-    body['id'] = widget.id.toString();
-    NetworkManager.httpPost(Globals.baseUrl + "chat/send", (r) {
-      if (r['status'] == true) {
+    body['type'] = "TEXT".toLowerCase();
+    body['provider_id'] = widget.id.toString();
+    body['user_id'] = UserManager.currentUser("id").toString();
+    body['send_by'] = UserManager.currentUser("id").toString();
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/create", context ,(r) { // chat/send
+      if (r['state'] == true) {
         // ifNotSeenSendNotifi();
         setState(() {
-          data.values.last.add(r['message']);
+          data.values.last.add(r['data'][0]);
         });
       }
     }, body: body);
@@ -1787,26 +1789,6 @@ class _LiveChatState extends State<LiveChat> {
     body = {};
   }
 
-  void cancelOffer(messageId, id, page, index) {
-    setState(() {
-      data[page][index]["message"]["status"] = "LOADING";
-    });
-    Map body = {
-      "id": id,
-      "page": page,
-      "index": index.toString(),
-      "message_id": messageId.toString()
-    };
-    NetworkManager.httpPost(Globals.baseUrl + "chat/cancelOffer", (r) {
-      if (r['status'] == true) {
-        setState(() {
-          data[r['page']][r['index']]["message"]["status"] = r['data'];
-        });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    }, body: body);
-  }
 
   void rejectOffer(messageId, id, page, index) {
     setState(() {
@@ -1816,23 +1798,23 @@ class _LiveChatState extends State<LiveChat> {
       "id": id.toString(),
       "page": page.toString(),
       "index": index.toString(),
-      "message_id": messageId.toString()
+      "message_id": messageId.toString(),
+      "status": "REJECTED",
+      'send_to' : widget.id.toString()
     };
-    NetworkManager.httpPost(Globals.baseUrl + "chat/rejectOffer", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpPost(Globals.baseUrl + "offer/status/$id", context ,(r) { // chat/rejectOffer
+      if (r['state'] == true) {
         setState(() {
-          data[r['page']][r['index']]["message"]["status"] = r['data'];
+          data[body['page']][index]["message"]["status"] = r['data']['status'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }
 
   void pickFile() async {
     FilePickerResult result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'mp4', 'pdf', 'doc', 'zip'],
+      type: FileType.any,
+      // allowedExtensions: ['jpg', 'mp4', 'pdf', 'doc', 'zip'],
     );
     if (result != null) {
       setState(() {

@@ -1,3 +1,5 @@
+import 'package:dr_tech/Models/UserManager.dart';
+import 'package:dr_tech/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -9,14 +11,42 @@ class NotificationIcon extends StatefulWidget {
 }
 
 class _NotificationIconState extends State<NotificationIcon> {
+
+  int countNotSeen =
+  UserManager.currentUser('not_seen').isNotEmpty
+      ? int.parse(UserManager.currentUser('not_seen'))
+      : 0;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-        onTap: () {},
-        child: Icon(
-          FlutterIcons.bell_outline_mco,
-          color: Colors.white,
-          size: 26,
+        onTap: () {
+          setState(() {
+            countNotSeen = 0;
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home(page: 2,)));
+          });
+        },
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            Icon(
+              FlutterIcons.bell_outline_mco,
+              color: Colors.white,
+              size: 26,
+            ),
+            countNotSeen > 0
+                ? Container(
+              alignment: Alignment.center,
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.red),
+              child: Text(
+                countNotSeen > 99 ? '99+' : countNotSeen.toString(),
+                style: TextStyle(fontSize: 6, color: Colors.white,fontWeight: FontWeight.w900 ),
+                textAlign: TextAlign.center,),
+            )
+                : Container()
+          ],
         ));
   }
 }

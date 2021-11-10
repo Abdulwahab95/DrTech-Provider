@@ -15,7 +15,9 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:vibration/vibration.dart';
 
 class EnterCode extends StatefulWidget {
-  EnterCode();
+  Map body;
+  String selectedCountrieCode;
+  EnterCode(this.body, this.selectedCountrieCode);
 
   @override
   _EnterCodeState createState() => _EnterCodeState();
@@ -63,7 +65,11 @@ class _EnterCodeState extends State<EnterCode> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       print('heree: addPostFrameCallback');
-      sendSms();
+      if(Globals.isLocal){
+        Alert.endLoading();
+        tick();
+      } else
+        sendSms();
     });
   }
 
@@ -267,10 +273,14 @@ class _EnterCodeState extends State<EnterCode> {
       return;
     }
 
-    sendSms();
+    if(Globals.isLocal){
+      Alert.endLoading();
+      tick();
+    } else
+      sendSms();
     // NetworkManager.httpPost(Globals.baseUrl + "user/resend", (r) {
     //   Alert.endLoading();
-    //   if (r['status'] == true) {
+    //   if (r['state'] == true) {
     //     setState(() {
     //       resendTime = r['time'];
     //       tick();
@@ -296,8 +306,20 @@ class _EnterCodeState extends State<EnterCode> {
     }
 
     Alert.startLoading(context);
-    signIn(code.values.join(), context);
 
+    if(Globals.isLocal){
+      NetworkManager.httpPost(Globals.baseUrl + "users/login", context ,(r) { // user/login
+        Alert.endLoading();
+        if (r['state'] == true) {
+          DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
+          DatabaseManager.save(Globals.authoKey, r['data']['token']);
+          UserManager.proccess(r['data']['user']);
+
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+        }
+      }, body: widget.body);
+    } else
+      signIn(code.values.join(), context);
   }
 
   Future<void> signIn(String otp, BuildContext contextPage) async {
@@ -316,19 +338,32 @@ class _EnterCodeState extends State<EnterCode> {
           Alert.show(contextPage, errorStr);
       } else if(value.runtimeType == UserCredential){
         print('heree: ${value.user.uid}');
-        // Navigator.pop(context, true);
-        NetworkManager.httpPost(Globals.baseUrl + "user/active", (r) {
+
+        Alert.startLoading(context);
+        NetworkManager.httpPost(Globals.baseUrl + "users/login", context ,(r) { // user/login
           Alert.endLoading();
-          if (r['status'] == true) {
-            DatabaseManager.save(Globals.authoKey, r['token']);
-            DatabaseManager.save('about', r['about']);
-            UserManager.proccess(r['user']);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home()));
-            // success
-          } else if (r['message'] != null) {
-            Alert.show(context, Converter.getRealText(r['message']));
+          if (r['state'] == true) {
+            DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
+            DatabaseManager.save(Globals.authoKey, r['data']['token']);
+            UserManager.proccess(r['data']['user']);
+
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
           }
-        }, body: {});
+        }, body: widget.body);
+
+        // Navigator.pop(context, true);
+        // NetworkManager.httpPost(Globals.baseUrl + "user/active", (r) {
+        //   Alert.endLoading();
+        //   if (r['state'] == true) {
+        //     DatabaseManager.save(Globals.authoKey, r['token']);
+        //     DatabaseManager.save('about', r['about']);
+        //     UserManager.proccess(r['user']);
+        //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home()));
+        //     // success
+        //   } else if (r['message'] != null) {
+        //     Alert.show(context, Converter.getRealText(r['message']));
+        //   }
+        // }, body: {});
       }
     });
   }
@@ -352,7 +387,7 @@ class _EnterCodeState extends State<EnterCode> {
     Alert.startLoading(context);
 
     await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: "+249965095703",
+      phoneNumber: widget.selectedCountrieCode + widget.body['number_phone'],// "+249965095703",
       forceResendingToken: _forceCodeResent,
       timeout: const Duration(seconds: duration),
       verificationCompleted: (PhoneAuthCredential  authCredential) {

@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dr_tech/Components/Alert.dart';
+import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
+import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart' as http_parser;
 
 class NetworkManager {
   static Map<String, int> asyncValidator = {};
-  String call(String url, Function callback, {var body, onError, cachable}) {
+  String call(String url, BuildContext context, Function callback, {var body, onError, cachable}) {
     String storageKey = url;
     int validatorKey = DateTime.now().microsecondsSinceEpoch;
     asyncValidator[url] = validatorKey;
@@ -25,10 +29,16 @@ class NetworkManager {
       if (responseBody == null) return;
 
       try {
+        log('try');
         var jsonData = json.decode(responseBody);
+        log('try: $jsonData');
         try {
+          // log('try2:');
+          // log('try2_jsonData: $jsonData');
+          // log('try2_payloadStorageKey: $payloadStorageKey');
           return callback(jsonData, payloadStorageKey);
         } catch (e) {
+          // log('catch1: $e');
           return callback(jsonData);
         }
       } catch (e) {
@@ -36,7 +46,18 @@ class NetworkManager {
         if (onError != null)
           onError('Error trying parsing server responce . ');
         else
-          log(e);
+          log('1onError: $e');
+
+        if (context != null) {
+          Alert.endLoading();
+          if (json.decode(responseBody)['state'] != null && json.decode(responseBody)['state'] == false) {
+            if (json.decode(responseBody)['message_code'] != null && json.decode(responseBody)['message_code'] != -1)
+              Alert.show(context, LanguageManager.getText(int.parse(json.decode(responseBody)['message_code'].toString())));
+            else
+              Alert.show(context, Converter.getRealText(json.decode(responseBody)['message']));
+          } else
+            Alert.show(context, responseBody);
+        }
       }
     };
 
@@ -44,32 +65,62 @@ class NetworkManager {
       var header = Globals.header();
       var response;
 
+      log("----------START---------");
+      log('url: $url');
+      log('form-data: $body');
+      log('header: $header');
+      log("-----------END--------");
+
       if (body != null)
         response = await http.post(Uri.parse(url), headers: header, body: body);
       else
         response = await http.get(Uri.parse(url), headers: header);
 
-      if (response == null) {
-        if (onError != null) onError("Null Responce");
-      }
-      final int statusCode = response.statusCode;
-      if (statusCode < 200 || statusCode > 400) {
-        if (onError != null) onError("Error while fetching data");
-        throw new Exception("Error while fetching data");
-      }
-
-      if (asyncValidator[payloadInfo['url']] != payloadInfo['validatorKey']) {
-        return null;
-      }
-
-      try {
-        // log
+      // log
+      try{
         log("----------START---------");
         log('url: $url');
         log('form-data: $body');
         log('header: $header');
         log('response.body: ${response.body}');
         log("-----------END--------");
+      }catch(e){
+        print('heree: catch: $e');
+      }
+
+      if (response == null) {
+        if (onError != null) onError("Null Responce");
+      }
+
+      final int statusCode = response.statusCode;
+      if (statusCode < 200 || statusCode > 400) {
+        if (onError != null) onError("Error while fetching data");
+        if(context != null) {
+          Alert.endLoading();
+          Alert.show(context, response.body.toString().length == 0? '$url\n--------\nstatusCode: ${response.statusCode}': response.body);
+        }
+        throw new Exception("Error while fetching data");
+      }else if (context != null && response.body != null
+          && json.decode(response.body)['state'] != null
+          && json.decode(response.body)['state'] == false) {
+
+        var r = json.decode(response.body);
+        // r['message_code'] = 10;
+          Alert.endLoading();
+        if(notInAllow(r, url)){
+          if (r['message_code'] != null && r['message_code'] != -1)
+            Alert.show(context, LanguageManager.getText(int.parse(r['message_code'].toString())));
+          else
+            Alert.show(context, Converter.getRealText(r['message']));
+        }
+      }
+
+
+      if (asyncValidator[payloadInfo['url']] != payloadInfo['validatorKey']) {
+        return null;
+      }
+
+      try {
 
         if (cachable == true) {
           DatabaseManager.save(payloadInfo['localStorageKey'], response.body);
@@ -108,6 +159,11 @@ class NetworkManager {
   }
 
   void fileUpload(url, List filesData, onProgress, callback, {body}) async {
+    log("----------START---------");
+    log('url: $url');
+    log('form-data: $body');
+    log("-----------END--------");
+
     final request = MultipartRequest(
       'POST',
       Uri.parse(url),
@@ -153,7 +209,7 @@ class NetworkManager {
     }
   }
 
-  static void httpGet(String url, Function callback,
+  static void httpGet(String url, BuildContext context, Function callback,
       {cashable = false, onError, Map<String, String> body}) {
     if (body != null) {
       List<String> getData = [];
@@ -162,18 +218,25 @@ class NetworkManager {
       }
       url = url + (url.contains("?") ? "&" : "?") + getData.join("&");
     }
-    NetworkManager().call(url, callback, onError: onError, cachable: cashable);
+    NetworkManager().call(url, context, callback, onError: onError, cachable: cashable);
   }
 
   /// Return Cash Key
-  static String httpPost(String url, Function callback,
+  static String httpPost(String url, BuildContext context, Function callback,
       {var body, onError, cachable}) {
     return NetworkManager()
-        .call(url, callback, body: body, onError: onError, cachable: cachable);
+        .call(url, context, callback, body: body, onError: onError, cachable: cachable);
   }
 
   static log(e) {
     print(e);
+  }
+
+  bool notInAllow(r, String url) {
+    if(r['message'].toString() == 'api.failed.unauthenticated' && url.endsWith('api/notifications'))
+      return false;
+    else
+      return true;
   }
 }
 

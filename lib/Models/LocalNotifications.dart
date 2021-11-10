@@ -36,9 +36,13 @@ class LocalNotifications {
 
     Map valueMap = json.decode(payload);
 
-    Globals.currentConversationId = valueMap['conversation_id'];
-    Globals.isOpenFromNotification = true;
-    Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+    if(valueMap['send_by'] != null) {
+      Globals.currentConversationId = valueMap['send_by'].toString();
+      Globals.isOpenFromNotification = true;
+      Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+    }else{
+      Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("WelcomePage");
+    }
 
   }
 

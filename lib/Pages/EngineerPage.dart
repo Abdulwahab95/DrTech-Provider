@@ -35,9 +35,7 @@ class _EngineerPageState extends State<EngineerPage> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl +
-            "user/engineer?id=${widget.id}&service_id=${widget.serviceId}",
-        (r) {
+        Globals.baseUrl + "user/engineer?id=${widget.id}&service_id=${widget.serviceId}", context, (r) {
       setState(() {
         isLoading = false;
       });
@@ -47,9 +45,6 @@ class _EngineerPageState extends State<EngineerPage> {
         });
       } else {
         Navigator.pop(context);
-        if (r['message'] != null) {
-          Alert.show(context, Converter.getRealText(r['message']));
-        }
       }
     });
   }
@@ -300,7 +295,7 @@ class _EngineerPageState extends State<EngineerPage> {
                       borderRadius: BorderRadius.circular(60),
                       color: Colors.grey,
                       image: DecorationImage(
-                          image: CachedNetworkImageProvider(item['image']))),
+                          image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
                 ),
                 Container(
                   width: 10,
@@ -412,7 +407,7 @@ class _EngineerPageState extends State<EngineerPage> {
                         : Container(),
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(user['image'])),
+                            image: CachedNetworkImageProvider(Globals.correctLink(user['image']))),
                         borderRadius: BorderRadius.circular(10),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -525,13 +520,11 @@ class _EngineerPageState extends State<EngineerPage> {
 
   void startNewConversation(id) {
     Alert.startLoading(context);
-    NetworkManager.httpGet(Globals.baseUrl + "chat/add?id=$id", (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "chat/add?id=$id", context, (r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     });
   }

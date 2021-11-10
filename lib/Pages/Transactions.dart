@@ -38,21 +38,17 @@ class _TransactionsState extends State<Transactions> {
     setState(() {
       isloading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "user/transactions?page=$page",
-        (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "user/transactions?page=$page", context, (r) {
       setState(() {
         isloading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data[r["page"]] = r['data'];
           balance = r['balance'];
           unit = r['unit'];
           page++;
         });
-      } else {
-        if (r['message'] != null)
-          Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -173,7 +169,7 @@ class _TransactionsState extends State<Transactions> {
                     Alert.show(
                         context, Converter.getRealText(results['message']));
                   }
-                  if (results['status'] == true) {
+                  if (results['state'] == true) {
                     page = 0;
                     data = {};
                     load();

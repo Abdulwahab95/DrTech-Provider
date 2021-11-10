@@ -16,7 +16,7 @@ class _RecyclerState extends State<Recycler> {
     return NotificationListener(
         onNotification: (n) {
           if (n is ScrollNotification) {
-            if (n.metrics.pixels == n.metrics.maxScrollExtent) {
+            if (n.metrics.pixels == n.metrics.maxScrollExtent &&  widget.onScrollDown != null) {
               widget.onScrollDown();
             }
           }

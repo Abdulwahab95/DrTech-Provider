@@ -45,7 +45,7 @@ class _ProductState extends State<Product> {
                       image: DecorationImage(
                           fit: BoxFit.fitWidth,
                           image: CachedNetworkImageProvider(
-                              widget.item['images'][0])),
+                              Globals.correctLink(widget.item['images'][0]))),
                       borderRadius: BorderRadius.circular(5),
                       color: Converter.hexToColor("#F2F2F2")),
                 ),
@@ -61,17 +61,11 @@ class _ProductState extends State<Product> {
                             widget.item['isLiked'] =
                                 widget.item['isLiked'] != true ? true : false;
                           });
-                          NetworkManager.httpGet(
-                              Globals.baseUrl +
-                                  "product/like?product_id=" +
-                                  widget.item["id"], (r) {
-                            if (r['status'] == true) {
+                          NetworkManager.httpGet(Globals.baseUrl + "product/like?product_id=" + widget.item["id"], context, (r) {
+                            if (r['state'] == true) {
                               setState(() {
                                 widget.item['isLiked'] = r["data"];
                               });
-                            } else if (r['message'] != null) {
-                              Alert.show(
-                                  context, Converter.getRealText(r['message']));
                             }
                           });
                         },

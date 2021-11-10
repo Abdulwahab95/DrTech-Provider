@@ -37,20 +37,17 @@ class _ConversationsState extends State<Conversations> {
   void load() {
     setState(() {isLoading = true;});
 
-    NetworkManager.httpGet(Globals.baseUrl + "chat/conversations?page=$page",
-        (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "user/convertations", context, (r) { // chat/conversations?page=$page
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
-          page++;
-          data[r['page']] = r['data'];
+          // page++;
+          data[page] = r['data'];// data[r['page']] = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
-    }, cashable: true);
+    },cashable: true);
   }
 
   @override
@@ -107,26 +104,28 @@ class _ConversationsState extends State<Conversations> {
     List<Widget> items = [];
     for (var page in data.keys) {
       for (var item in data[page]) {
+        // print('here_getChatConversations: $item');
         items.add(getConversationItem(item));
       }
     }
+    print('here_getChatConversations: items: $items , isLoading: $isLoading, data: $data');
 
     if (items.length == 0 && isLoading) {
       return Container(
         alignment: Alignment.center,
         child: CustomLoading(),
       );
-    } else if (items.length > 0 && data[0].length == 0 && !isLoading) {
+    } else if (data[0].length == 0 && !isLoading) { // items.length > 0 && data[0].length == 0
       return EmptyPage("conversation", 97);
     }
 
     return Recycler(
       children: items,
       onScrollDown: () {
-        if (!isLoading) {
-          if (data.length > 0 && data[0].length == 0) return;
-          load();
-        }
+      //   if (!isLoading) { //--------------------------------------------------------------- re**
+      //     if (data.length == 0) return; // data.length > 0 && data[0].length == 0
+      //     load();
+      //   }
       },
     );
   }
@@ -134,8 +133,7 @@ class _ConversationsState extends State<Conversations> {
   Widget getConversationItem(item) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (_) => LiveChat(item["id"])));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["engineer_id"].toString())));
       },
       child: Container(
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
@@ -157,8 +155,7 @@ class _ConversationsState extends State<Conversations> {
               height: 50,
               width: 50,
               decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: CachedNetworkImageProvider(item['user']['image'])),
+                  image: DecorationImage(image: CachedNetworkImageProvider(Globals.correctLink(item['user']['image']))),//----------------------- re**
                   borderRadius: BorderRadius.circular(10)),
             ),
             Expanded(
@@ -167,7 +164,7 @@ class _ConversationsState extends State<Conversations> {
               textDirection: LanguageManager.getTextDirection(),
               children: [
                 Text(
-                  item['user']['name'],
+                  item['user']['name'].toString(),//item['user']['name'],
                   textDirection: LanguageManager.getTextDirection(),
                   style: TextStyle(
                       fontSize: 16,

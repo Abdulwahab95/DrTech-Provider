@@ -51,11 +51,11 @@ class _ContactUsState extends State<ContactUs> {
       ),
     ));
     //
-    items.add(createInput("name", 243));
-    items.add(createInput("address", 244));
-    items.add(createInput("phone", 245));
-    items.add(createInput("email", 246));
-    items.add(createInput("description", 247, maxInput: 250, maxLines: 4));
+    // items.add(createInput("name", 243));
+    items.add(createInput("title", 244));
+    // items.add(createInput("phone", 245));
+    // items.add(createInput("email", 246));
+    items.add(createInput("content", 247, maxInput: 250, maxLines: 4));
 
     items.add(Container(
       padding: EdgeInsets.all(7),
@@ -117,7 +117,7 @@ class _ContactUsState extends State<ContactUs> {
   }
 
   void send() {
-    List validateKeys = ["name", "address", "phone", "email", "description"];
+    List validateKeys = ["title", "content"]; // "name", "address", "phone", "email", "description"
 
     for (var key in validateKeys) {
       if (body[key] == null || body[key].isEmpty)
@@ -129,11 +129,14 @@ class _ContactUsState extends State<ContactUs> {
     if (errors.keys.length > 0) return;
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "information/contact", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "reports/create", context ,(r) { // information/contact
       Alert.endLoading();
-      if (r['status'] == true) Navigator.pop(context);
+      // if (r['state'] == true) Navigator.pop(context);
       if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
+        Alert.show(context, Converter.getRealText(r['message']), onYes: (){
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }, onYesShowSecondBtn: false);
       }
     }, body: body);
   }

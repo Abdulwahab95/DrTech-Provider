@@ -18,7 +18,7 @@ class RateApp extends StatefulWidget {
 }
 
 class _RateAppState extends State<RateApp> {
-  Map<String, String> body = {};
+  Map<String, String> body = {'stars':'5'};
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +74,7 @@ class _RateAppState extends State<RateApp> {
                   color: Converter.hexToColor("#8D8C8E")),
             ),
           ),
-          RateStars(30, spacing: 0.5, onUpdate: (stars) {
+          RateStars(30, spacing: 0.5, stars: 5,onUpdate: (stars) {
             body["stars"] = stars.toString();
           }),
           Container(
@@ -94,8 +94,8 @@ class _RateAppState extends State<RateApp> {
               onChanged: (t) {
                 body["comment"] = t;
               },
-              textDirection: LanguageManager.getTextDirection(),
-              decoration: InputDecoration(border: InputBorder.none),
+              textDirection: LanguageManager.getTextDirection(), // 'صف لنا تجربتك (إختيارية)'
+              decoration: InputDecoration(border: InputBorder.none, hintText: LanguageManager.getText(291), hintTextDirection: LanguageManager.getTextDirection()),
               maxLines: 4,
             ),
           ),
@@ -132,9 +132,9 @@ class _RateAppState extends State<RateApp> {
     }
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/app", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "application/rate/create", context ,(r) { // user/app
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.pop(context);
         Alert.show(
             context,
@@ -165,19 +165,19 @@ class _RateAppState extends State<RateApp> {
             ),
             type: AlertType.WIDGET);
       }
-      if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
     }, body: body);
   }
 
   Widget getShearinIcons() {
     List<Widget> shearIcons = [];
-    if (Globals.getConfig("shearing") != "")
-      for (var item in Globals.getConfig("shearing")) {
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
         shearIcons.add(GestureDetector(
           onTap: () async {
-            launch(item['url']);
+            await launch(item['url']) ;
+            // void _launchURL() async =>
+            // item['url']= 'https://api.whatsapp.com/';
+            //     await canLaunch(item['url']) ? await launch(item['url']) : throw 'Could not launch ${item['url']}';
           },
           child: Container(
             width: 40,
@@ -186,7 +186,7 @@ class _RateAppState extends State<RateApp> {
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.contain,
-                    image: CachedNetworkImageProvider(item["icon"]))),
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
           ),
         ));
       }

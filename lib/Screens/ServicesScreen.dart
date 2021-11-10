@@ -42,21 +42,17 @@ class _ServicesScreenState extends State<ServicesScreen> {
       // if (item["status"] != "inactive"){
         if (lastInsert.length < 3) {
           print('item: $item');
-          lastInsert.add(createService(item["icon"], item["name"], () {
+          lastInsert.add(createService(item["icon"], Globals.isRtl()? item["name"]: item["name_en"], () {
             if (item["target"].toString() == "0") {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => Store()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => Store()));
               return;
             }
             if (item["target"].toString() == "1") {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => OnlineServices()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => OnlineServices()));
               return;
             }
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => Service(item['id'], item["name"])));
+            Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => Service(item['id'], Globals.isRtl()? item["name"]: item["name_en"])));
           }, () {}));
         }
 
@@ -148,7 +144,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 13,//14
+                          fontSize: 14,//14
                           color: Converter.hexToColor("#707070"),
                           fontWeight: FontWeight.bold),
                     ),

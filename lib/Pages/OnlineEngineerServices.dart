@@ -42,13 +42,11 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
 
   void getConfig() {
     NetworkManager.httpGet(
-        Globals.baseUrl + "services/filters?target=${widget.id}", (r) {
-      if (r['status'] == true) {
+        Globals.baseUrl + "services/filters?target=${widget.id}", context, (r) {
+      if (r['state'] == true) {
         setState(() {
           configFilters = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['messahe']));
       }
     }, cashable: true);
   }
@@ -61,16 +59,14 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
 
     NetworkManager.httpGet(
         Globals.baseUrl +
-            "services/onlineServices?target=${widget.id}&page$page", (r) {
+            "services/onlineServices?target=${widget.id}&page$page", context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data[r['page']] = r['data'];
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: filters, cashable: true);
   }
@@ -495,7 +491,7 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: CachedNetworkImageProvider(
-                                item['image'].toString())),
+                                Globals.correctLink(item['image'].toString()))),
                         borderRadius: BorderRadius.circular(10),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -721,13 +717,11 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
   void startNewConversation(id, serviceId) {
     Alert.startLoading(context);
     NetworkManager.httpGet(
-        Globals.baseUrl + "chat/add?id=$id&service_id=$serviceId", (r) {
+        Globals.baseUrl + "chat/add?id=$id&service_id=$serviceId", context, (r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     });
   }

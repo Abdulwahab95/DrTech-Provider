@@ -1,12 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/OrderSetRating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+
+import 'LiveChat.dart';
 
 class OrderDetails extends StatefulWidget {
   final data;
@@ -17,6 +21,16 @@ class OrderDetails extends StatefulWidget {
 }
 
 class _OrderDetailsState extends State<OrderDetails> {
+
+  Map cancel = {}, errors = {};
+
+  @override
+  void initState() {
+    print('here_OrderDetails: ${widget.data}' );
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,9 +41,9 @@ class _OrderDetailsState extends State<OrderDetails> {
             children: [
               Container(
                   decoration:
-                      BoxDecoration(color: Converter.hexToColor("#2094cd")),
+                  BoxDecoration(color: Converter.hexToColor("#2094cd")),
                   padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                   child: Container(
                       width: MediaQuery.of(context).size.width,
                       padding: EdgeInsets.only(
@@ -63,35 +77,47 @@ class _OrderDetailsState extends State<OrderDetails> {
                 width: MediaQuery.of(context).size.width * 0.95,
                 height: MediaQuery.of(context).size.width * 0.455,
                 margin:
-                    EdgeInsets.all(MediaQuery.of(context).size.width * 0.025),
+                EdgeInsets.all(MediaQuery.of(context).size.width * 0.025),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Converter.hexToColor("#F2F2F2")),
-                alignment: Alignment.topLeft,
-                child: Container(
-                  height: 30,
-                  width: 60,
-                  margin: EdgeInsets.only(top: 5),
-                  alignment: Alignment.center,
-                  child: Text(
-                    getStatusText(widget.data["status"]),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  decoration: BoxDecoration(
-                      color: Converter.hexToColor(
-                          widget.data["status"] == 'CANCELED'
-                              ? "#f00000"
-                              : "#2094CD"),
-                      borderRadius: LanguageManager.getDirection()
-                          ? BorderRadius.only(
+                    color: Converter.hexToColor("#F2F2F2"),
+                    image: DecorationImage(
+                        // fit: BoxFit.cover,
+                        image: CachedNetworkImageProvider(Globals.correctLink(widget.data['service_icon'])))
+                ),
+                alignment: LanguageManager.getDirection()? Alignment.topLeft: Alignment.topRight,
+                child: Row(
+                  textDirection: LanguageManager.getDirection()? TextDirection.ltr : TextDirection.rtl,
+                  children: [
+                    Container(
+                      height: 30,
+                      padding: EdgeInsets.only(left: 5, right: 10),
+                      // width: 60,
+                      margin: EdgeInsets.only(top: 5),
+                      alignment: Alignment.center,
+                      child: Text(
+                        getStatusText(widget.data["status"]).replaceAll('\n', ' '),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          color: Converter.hexToColor(
+                              widget.data["status"] == 'CANCELED'
+                                  ? "#f00000"
+                                  : widget.data["status"] == 'WAITING'
+                                    ? "#0ec300"
+                                    : "#2094CD"),
+                          borderRadius: LanguageManager.getDirection()
+                              ? BorderRadius.only(
                               topRight: Radius.circular(15),
                               bottomRight: Radius.circular(15))
-                          : BorderRadius.only(
+                              : BorderRadius.only(
                               topLeft: Radius.circular(15),
                               bottomLeft: Radius.circular(15))),
+                    ),
+                  ],
                 ),
               ),
               Container(
@@ -136,7 +162,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 Text(
                                   widget.data["price"].toString(),
                                   textDirection:
-                                      LanguageManager.getTextDirection(),
+                                  LanguageManager.getTextDirection(),
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -148,7 +174,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 Text(
                                   widget.data["unit"].toString(),
                                   textDirection:
-                                      LanguageManager.getTextDirection(),
+                                  LanguageManager.getTextDirection(),
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.normal,
@@ -189,29 +215,29 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontWeight: FontWeight.normal,
                                     fontSize: 14),
                                 textDirection:
-                                    LanguageManager.getTextDirection(),
+                                LanguageManager.getTextDirection(),
                               )
                             ],
                           ),
                           Row(
                             textDirection: LanguageManager.getTextDirection(),
                             children: [
+                              // InkWell(
+                              //   onTap: () {
+                              //     // Chat action
+                              //   },
+                              //   child: Icon(
+                              //     FlutterIcons.phone_faw,
+                              //     color: Converter.hexToColor("#344F64"),
+                              //     size: 22,
+                              //   ),
+                              // ),
+                              // Container(
+                              //   width: 5,
+                              // ),
                               InkWell(
                                 onTap: () {
-                                  // Chat action
-                                },
-                                child: Icon(
-                                  FlutterIcons.phone_faw,
-                                  color: Converter.hexToColor("#344F64"),
-                                  size: 22,
-                                ),
-                              ),
-                              Container(
-                                width: 5,
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  // Chat action
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(widget.data['provider_id'].toString())));
                                 },
                                 child: Icon(
                                   Icons.message,
@@ -238,63 +264,77 @@ class _OrderDetailsState extends State<OrderDetails> {
                   ),
                 ),
               ),
-              widget.data['status'] != 'PENDING' &&
-                      widget.data['status'] != 'PROCESSING'
-                  ? Container()
-                  : Row(
-                      textDirection: LanguageManager.getTextDirection(),
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        InkWell(
-                          onTap: completedOrder,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.45,
-                            height: 45,
-                            alignment: Alignment.center,
-                            child: Text(
-                              LanguageManager.getText(179),
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black.withAlpha(15),
-                                      spreadRadius: 2,
-                                      blurRadius: 2)
-                                ],
-                                borderRadius: BorderRadius.circular(8),
-                                color: Converter.hexToColor("#344f64")),
-                          ),
+              // widget.data['status'] != 'PENDING' &&
+              //     widget.data['status'] != 'WAITING'
+              //     ? Container()
+              //     :
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(width: 30),
+                widget.data['status'] == 'WAITING'
+                  ? Expanded(
+                  flex: 1,
+                    child: InkWell(
+                      onTap: completedOrder,
+                      child: Container(
+                        height: 45,
+                        alignment: Alignment.center,
+                        child: Text(
+                          LanguageManager.getText(179), // استلام الطلب
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
                         ),
-                        InkWell(
-                          onTap: () {
-                            cancelOrder();
-                          },
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.45,
-                            height: 45,
-                            alignment: Alignment.center,
-                            child: Text(
-                              LanguageManager.getText(180),
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black.withAlpha(15),
-                                      spreadRadius: 2,
-                                      blurRadius: 2)
-                                ],
-                                borderRadius: BorderRadius.circular(8),
-                                color: Converter.hexToColor("#FF0000")),
-                          ),
-                        ),
-                      ],
+                        decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withAlpha(15),
+                                  spreadRadius: 2,
+                                  blurRadius: 2)
+                            ],
+                            borderRadius: BorderRadius.circular(8),
+                            color: Converter.hexToColor("#0ec300")),
+                      ),
                     ),
+                  )
+                    :Container(),
+                  widget.data['status'] != 'WAITING'
+                      ? Container()
+                      : Container(width: 15),
+                  widget.data['status'] == 'PENDING' || widget.data['status'] == 'WAITING'
+                  ? Expanded(
+                    flex: 1,
+                    child: InkWell(
+                      onTap: () {
+                        cancelOrder();
+                      },
+                      child: Container(
+                        height: 45,
+                        alignment: Alignment.center,
+                        child: Text(
+                          LanguageManager.getText(180), // الغاء الطلب
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withAlpha(15),
+                                  spreadRadius: 2,
+                                  blurRadius: 2)
+                            ],
+                            borderRadius: BorderRadius.circular(8),
+                            color: Converter.hexToColor("#FF0000")),
+                      ),
+                    ),
+                  )
+                :Container(),
+                  Container(width: 30),
+                ],
+              ),
               Container(
                 height: 15,
               )
@@ -302,139 +342,185 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   void cancelOrderConferm() {
+
+    errors = {};
+    Alert.staticContent = getCancelWidget();
+    Alert.setStateCall = () {};
+    Alert.callSetState();
+
+    if(cancel.isEmpty) {
+      errors['canceled_reason'] = true;
+      Alert.staticContent = getCancelWidget();
+      Alert.setStateCall = () {};
+      Alert.callSetState();
+    }
+
+    print('here_cancelOrderConferm: cancel: $cancel ${cancel.isEmpty}, errors: $errors');
+
+    if (errors.keys.length > 0) {
+      Globals.vibrate();
+      return;
+    }
+
+    Navigator.pop(context);
+
     Alert.startLoading(context);
-    Map<String, String> body = {"id": widget.data['id'].toString()};
-    NetworkManager.httpPost(Globals.baseUrl + "orders/cancel", (r) {
+    cancel["status"] = "CANCELED";
+    cancel["canceled_by"] = UserManager.currentUser("id");
+    NetworkManager.httpPost(Globals.baseUrl + "orders/status/${widget.data['id']}", context ,(r) { // orders/cancel
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.of(context).pop(true);
       }
-      if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    }, body: body);
+    }, body: cancel);
   }
 
   void completedOrderConferm() {
     Alert.startLoading(context);
-    Map<String, String> body = {"id": widget.data['id'].toString()};
-    NetworkManager.httpPost(Globals.baseUrl + "orders/completed", (r) {
+    // Map<String, String> body = {"id": widget.data['id'].toString()};
+    NetworkManager.httpPost(Globals.baseUrl + "orders/status/${widget.data['id']}", context ,(r) async { //orders/completed
       Alert.endLoading();
-      if (r['status'] == true) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (_) => OrderSetRating(widget.data['id'])));
+      if (r['state'] == true) {
+        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => OrderSetRating(widget.data['id'])));
+        var results = await Navigator.push(context, MaterialPageRoute(builder: (_) => OrderSetRating(widget.data['id'])));
+        print('here_2: $results');
+        if (results == true) {
+            Navigator.of(context).pop(true);
+            Alert.show(context, Converter.getRealText(237));
+        }
       }
-      if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    }, body: body);
+    }, body: {"status":"COMPLETED"});
   }
 
-  void cancelOrder() {
-    Alert.show(
-        context,
-        Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+  getCancelWidget() {
+    return Container(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        textDirection: LanguageManager.getTextDirection(),
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
             textDirection: LanguageManager.getTextDirection(),
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                textDirection: LanguageManager.getTextDirection(),
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(),
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(
-                      FlutterIcons.x_fea,
-                      size: 24,
-                    ),
-                  )
-                ],
-              ),
-              Container(
+              Container(),
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
                 child: Icon(
-                  FlutterIcons.trash_faw,
-                  size: 50,
-                  color: Converter.hexToColor("#f00000"),
+                  FlutterIcons.x_fea,
+                  size: 24,
                 ),
-              ),
-              Container(
-                height: 30,
-              ),
-              Text(
-                LanguageManager.getText(171),
-                style: TextStyle(
-                    color: Converter.hexToColor("#707070"),
-                    fontWeight: FontWeight.bold),
-              ),
-              Container(
-                height: 30,
-              ),
-              Row(
-                textDirection: LanguageManager.getTextDirection(),
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Alert.publicClose();
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.45,
-                      height: 45,
-                      alignment: Alignment.center,
-                      child: Text(
-                        LanguageManager.getText(172),
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withAlpha(15),
-                                spreadRadius: 2,
-                                blurRadius: 2)
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                          color: Converter.hexToColor("#344f64")),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                      cancelOrderConferm();
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.45,
-                      height: 45,
-                      alignment: Alignment.center,
-                      child: Text(
-                        LanguageManager.getText(169),
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withAlpha(15),
-                                spreadRadius: 2,
-                                blurRadius: 2)
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                          color: Converter.hexToColor("#FF0000")),
-                    ),
-                  ),
-                ],
               )
             ],
           ),
-        ),
-        type: AlertType.WIDGET);
+          Container(
+            child: Icon(
+              FlutterIcons.cancel_mdi,
+              size: 50,
+              color: Converter.hexToColor("#f00000"),
+            ),
+          ),
+          Container(height: 30),
+          Text(
+            LanguageManager.getText(296), // هل أنت متأكد من إلغاء الطلب؟
+            style: TextStyle(
+                color: Converter.hexToColor("#707070"),
+                fontWeight: FontWeight.bold),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Converter.hexToColor(errors['canceled_reason'] == true? "#ffd1ce" : "#F2F2F2"),
+            ),
+            child: TextField(
+              onChanged: (v) {
+                cancel["canceled_reason"] = v;
+              },
+              textDirection: LanguageManager.getTextDirection(),
+              keyboardType: TextInputType.multiline,
+              maxLines: 4,
+              decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(vertical: 0),
+                  border: InputBorder.none,
+                  hintTextDirection: LanguageManager.getTextDirection(),
+                  hintText: LanguageManager.getText(297)), // اكتب سبب الإلغاء...
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          Container(height: 30),
+          Row(
+            textDirection: LanguageManager.getTextDirection(),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              InkWell(
+                onTap: () {
+                  Alert.publicClose();
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: 45,
+                  alignment: Alignment.center,
+                  child: Text(
+                    LanguageManager.getText(172),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withAlpha(15),
+                            spreadRadius: 2,
+                            blurRadius: 2)
+                      ],
+                      borderRadius: BorderRadius.circular(8),
+                      color: Converter.hexToColor("#344f64")),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  cancelOrderConferm();
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: 45,
+                  alignment: Alignment.center,
+                  child: Text(
+                    LanguageManager.getText(180), // الغاء الطلب
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withAlpha(15),
+                            spreadRadius: 2,
+                            blurRadius: 2)
+                      ],
+                      borderRadius: BorderRadius.circular(8),
+                      color: Converter.hexToColor("#FF0000")),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+  void cancelOrder() {
+    cancel = {};
+    errors = {};
+
+    if(Alert.callSetState != null) {
+      Alert.staticContent = getCancelWidget();
+      Alert.setStateCall = () {};
+      Alert.callSetState();
+    }
+
+    Alert.show(context, getCancelWidget(), type: AlertType.WIDGET);
   }
 
   void completedOrder() {
@@ -487,6 +573,30 @@ class _OrderDetailsState extends State<OrderDetails> {
                 children: [
                   InkWell(
                     onTap: () {
+                      Alert.publicClose();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(172),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#344f64")),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
                       Navigator.pop(context);
                       completedOrderConferm();
                     },
@@ -510,30 +620,6 @@ class _OrderDetailsState extends State<OrderDetails> {
                           color: Converter.hexToColor("#2094CD")),
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      Alert.publicClose();
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.45,
-                      height: 45,
-                      alignment: Alignment.center,
-                      child: Text(
-                        LanguageManager.getText(172),
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withAlpha(15),
-                                spreadRadius: 2,
-                                blurRadius: 2)
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                          color: Converter.hexToColor("#344f64")),
-                    ),
-                  ),
                 ],
               )
             ],
@@ -544,11 +630,12 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   String getStatusText(status) {
     return LanguageManager.getText({
-          'PENDING': 92,
-          'PROCESSING': 93,
-          'COMPLETED': 94,
-          'CANCELED': 184
-        }[status] ??
+      'PENDING': 93,
+      'WAITING': 92,
+      'COMPLETED': 94,
+      'CANCELED': 184
+    }[status.toString().toUpperCase()] ??
         92);
   }
+
 }

@@ -355,9 +355,9 @@ class _WithdrawalState extends State<Withdrawal> {
 
   void withdrawalConferm() {
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawalRequisite", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawalRequisite", context ,(r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => EnterCodeWithdrawal(body)));
       }

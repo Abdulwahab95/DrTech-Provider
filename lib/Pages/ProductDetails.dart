@@ -3,6 +3,7 @@ import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -352,7 +353,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         height: size.height,
         decoration: BoxDecoration(
             image: DecorationImage(
-                fit: BoxFit.contain, image: CachedNetworkImageProvider(item))),
+                fit: BoxFit.contain, image: CachedNetworkImageProvider(Globals.correctLink(item)))),
       ));
     }
     return sliders;

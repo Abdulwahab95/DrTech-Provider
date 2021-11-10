@@ -33,6 +33,7 @@ dependencies:
   file_picker: ^3.0.0
   firebase_auth:
   package_info_plus: ^1.0.6
+#  geolocation: ^1.1.2
 
   cupertino_icons: ^1.0.2
 
@@ -61,3 +62,6 @@ flutter:
         weight: 500
       - asset: assets/fonts/Cairo-Bold.ttf
         weight: 600
+
+module:
+  androidX: true # Add this line.

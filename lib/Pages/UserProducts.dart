@@ -33,9 +33,9 @@ class _UserProductsState extends State<UserProducts> {
     setState(() {isLoading = true;});
 
     NetworkManager.httpGet(
-        Globals.baseUrl + "product/load?page=$page&type=user", (r) {
+        Globals.baseUrl + "product/load?page=$page&type=user", context, (r) {
 
-      if (r['status'] == true) {
+      if (r['state'] == true) {
 
         if(data.isNotEmpty) {
           var exist = false;
@@ -61,8 +61,6 @@ class _UserProductsState extends State<UserProducts> {
           data[r['page']] = r['data'];
         });
         setState(() {isLoading = false;});
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
 
@@ -200,7 +198,7 @@ class _UserProductsState extends State<UserProducts> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image:
-                                CachedNetworkImageProvider(item['images'][0])),
+                                CachedNetworkImageProvider(Globals.correctLink(item['images'][0]))),
                         borderRadius: BorderRadius.circular(7),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -549,14 +547,12 @@ class _UserProductsState extends State<UserProducts> {
   void deleteProductConferm(id, page, i) {
     Alert.startLoading(context);
     Map<String, String> body = {"id": id.toString()};
-    NetworkManager.httpPost(Globals.baseUrl + "product/delete", (r) {
+    NetworkManager.httpPost(Globals.baseUrl + "product/delete", context ,(r) {
       Alert.endLoading();
-      if (r['status'] == true) {
+      if (r['state'] == true) {
         setState(() {
           data[page].removeAt(i);
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, body: body);
   }

@@ -41,8 +41,8 @@ class _AddServicesState extends State<AddServices>
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "services/configuration", (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpGet(Globals.baseUrl + "services/configuration", context, (r) {
+      if (r['state'] == true) {
         setState(() {
           config = r['data'];
           if (widget.id != null) {
@@ -51,8 +51,6 @@ class _AddServicesState extends State<AddServices>
             isLoading = false;
           }
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -61,16 +59,13 @@ class _AddServicesState extends State<AddServices>
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "user/service?id=${widget.id}",
-        (r) {
-      if (r['status'] == true) {
+    NetworkManager.httpGet(Globals.baseUrl + "user/service?id=${widget.id}", context, (r) {
+      if (r['state'] == true) {
         setState(() {
           data = r['data'];
           initBodyData();
           isLoading = false;
         });
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
       }
     }, cashable: true);
   }
@@ -689,8 +684,6 @@ class _AddServicesState extends State<AddServices>
       Alert.endLoading();
       if (r["status"] == true) {
         Navigator.of(context).pop(true);
-      } else if (r["message"] != null) {
-        Alert.show(context, Converter.getRealText(r["message"]));
       }
     }, body: body);
   }

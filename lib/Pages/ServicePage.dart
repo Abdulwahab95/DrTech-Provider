@@ -9,11 +9,12 @@ import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/ShareManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:dr_tech/Pages/AddServices.dart';
 import 'package:dr_tech/Pages/EngineerRatings.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+
+import 'Login.dart';
 
 class ServicePage extends StatefulWidget {
   final id;
@@ -38,22 +39,17 @@ class _ServicePageState extends State<ServicePage>
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "user/service?id=${widget.id} ",
-        (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "service/${widget.id}", context, (r) { // user/service?id=${widget.id}
       setState(() {
         isLoading = false;
       });
-      if (r["status"] == true) {
+      if (r["state"] == true) {
         setState(() {
           data = r['data'];
-          controller =
-              new TabController(length: data['images'].length, vsync: this);
+          controller = new TabController(length: (data['images'] as String).split('||').length , vsync: this);
         });
       } else {
         Navigator.pop(context);
-        if (r['message'] != null) {
-          Alert.show(context, Converter.getRealText(r['message']));
-        }
       }
     });
   }
@@ -347,87 +343,56 @@ class _ServicePageState extends State<ServicePage>
                               ],
                             ),
                           ),
-                          //      getComments(),
+                               getComments(),
                         ],
                       ),
                     )),
-          UserManager.currentUser("type") == "ENGINEER"
-              ? InkWell(
-                  onTap: () async {
-                    var results = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => AddServices(id: data['id'])));
-                    if (results == true) {
-                      load();
-                    }
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(10),
-                    height: 45,
-                    alignment: Alignment.center,
-                    child: Text(
-                      LanguageManager.getText(170),
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withAlpha(15),
-                              spreadRadius: 2,
-                              blurRadius: 2)
-                        ],
-                        borderRadius: BorderRadius.circular(8),
-                        color: Converter.hexToColor("#344f64")),
-                  ),
-                )
-              : Container(
+          Container(
                   padding: EdgeInsets.all(15),
                   child: Row(
                     textDirection: LanguageManager.getTextDirection(),
                     children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: () {},
-                          child: Container(
-                            height: 46,
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              textDirection: LanguageManager.getTextDirection(),
-                              children: [
-                                Icon(
-                                  FlutterIcons.phone_faw,
-                                  color: Colors.white,
-                                ),
-                                Container(
-                                  width: 5,
-                                ),
-                                Text(
-                                  LanguageManager.getText(96),
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                            decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black.withAlpha(15),
-                                      spreadRadius: 2,
-                                      blurRadius: 2)
-                                ],
-                                borderRadius: BorderRadius.circular(12),
-                                color: Converter.hexToColor("#344f64")),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 10,
-                      ),
+                      // Expanded(
+                      //   child: InkWell(
+                      //     onTap: () {},
+                      //     child: Container(
+                      //       height: 46,
+                      //       alignment: Alignment.center,
+                      //       child: Row(
+                      //         mainAxisAlignment: MainAxisAlignment.center,
+                      //         textDirection: LanguageManager.getTextDirection(),
+                      //         children: [
+                      //           Icon(
+                      //             FlutterIcons.phone_faw,
+                      //             color: Colors.white,
+                      //           ),
+                      //           Container(
+                      //             width: 5,
+                      //           ),
+                      //           Text(
+                      //             LanguageManager.getText(96),
+                      //             style: TextStyle(
+                      //                 color: Colors.white,
+                      //                 fontSize: 15,
+                      //                 fontWeight: FontWeight.w600),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //       decoration: BoxDecoration(
+                      //           boxShadow: [
+                      //             BoxShadow(
+                      //                 color: Colors.black.withAlpha(15),
+                      //                 spreadRadius: 2,
+                      //                 blurRadius: 2)
+                      //           ],
+                      //           borderRadius: BorderRadius.circular(12),
+                      //           color: Converter.hexToColor("#344f64")),
+                      //     ),
+                      //   ),
+                      // ),
+                      // Container(
+                      //   width: 10,
+                      // ),
                       Expanded(
                         child: InkWell(
                           onTap: () {
@@ -498,7 +463,7 @@ class _ServicePageState extends State<ServicePage>
                       borderRadius: BorderRadius.circular(60),
                       color: Colors.grey,
                       image: DecorationImage(
-                          image: CachedNetworkImageProvider(item['image']))),
+                          image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
                 ),
                 Container(
                   width: 10,
@@ -510,11 +475,11 @@ class _ServicePageState extends State<ServicePage>
                       textDirection: LanguageManager.getTextDirection(),
                       children: [
                         Icon(
-                          int.tryParse(item['stars']) > 2
+                          (item['stars'] != null? item['stars'] : 5) > 2
                               ? FlutterIcons.like_fou
                               : FlutterIcons.dislike_fou,
-                          color: Colors.grey,
-                          size: 24,
+                          color: (item['stars'] != null? item['stars'] : 5) > 2 ? Colors.orange : Colors.grey,
+                          size: 20,
                         ),
                         Container(
                           width: 5,
@@ -593,16 +558,14 @@ class _ServicePageState extends State<ServicePage>
                 height: size * 0.5 - 10,
                 child: TabBarView(
                     controller: controller,
-                    children: (data['images'] as List)
-                        .map((e) => Container(
-                              width: size - 20,
-                              height: size * 0.5 - 10,
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: CachedNetworkImageProvider(
-                                          e['name']))),
-                            ))
-                        .toList()),
+                  children: (data['images'] as String)
+                      .split('||')
+                      .map<Widget>((String url) => Container(
+                    width: size - 20,
+                    height: size * 0.5 - 10,
+                    decoration: BoxDecoration(image: DecorationImage(image: CachedNetworkImageProvider(Globals.correctLink(url)))),
+                  ))
+                      .toList()),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: Converter.hexToColor("#F2F2F2")),
@@ -616,19 +579,16 @@ class _ServicePageState extends State<ServicePage>
                     Container(),
                     Row(
                         textDirection: LanguageManager.getTextDirection(),
-                        children: (data['images'] as List)
-                            .map((e) => Container(
+                        children: (data['images'] as String).split('||')
+                            .map<Widget>((String url) => Container(
                                   width: 7,
                                   height: 7,
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
-                                      color: controller.index ==
-                                              (data['images'] as List)
-                                                  .indexOf(e)
+                                      color: controller.index == (data['images'] as String).split('||').indexOf(url)
                                           ? Colors.white
                                           : Converter.hexToColor("#344F64")),
-                                ))
-                            .toList()),
+                                )).toList()),
                     Container(
                       child: InkWell(
                         onTap: () {
@@ -651,15 +611,20 @@ class _ServicePageState extends State<ServicePage>
   }
 
   void startNewConversation(id) {
-    Alert.startLoading(context);
-    NetworkManager.httpGet(Globals.baseUrl + "chat/add?id=$id", (r) {
-      Alert.endLoading();
-      if (r['status'] == true) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
-      } else if (r['message'] != null) {
-        Alert.show(context, Converter.getRealText(r['message']));
-      }
-    });
+    // Alert.startLoading(context);
+    // NetworkManager.httpPost(Globals.baseUrl + "convertation", (r) { // chat/add?id=$id
+    //   Alert.endLoading();
+    //   if (r['state'] == true) {
+    UserManager.currentUser("id").isNotEmpty
+        ? Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(id.toString())))
+        : Alert.show(context, LanguageManager.getText(298),
+        premieryText: LanguageManager.getText(30),
+        onYes: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => Login()));
+        }, onYesShowSecondBtn: false);
+    //   } else if (r['message'] != null) {
+    //     Alert.show(context, Converter.getRealText(r['message']));
+    //   }
+    // }, body: {});
   }
 }

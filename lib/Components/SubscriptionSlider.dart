@@ -56,7 +56,7 @@ class _SubscriptionSliderState extends State<SubscriptionSlider> {
               borderRadius: BorderRadius.circular(15),
               image: DecorationImage(
                   fit: BoxFit.cover,
-                  image: CachedNetworkImageProvider(item['image']))),
+                  image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
         ));
       }
     return Container(
