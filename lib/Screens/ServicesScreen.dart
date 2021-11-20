@@ -1,3 +1,4 @@
+import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
@@ -41,7 +42,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
       // if (item["status"] != "inactive"){
         if (lastInsert.length < 3) {
-          print('item: $item');
+          // print('item: $item');
           lastInsert.add(createService(item["icon"], Globals.isRtl()? item["name"]: item["name_en"], () {
             if (item["target"].toString() == "0") {
               Navigator.push(context, MaterialPageRoute(builder: (_) => Store()));
@@ -53,16 +54,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
             }
             Navigator.push(context, MaterialPageRoute(
                     builder: (_) => Service(item['id'], Globals.isRtl()? item["name"]: item["name_en"])));
-          }, () {}));
+          }, () {Alert.show(context, item['description']);}));
         }
 
       if (lastInsert.length == 1) {
-        print('row1: $item');
+        // print('row1: $item');
         lastInsert.add(Container(width: 20,));
       }
       if (lastInsert.length == 3) {
         // numItemAdd += 2;
-        print('row: $item');
+        // print('row: $item');
         rows.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           textDirection: LanguageManager.getTextDirection(),

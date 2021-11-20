@@ -20,7 +20,7 @@ class Globals {
   static var urlServerGlobal = "https://drtech.takiddine.co";
   static String authoKey = "Authorization";// x-autho
   static String baseUrl = isLocal ? "$urlServerLocal/api/" : "$urlServerGlobal/api/";
-  static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal/"; // https://server.drtechapp.com/
+  static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/
   static String shareUrl = "https://share.drtechapp.com/";
   static String appFont = "Cario";
   static SharedPreferences sharedPreferences;
@@ -28,6 +28,7 @@ class Globals {
   // Callbacks
   static Function updateInCartCount;
   static Function updateNotificationCount = (){};
+  static Function updateChatCount = (){};
   static var settings;
   // Chat + Notification
   static String currentConversationId = '';
@@ -197,22 +198,22 @@ class Globals {
 
     else  {
       String url = data.toString();
-      print('here_correct1: $url');
+      // print('here_correct1: $url');
       if(!url.contains('http')) {
         url = imageUrl + data;
-        print('here_correct2: $url');
+        // print('here_correct2: $url');
       } else if ((url.contains(urlServerGlobal) || url.contains("https://server.drtechapp.com")) && isLocal) {
         url = data
             .toString()
             .replaceFirst(urlServerGlobal, urlServerLocal)
             .replaceFirst("https://server.drtechapp.com/storage/images/",
             "http://192.168.43.152/images/sliders/");
-        print('here_correct3: $url');
+        // print('here_correct3: $url');
       } else {
         url = data.toString();
-        print('here_correct4: $url');
+        // print('here_correct4: $url');
       }
-      print('here_correct5: $url');
+      // print('here_correct5: $url');
       return url;
     }
 
@@ -222,6 +223,10 @@ class Globals {
     if (await Vibration.hasVibrator()) {
       Vibration.vibrate();
     }
+  }
+
+  static checkNullOrEmpty(item) {
+    return !(item == null || (item != null && (item.toString().isEmpty || item.toString().toLowerCase() == 'null')) );
   }
 
 }

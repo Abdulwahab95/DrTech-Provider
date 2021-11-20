@@ -944,8 +944,7 @@ class _LiveChatState extends State<LiveChat> {
                                               width: 5,
                                             ),
                                             Text(
-                                              item['message']['unit']
-                                                  .toString(),
+                                              Converter.getRealText(UserManager.currentUser("unit")),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
@@ -1768,25 +1767,30 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   void send() {
-    typingNotifyer = false;
-    if (body.keys.length == 0) return;
-    AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    body['type'] = "TEXT".toLowerCase();
-    body['provider_id'] = widget.id.toString();
-    body['user_id'] = UserManager.currentUser("id").toString();
-    body['send_by'] = UserManager.currentUser("id").toString();
-    NetworkManager.httpPost(Globals.baseUrl + "convertation/create", context ,(r) { // chat/send
-      if (r['state'] == true) {
-        // ifNotSeenSendNotifi();
-        setState(() {
-          data.values.last.add(r['data'][0]);
-        });
-      }
-    }, body: body);
-    setState(() {
-      controller.text = "";
-    });
-    body = {};
+    if(body['text'].toString().replaceAll(new RegExp(r'[^0-9]'),'').length<7) {
+      typingNotifyer = false;
+      if (body.keys.length == 0) return;
+      AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
+      body['type'] = "TEXT".toLowerCase();
+      body['provider_id'] = widget.id.toString();
+      body['user_id'] = UserManager.currentUser("id").toString();
+      body['send_by'] = UserManager.currentUser("id").toString();
+      NetworkManager.httpPost(
+          Globals.baseUrl + "convertation/create", context, (r) { // chat/send
+        if (r['state'] == true) {
+          // ifNotSeenSendNotifi();
+          setState(() {
+            data.values.last.add(r['data'][0]);
+          });
+        }
+      }, body: body);
+      setState(() {
+        controller.text = "";
+      });
+      body = {};
+    }else{
+      Alert.show(context, 'لضمان جودة الخدمة لايسمح بتبادل الأرقام');
+    }
   }
 
 

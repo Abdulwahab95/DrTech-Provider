@@ -1,6 +1,8 @@
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Config/Converter.dart';
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Pages/Conversations.dart';
 import 'package:dr_tech/Pages/Orders.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +16,18 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+
+  int count = UserManager.currentUser('chat_not_seen').isNotEmpty? int.parse(UserManager.currentUser('chat_not_seen')) : 0;
+
   @override
   void initState() {
+    Globals.updateChatCount = ()
+    {
+      if(mounted)
+        setState(() {
+          count = UserManager.currentUser('chat_not_seen').isNotEmpty? int.parse(UserManager.currentUser('chat_not_seen')) : 0;
+        });
+    };
     super.initState();
   }
 
@@ -69,6 +81,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget createServices(icon, titel, onTap) {
+    print('here_count: $count');
     var width = MediaQuery.of(context).size.width * 0.9;
     if (width > 400) width = 400;
     double height = 70;
@@ -86,18 +99,38 @@ class _MainScreenState extends State<MainScreen> {
               Container(
                 width: 10,
               ),
-              Container(
-                width: height * 0.8,
-                height: height * 0.8,
-                alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  "assets/icons/$icon.svg",
-                  width: height * 0.4,
-                  height: height * 0.4,
-                ),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Converter.hexToColor("#F2F2F2")),
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Center(
+                    child: Container(
+                      width: height * 0.8,
+                      height: height * 0.8,
+                      alignment: Alignment.center,
+                      child: SvgPicture.asset(
+                        "assets/icons/$icon.svg",
+                        width: height * 0.4,
+                        height: height * 0.4,
+                      ),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Converter.hexToColor("#F2F2F2")),
+                    ),
+                  ),
+                  count > 0 && titel == 36
+                      ? Container(
+                    margin: EdgeInsets.only(top: 3),
+                          alignment: Alignment.center,
+                          width: 15,
+                          height: 15,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.red),
+                            child: Text(
+                              count > 99 ? '+99' : count.toString(),
+                              style: TextStyle(fontSize: 7, color: Colors.white,fontWeight: FontWeight.w900 ),
+                              textAlign: TextAlign.center,),
+                            )
+                      : Container(),
+                ],
               ),
               Container(
                 width: 20,

@@ -21,7 +21,9 @@ class _NavBarState extends State<NavBar> {
   Color activeColor;
   int iSelectedIndex = 0;
   double homeIconSize;
+
   int countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
+
   @override
   void initState() {
     activeColor = Converter.hexToColor("#2094CD");
@@ -63,29 +65,16 @@ class _NavBarState extends State<NavBar> {
             children: [
               // Home
               createIcon("home", 43, () {
-                UserManager.currentUser("id").isNotEmpty
-                    ? setState(() {
-                        iSelectedIndex = 0;
-                      })
-                    : goLogin();
+                UserManager.currentUser("id").isNotEmpty ? setState(() {iSelectedIndex = 0;}) : goLogin();
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 0, isBig: true),
-              createIcon("services", 44, () {
-                setState(() {
-                  iSelectedIndex = 1;
-                });
+              createIcon("services", 44, () {setState(() {iSelectedIndex = 1;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 1),
-              createIcon("bell", 45, () {
-                setState(() {
-                  iSelectedIndex = 2;
-                });
+              createIcon("bell", 45, () {setState(() {iSelectedIndex = 2;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 2),
-              createIcon("menu", 46, () {
-                setState(() {
-                  iSelectedIndex = 3;
-                });
+              createIcon("menu", 46, () {setState(() {iSelectedIndex = 3;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 3),
             ],

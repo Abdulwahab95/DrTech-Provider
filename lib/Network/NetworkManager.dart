@@ -31,7 +31,7 @@ class NetworkManager {
       try {
         log('try');
         var jsonData = json.decode(responseBody);
-        log('try: $jsonData');
+        // log('try: $jsonData');
         try {
           // log('try2:');
           // log('try2_jsonData: $jsonData');
