@@ -286,7 +286,7 @@ class _WelcomeState extends State<Welcome> {
                     ? WebBrowser(Globals.getWebViewUrl(), '')
                     :
                 UserManager.currentUser("id").isNotEmpty
-                    ?  UserManager.currentUser("identity").isEmpty? JoinRequest() //
+                    ? UserManager.currentUser("identity").isEmpty? JoinRequest() //
                     : Globals.isOpenFromNotification? LiveChat(Globals.currentConversationId) : Home()
                     : Login())
     );

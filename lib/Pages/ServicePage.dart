@@ -213,143 +213,143 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                               ),
                             ),
                             Container(
-                              height: 10,
+                              height: 25,
                             ),
-                            Row(
-                              textDirection: LanguageManager.getTextDirection(),
-                              children: [
-                                Container(
-                                  width: 10,
-                                ),
-                                Container(
-                                  height: 36,
-                                  width: 160,
-                                  child: Row(
-                                      textDirection:
-                                          LanguageManager.getTextDirection(),
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.only(
-                                              left: 10, right: 10),
-                                          child: Icon(
-                                            FlutterIcons.tag_ant,
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                            size: 18,
-                                          ),
-                                        ),
-                                        Text(
-                                          LanguageManager.getText(141),
-                                          textDirection:
-                                              LanguageManager.getTextDirection(),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                            color:
-                                                Converter.hexToColor("#344F64"),
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 40,
-                                        )
-                                      ]),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    /*border: Border.all(
-                                          width: 1.6,
-                                          color: Converter.hexToColor("#344F64"))*/
-                                  ),
-                                ),
-                              ],
-                            ),
-                            data['offers'].length == 0
-                                ? Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.9,
-                                    margin: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.grey.withAlpha(50),
-                                            width: 1),
-                                        borderRadius: BorderRadius.circular(15)),
-                                    padding: EdgeInsets.all(25),
-                                    child: Text(
-                                      LanguageManager.getText(267),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                : Container(
-                                    child: Column(
-                                      textDirection:
-                                          LanguageManager.getTextDirection(),
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: (data['offers'] as List).map((e) {
-                                        return Container(
-                                          margin: EdgeInsets.all(15),
-                                          padding: EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                    color: Colors.black
-                                                        .withAlpha(15),
-                                                    blurRadius: 2,
-                                                    spreadRadius: 2)
-                                              ],
-                                              borderRadius:
-                                                  BorderRadius.circular(15)),
-                                          child: Column(
-                                            textDirection: LanguageManager
-                                                .getTextDirection(),
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                textDirection: LanguageManager
-                                                    .getTextDirection(),
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    e["price"].toString() +
-                                                        " " +
-                                                        data["unit"].toString(),
-                                                    textDirection: LanguageManager
-                                                        .getTextDirection(),
-                                                    style: TextStyle(
-                                                        color:
-                                                            Converter.hexToColor(
-                                                                "#2094CD"),
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  )
-                                                ],
-                                              ),
-                                              Text(
-                                                e["description"].toString(),
-                                                textDirection: LanguageManager
-                                                    .getTextDirection(),
-                                                style: TextStyle(
-                                                    color: Converter.hexToColor(
-                                                        "#727272"),
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.normal),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                            Container(
-                              height: 10,
-                            ),
+                            // Row(
+                            //   textDirection: LanguageManager.getTextDirection(),
+                            //   children: [
+                            //     Container(
+                            //       width: 10,
+                            //     ),
+                            //     Container(
+                            //       height: 36,
+                            //       width: 160,
+                            //       child: Row(
+                            //           textDirection:
+                            //               LanguageManager.getTextDirection(),
+                            //           mainAxisAlignment:
+                            //               MainAxisAlignment.spaceBetween,
+                            //           children: [
+                            //             Container(
+                            //               margin: EdgeInsets.only(
+                            //                   left: 10, right: 10),
+                            //               child: Icon(
+                            //                 FlutterIcons.tag_ant,
+                            //                 color:
+                            //                     Converter.hexToColor("#344F64"),
+                            //                 size: 18,
+                            //               ),
+                            //             ),
+                            //             Text(
+                            //               LanguageManager.getText(141),
+                            //               textDirection:
+                            //                   LanguageManager.getTextDirection(),
+                            //               textAlign: TextAlign.center,
+                            //               style: TextStyle(
+                            //                 fontWeight: FontWeight.w600,
+                            //                 fontSize: 16,
+                            //                 color:
+                            //                     Converter.hexToColor("#344F64"),
+                            //               ),
+                            //             ),
+                            //             Container(
+                            //               width: 40,
+                            //             )
+                            //           ]),
+                            //       decoration: BoxDecoration(
+                            //         borderRadius: BorderRadius.circular(15),
+                            //         /*border: Border.all(
+                            //               width: 1.6,
+                            //               color: Converter.hexToColor("#344F64"))*/
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+                            // data['offers'].length == 0
+                            //     ? Container(
+                            //         width:
+                            //             MediaQuery.of(context).size.width * 0.9,
+                            //         margin: EdgeInsets.all(10),
+                            //         decoration: BoxDecoration(
+                            //             border: Border.all(
+                            //                 color: Colors.grey.withAlpha(50),
+                            //                 width: 1),
+                            //             borderRadius: BorderRadius.circular(15)),
+                            //         padding: EdgeInsets.all(25),
+                            //         child: Text(
+                            //           LanguageManager.getText(267),
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       )
+                            //     : Container(
+                            //         child: Column(
+                            //           textDirection:
+                            //               LanguageManager.getTextDirection(),
+                            //           mainAxisSize: MainAxisSize.min,
+                            //           children: (data['offers'] as List).map((e) {
+                            //             return Container(
+                            //               margin: EdgeInsets.all(15),
+                            //               padding: EdgeInsets.all(10),
+                            //               decoration: BoxDecoration(
+                            //                   color: Colors.white,
+                            //                   boxShadow: [
+                            //                     BoxShadow(
+                            //                         color: Colors.black
+                            //                             .withAlpha(15),
+                            //                         blurRadius: 2,
+                            //                         spreadRadius: 2)
+                            //                   ],
+                            //                   borderRadius:
+                            //                       BorderRadius.circular(15)),
+                            //               child: Column(
+                            //                 textDirection: LanguageManager
+                            //                     .getTextDirection(),
+                            //                 crossAxisAlignment:
+                            //                     CrossAxisAlignment.start,
+                            //                 children: [
+                            //                   Row(
+                            //                     textDirection: LanguageManager
+                            //                         .getTextDirection(),
+                            //                     mainAxisAlignment:
+                            //                         MainAxisAlignment
+                            //                             .spaceBetween,
+                            //                     children: [
+                            //                       Text(
+                            //                         e["price"].toString() +
+                            //                             " " +
+                            //                             data["unit"].toString(),
+                            //                         textDirection: LanguageManager
+                            //                             .getTextDirection(),
+                            //                         style: TextStyle(
+                            //                             color:
+                            //                                 Converter.hexToColor(
+                            //                                     "#2094CD"),
+                            //                             fontSize: 16,
+                            //                             fontWeight:
+                            //                                 FontWeight.bold),
+                            //                       )
+                            //                     ],
+                            //                   ),
+                            //                   Text(
+                            //                     e["description"].toString(),
+                            //                     textDirection: LanguageManager
+                            //                         .getTextDirection(),
+                            //                     style: TextStyle(
+                            //                         color: Converter.hexToColor(
+                            //                             "#727272"),
+                            //                         fontSize: 16,
+                            //                         fontWeight:
+                            //                             FontWeight.normal),
+                            //                   ),
+                            //                 ],
+                            //               ),
+                            //             );
+                            //           }).toList(),
+                            //         ),
+                            //       ),
+                            // Container(
+                            //   height: 10,
+                            // ),
                             Container(
                                 height: 1,
                                 margin: EdgeInsets.only(top: 2, bottom: 2),
@@ -510,6 +510,7 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                 )
               ],
             ),
+            Container(height: 10,),
             Text(
               item['comment'].toString(),
               textDirection: LanguageManager.getTextDirection(),

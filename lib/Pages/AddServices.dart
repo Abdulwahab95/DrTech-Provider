@@ -9,6 +9,7 @@ import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -25,11 +26,13 @@ class AddServices extends StatefulWidget {
 class _AddServicesState extends State<AddServices>
     with TickerProviderStateMixin {
   Map<String, String> body = {}, selectedTexts = {}, errors = {};
-  Map selectOptions = {}, selectSubcategoriesOptions = {},  config, data;
+  Map selectOptions = {}, selectSubcategoriesOptions = {}, selectSub2Options = {},
+      selectSub3Options = {},selectSub4Options = {}, config, data;
   List images = [], removedImagesUpdate = [], removedOffers = [];
   Map<String, TextEditingController> controllers = {};
   Map<String, TabController> tabControllers = {};
   bool isLoading = false, isHas3Child = false;
+  bool showSelectCountry = false, showSelectCity = false, showSelectStreet = false;
   List<Map> selectedFiles = [], offers = [];
 
   @override
@@ -163,19 +166,74 @@ class _AddServicesState extends State<AddServices>
     // }, cashable: true);
   }
 
+
+
   void initBodyData() {
+    print('here_data: $data');
     offers = [];
     selectedFiles = [];
 
-    // body["service_id"] = data['service_id']??'';
-    // body["service_categories_id"] = data['service_categories_id']??'';
-    // body["service_subcategories_id"] = data['service_subcategories_id']??'';
-    //
-    // selectOptions["categories"] = v['categories'];
-    // selectedTexts["service"] = v['name'];
-    // selectSubcategoriesOptions["subcategories"] = v['subcategories'];
-    // selectedTexts['categories'] = v['name'];
-    // selectedTexts["service_subcategories"] = v['name'];
+    if(data['service_id'] != null) {
+      body["service_id"] = data['service_id'].toString();
+      selectedTexts["service_id"] = getNameFromId(config['service'], data['service_id'].toString());
+      selectOptions["categories"] = config['service'][getIndexFromId(config['service'],data['service_id'].toString())]['categories'];
+      List CCS= (config['service'][getIndexFromId(config['service'],data['service_id'].toString())]['is_country_city_street'] as String).split('-').toList();
+      if(CCS[0] == '1') {
+        showSelectCountry = true;
+        selectedTexts["country_id"] =  getNameFromId(config['countries'], data['country_id'].toString());
+        body["country_id"] = data['country_id'].toString();
+        selectOptions["cities"] = config['countries'][getIndexFromId(config['countries'],data['country_id'].toString())]['cities'];
+      } else {
+        (config['countries'] as List<dynamic>).forEach((element) {
+          if((element as Map)['id'].toString() == UserManager.currentUser('country_id')) {
+            selectOptions["cities"] = element['cities'];
+          }
+        });
+      }
+      if(CCS[1] == '1') {
+        showSelectCity = true;
+        selectedTexts["city_id"] = getNameFromId(selectOptions["cities"], data['city_id'].toString());
+        body["city_id"] = data['city_id'].toString();
+        selectOptions["street"] = selectOptions["cities"][getIndexFromId(selectOptions["cities"],data['city_id'].toString())]['street'];
+      }
+      if(CCS[2] == '1') {
+        showSelectStreet = true;
+        selectedTexts["street_id"] = getNameFromId(selectOptions["street"], data['street_id'].toString());
+        body["street_id"] = data['street_id'].toString();
+      }
+
+    }
+
+    if(data['service_categories_id'] != null) {
+      body["service_categories_id"] = data['service_categories_id'].toString();
+      selectedTexts["service_categories_id"] = getNameFromId(selectOptions["categories"], data['service_categories_id'].toString());
+      selectSubcategoriesOptions["subcategories"] = selectOptions["categories"][getIndexFromId(selectOptions["categories"],data['service_categories_id'].toString())]['subcategories'];
+    }
+
+    if(data['service_subcategories_id'] != null) {
+      body["service_subcategories_id"] = data['service_subcategories_id'].toString();
+      selectedTexts['service_subcategories_id'] = getNameFromId(selectSubcategoriesOptions["subcategories"], data['service_subcategories_id'].toString());
+      selectSub2Options["service_sub_2"] = selectSubcategoriesOptions["subcategories"][getIndexFromId(selectSubcategoriesOptions["subcategories"],data['service_subcategories_id'].toString())]['service_sub_2'];
+    }
+
+    if(data['sub2_id'] != null) {
+      body["sub2_id"] = data['sub2_id'].toString();
+      selectedTexts['sub2_id'] = getNameFromId(selectSub2Options["service_sub_2"], data['sub2_id'].toString());
+      selectSub3Options["service_sub_3"] = selectSub2Options["service_sub_2"][getIndexFromId(selectSub2Options["service_sub_2"],data['sub2_id'].toString())]['service_sub_3'];
+    }
+
+    if(data['sub3_id'] != null) {
+      body["sub3_id"] = data['sub3_id'].toString();
+      selectedTexts['sub3_id'] = getNameFromId(selectSub3Options["service_sub_3"], data['sub3_id'].toString());
+      selectSub4Options["service_sub_4"] = selectSub3Options["service_sub_3"][getIndexFromId(selectSub3Options["service_sub_3"],data['sub3_id'].toString())]['service_sub_4'];
+    }
+
+    if(data['sub4_id'] != null) {
+      body["sub4_id"] = data['sub4_id'].toString();
+      selectedTexts['sub4_id'] = getNameFromId(selectSub4Options["service_sub_4"], data['sub4_id'].toString());
+    }
+
+    print('here_body: $body');
 
     body['title'] = data["name"];
     body['description'] = data["about"];
@@ -188,13 +246,11 @@ class _AddServicesState extends State<AddServices>
       selectedFiles.add({"id": '1', "name": Globals.correctLink(item)});
     }
 
-    // for (var item in data['images']) {
-    //   selectedFiles.add({"id": item['id'], "name": item['name']});
-    // }
-
     controllers['title'] = TextEditingController(text: body['title'] ?? "");
     controllers['description'] = TextEditingController(text: body['description'] ?? "");
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -248,41 +304,130 @@ class _AddServicesState extends State<AddServices>
 
   List<Widget> getFormInputs() {
     List<Widget> items = [];
-    items.add(createInput("title", 255, maxInput: 60, maxLines: 2));
+    // items.add(createInput("title", 255, maxInput: 60, maxLines: 2));
 
-    if (widget.data == null)
-      items.add(createSelectInput("service", 283, config['service'], onSelected: (v) {
+    if (widget.data == null || body['service_id'] != null)
+      items.add(createSelectInput("service_id", 283, config['service'], onSelected: (v) {
       setState(() {
         selectOptions["categories"] = v['categories'];
-        selectedTexts["service"] = v['name'];
+
+        selectedTexts["service_id"] = v['name'];
         body["service_id"] = v['id'].toString();
 
-        selectedTexts['service_categories'] = null;
+        selectedTexts['service_categories_id'] = null;
         body["service_categories_id"] = null;
+
+        List CCS= (v['is_country_city_street'] as String).split('-').toList();
+        if(CCS[0] == '1') showSelectCountry = true; else {selectedTexts["country_id"] = null; body["country_id"] = null; showSelectCountry = false;}
+        if(CCS[1] == '1') showSelectCity    = true; else {selectedTexts["city_id"]    = null; body["city_id"]    = null; showSelectCity    = false;}
+        if(CCS[2] == '1') showSelectStreet  = true; else {selectedTexts["street_id"]  = null; body["street_id"]  = null; showSelectStreet  = false;}
+
+        selectedTexts["country_id"] = null;
+        body["country_id"]          = null;
+        selectedTexts['city_id']    = null;
+        body["city_id"]             = null;
+        selectedTexts['street_id']  = null;
+        body["street_id"]           = null;
+        selectOptions["cities"]     = null;
+        selectOptions["street"]     = null;
+
+        if(selectSubcategoriesOptions.containsKey('subcategories')) selectSubcategoriesOptions.remove('subcategories');
+        if(selectSub2Options.containsKey('service_sub_2')) selectSub2Options.remove('service_sub_2');
+        if(selectSub3Options.containsKey('service_sub_3')) selectSub3Options.remove('service_sub_3');
+        if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
+
       });
     }));
 
-    if (widget.data == null)
-    items.add(createSelectInput("categories", 256, selectOptions["categories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+    if (widget.data == null || data['service_categories_id'] != null)
+    items.add(createSelectInput("service_categories_id", 256, selectOptions["categories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
       setState(() {
         selectSubcategoriesOptions["subcategories"] = v['subcategories'];
-        selectedTexts['categories'] = v['name'];
+
+        selectedTexts['service_categories_id'] = v['name'];
         body["service_categories_id"] = v['id'].toString();
 
-        selectedTexts["service_subcategories"] = null;
+        body['title'] = v['name'];
+
+        selectedTexts["service_subcategories_id"] = null;
         body["service_subcategories_id"] = null;
+        body["sub2_id"] = null;
+        body["sub3_id"] = null;
+        body["sub4_id"] = null;
+
+        if(selectSub2Options.containsKey('service_sub_2')) selectSub2Options.remove('service_sub_2');
+        if(selectSub3Options.containsKey('service_sub_3')) selectSub3Options.remove('service_sub_3');
+        if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
+        //
+        // items.removeWhere((element) {
+        //   return (!(items.indexOf(element) == 0 || items.indexOf(element) == 1)) ? true :  false;
+        // });
       });
     }));
 
-    if (widget.data == null)
+   // if (widget.data == null || data['service_subcategories_id'] != null)
     items.add(selectSubcategoriesOptions.containsKey("subcategories") && selectSubcategoriesOptions["subcategories"].length > 0 ?
-        createSelectInput("service_subcategories", 256, selectSubcategoriesOptions["subcategories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+        createSelectInput("service_subcategories_id", 256, selectSubcategoriesOptions["subcategories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
             setState(() {
-              selectedTexts["service_subcategories"] = v['name'];
+              selectedTexts["service_subcategories_id"] = v['name'];
               body["service_subcategories_id"] = v['id'].toString();
+
+              selectSub2Options["service_sub_2"] = v['service_sub_2'];
+
+              selectedTexts["sub2_id"] = null;
+              body["sub2_id"] = null;
+              body["sub3_id"] = null;
+              body["sub4_id"] = null;
+
+
+              if(selectSub3Options.containsKey('service_sub_3')) selectSub3Options.remove('service_sub_3');
+              if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
             });
           })
         : Container());
+
+    //if (widget.data == null || data['sub2_id'] != null)
+      items.add(selectSub2Options.containsKey("service_sub_2") && selectSub2Options["service_sub_2"].length > 0 ?
+      createSelectInput("sub2_id", 256, selectSub2Options["service_sub_2"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+        setState(() {
+          selectedTexts["sub2_id"] = v['name'];
+          body["sub2_id"] = v['id'].toString();
+
+          selectSub3Options["service_sub_3"] = v['service_sub_3'];
+
+          selectedTexts["sub3_id"] = null;
+          body["sub3_id"] = null;
+          body["sub4_id"] = null;
+
+          if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
+        });
+      })
+          : Container());
+
+    //if (widget.data == null || data['sub3_id'] != null)
+      items.add(selectSub3Options.containsKey("service_sub_3") && selectSub3Options["service_sub_3"].length > 0 ?
+      createSelectInput("sub3_id", 256, selectSub3Options["service_sub_3"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+        setState(() {
+          selectedTexts["sub3_id"] = v['name'];
+          body["sub3_id"] = v['id'].toString();
+
+          selectSub4Options["service_sub_4"] = v['service_sub_4'];
+
+          selectedTexts["sub4_id"] = null;
+          body["sub4_id"] = null;
+        });
+      })
+          : Container());
+
+    //if (widget.data == null || data['sub4_id'] != null)
+      items.add(selectSub4Options.containsKey("service_sub_4") && selectSub4Options["service_sub_4"].length > 0 ?
+      createSelectInput("sub4_id", 256, selectSub4Options["service_sub_4"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+        setState(() {
+          selectedTexts["sub4_id"] = v['name'];
+          body["sub4_id"] = v['id'].toString();
+        });
+      })
+          : Container());
 
     items.add(createInput("description", 258, maxInput: 500, maxLines: 4));
 
@@ -300,113 +445,167 @@ class _AddServicesState extends State<AddServices>
     ));
     items.add(createImagesPicker());
 
-    items.add(InkWell(
-      onTap: () {
-        Alert.show(context, getAddOfferForm(), type: AlertType.WIDGET);
-      },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    // items.add(InkWell(
+    //   onTap: () {
+    //     Alert.show(context, getAddOfferForm(), type: AlertType.WIDGET);
+    //   },
+    //   child: Row(
+    //     crossAxisAlignment: CrossAxisAlignment.center,
+    //     textDirection: LanguageManager.getTextDirection(),
+    //     children: [
+    //       Container(
+    //         margin: EdgeInsets.only(right: 10, left: 10),
+    //         width: 20,
+    //         height: 20,
+    //         decoration: BoxDecoration(
+    //             color: Converter.hexToColor("#344F64"),
+    //             borderRadius: BorderRadius.circular(10)),
+    //         child: Icon(
+    //           Icons.add,
+    //           color: Colors.white,
+    //           size: 20,
+    //         ),
+    //       ),
+    //       Container(
+    //         child: Text(
+    //           LanguageManager.getText(260),
+    //           textDirection: LanguageManager.getTextDirection(),
+    //           style: TextStyle(
+    //               color: Converter.hexToColor("#2094CD"),
+    //               fontSize: 16,
+    //               fontWeight: FontWeight.bold),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // ));
+    // items.add(offers.length == 0
+    //     ? Container(
+    //         margin: EdgeInsets.all(10),
+    //         decoration: BoxDecoration(
+    //             border: Border.all(color: Colors.grey.withAlpha(50), width: 1),
+    //             borderRadius: BorderRadius.circular(15)),
+    //         padding: EdgeInsets.all(25),
+    //         child: Text(
+    //           LanguageManager.getText(263),
+    //           textAlign: TextAlign.center,
+    //         ),
+    //       )
+    //     : Container(
+    //         child: Column(
+    //           textDirection: LanguageManager.getTextDirection(),
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: offers.map((e) {
+    //             return Container(
+    //               margin: EdgeInsets.all(5),
+    //               padding: EdgeInsets.all(10),
+    //               decoration: BoxDecoration(
+    //                   color: Colors.white,
+    //                   boxShadow: [
+    //                     BoxShadow(
+    //                         color: Colors.black.withAlpha(15),
+    //                         blurRadius: 2,
+    //                         spreadRadius: 2)
+    //                   ],
+    //                   borderRadius: BorderRadius.circular(15)),
+    //               child: Column(
+    //                 textDirection: LanguageManager.getTextDirection(),
+    //                 crossAxisAlignment: CrossAxisAlignment.start,
+    //                 children: [
+    //                   Row(
+    //                     textDirection: LanguageManager.getTextDirection(),
+    //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                     children: [
+    //                       Text(
+    //                         e["price"].toString() + " " + UserManager.currentUser("unit"),
+    //                         textDirection: LanguageManager.getTextDirection(),
+    //                         style: TextStyle(
+    //                             color: Converter.hexToColor("#2094CD"),
+    //                             fontSize: 16,
+    //                             fontWeight: FontWeight.bold),
+    //                       ),
+    //                       InkWell(
+    //                         onTap: () {
+    //                           setState(() {
+    //                             offers.remove(e);
+    //                           });
+    //                         },
+    //                         child: Icon(
+    //                           Icons.delete,
+    //                           color: Colors.red,
+    //                           size: 20,
+    //                         ),
+    //                       )
+    //                     ],
+    //                   ),
+    //                   Text(
+    //                     e["details"].toString(),
+    //                     textDirection: LanguageManager.getTextDirection(),
+    //                     style: TextStyle(
+    //                         color: Converter.hexToColor("#727272"),
+    //                         fontSize: 16,
+    //                         fontWeight: FontWeight.normal),
+    //                   ),
+    //                 ],
+    //               ),
+    //             );
+    //           }).toList(),
+    //         ),
+    //       ));
+
+    if (showSelectCountry) {
+      items.add(createSelectInput("country_id", 312, config['countries'], onSelected: (v) {
+        setState(() {
+          selectOptions["cities"] = v['cities'];
+
+          selectedTexts["country_id"] = v['name'];
+          body["country_id"] = v['id'].toString();
+
+          selectedTexts['city_id'] = null;
+          body["city_id"] = null;
+          body["street_id"] = null;
+        });
+      }));
+    } else if(showSelectCity){
+      (config['countries'] as List<dynamic>).forEach((element) {
+        if((element as Map)['id'].toString() == UserManager.currentUser('country_id')) {
+          print('here_element: $element');
+          selectOptions["cities"] = element['cities'];
+        }
+      });
+
+    }
+
+    if ((widget.data == null  || data['city_id'] != null) && showSelectCity)
+      items.add(Row(
         textDirection: LanguageManager.getTextDirection(),
         children: [
-          Container(
-            margin: EdgeInsets.only(right: 10, left: 10),
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-                color: Converter.hexToColor("#344F64"),
-                borderRadius: BorderRadius.circular(10)),
-            child: Icon(
-              Icons.add,
-              color: Colors.white,
-              size: 20,
-            ),
+          Expanded(
+            child: createSelectInput("city_id", 107, selectOptions["cities"], onEmptyMessage: LanguageManager.getText(311), onSelected: (v) {
+              setState(() {
+                selectOptions["street"] = v['street'];
+
+                selectedTexts["city_id"] = v['name'];
+                body["city_id"] = v['id'].toString();
+
+                selectedTexts['street_id'] = null;
+                body["street_id"] = null;
+              });
+            }),
           ),
-          Container(
-            child: Text(
-              LanguageManager.getText(260),
-              textDirection: LanguageManager.getTextDirection(),
-              style: TextStyle(
-                  color: Converter.hexToColor("#2094CD"),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
+          showSelectStreet?
+          Expanded(
+            child: createSelectInput("street_id", 108, selectOptions["street"], onEmptyMessage: LanguageManager.getText(113),onSelected: (v) {
+              setState(() {
+                selectedTexts["street_id"] = v['name'];
+                body["street_id"] = v['id'].toString();
+              });
+            }),
+          ):Container()
         ],
-      ),
-    ));
-    items.add(offers.length == 0
-        ? Container(
-            margin: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.withAlpha(50), width: 1),
-                borderRadius: BorderRadius.circular(15)),
-            padding: EdgeInsets.all(25),
-            child: Text(
-              LanguageManager.getText(263),
-              textAlign: TextAlign.center,
-            ),
-          )
-        : Container(
-            child: Column(
-              textDirection: LanguageManager.getTextDirection(),
-              mainAxisSize: MainAxisSize.min,
-              children: offers.map((e) {
-                return Container(
-                  margin: EdgeInsets.all(5),
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withAlpha(15),
-                            blurRadius: 2,
-                            spreadRadius: 2)
-                      ],
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Column(
-                    textDirection: LanguageManager.getTextDirection(),
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        textDirection: LanguageManager.getTextDirection(),
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            e["price"].toString() + " " + config["unit"],
-                            textDirection: LanguageManager.getTextDirection(),
-                            style: TextStyle(
-                                color: Converter.hexToColor("#2094CD"),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                offers.remove(e);
-                              });
-                            },
-                            child: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                              size: 20,
-                            ),
-                          )
-                        ],
-                      ),
-                      Text(
-                        e["details"].toString(),
-                        textDirection: LanguageManager.getTextDirection(),
-                        style: TextStyle(
-                            color: Converter.hexToColor("#727272"),
-                            fontSize: 16,
-                            fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ));
+      ));
+
+    items.add(Container(height: 10,));
     items.add(InkWell(
       onTap: widget.data == null ? send : update,
       child: Container(
@@ -765,10 +964,33 @@ class _AddServicesState extends State<AddServices>
   }
 
   void send() {
+
     setState(() { errors = {}; });
-	
-    List validateKeys = ["title", "service_id","service_categories_id", "description"]; // ,"service"
-	
+    print('here_body: selectSubcategoriesOptions: ${selectSubcategoriesOptions.isNotEmpty}, $body');
+    List validateKeys = ["service_id","service_categories_id", "description"]; // ,"service"
+
+    if(showSelectCountry == true)
+      validateKeys.add('country_id');
+
+    if(showSelectCity == true)
+      validateKeys.add('city_id');
+
+    if(showSelectStreet == true)
+      validateKeys.add('street_id');
+
+    if(selectSubcategoriesOptions.isNotEmpty && selectSubcategoriesOptions["subcategories"].length > 0)
+      validateKeys.add('service_subcategories_id');
+
+    if(selectSub2Options.isNotEmpty && selectSub2Options["service_sub_2"].length > 0)
+      validateKeys.add('sub2_id');
+
+    if(selectSub3Options.isNotEmpty && selectSub3Options["service_sub_3"].length > 0)
+      validateKeys.add('sub3_id');
+
+    if(selectSub4Options.isNotEmpty && selectSub4Options["service_sub_4"].length > 0)
+      validateKeys.add('sub4_id');
+
+
     for (var key in validateKeys) {
       if (body[key] == null || body[key].isEmpty)
         setState(() {
@@ -782,6 +1004,11 @@ class _AddServicesState extends State<AddServices>
 
     print('here_errors: $errors');
     if (errors.keys.length > 0) return;
+
+    var isCountryCityStreet = config['service'][getIndexFromId(config['service'],body['service_id'].toString())]['is_country_city_street'];
+    if(isCountryCityStreet.toString().contains('1') && ((body.containsKey('country_id') && body["country_id"] == null) || (!body.containsKey('country_id')))){
+      body["country_id"] = UserManager.currentUser('country_id');
+    }
 
     List files = [];
 
@@ -806,7 +1033,12 @@ class _AddServicesState extends State<AddServices>
     body['service_subcategories_id'] == null? body.remove('service_subcategories_id') : null;
 
     print('here_body: $body');
-    // Alert.startLoading(context);
+
+    body.removeWhere((key, value) {
+      return value == null ? true :  false;
+    });
+
+    Alert.startLoading(context);
     NetworkManager().fileUpload(Globals.baseUrl + "provider/service/create", files, (p) {},  (r) { // services/add
       Alert.endLoading();
       if (r['state'] == true) {
@@ -815,12 +1047,35 @@ class _AddServicesState extends State<AddServices>
         Alert.show(context, Converter.getRealText(r["message"]));
       }
     }, body: body);
+
   }
 
   void update() {
+
     setState(() { errors = {}; });
 
-    List validateKeys = ["title"  , "description"]; // ,"service"
+    List validateKeys = ["service_id","service_categories_id", "description"]; // ,"service"
+
+    if(showSelectCountry == true)
+      validateKeys.add('country_id');
+
+    if(showSelectCity == true)
+      validateKeys.add('city_id');
+
+    if(showSelectStreet == true)
+      validateKeys.add('street_id');
+
+    if(selectSubcategoriesOptions.isNotEmpty && selectSubcategoriesOptions["subcategories"].length > 0)
+      validateKeys.add('service_subcategories_id');
+
+    if(selectSub2Options.isNotEmpty && selectSub2Options["service_sub_2"].length > 0)
+      validateKeys.add('sub2_id');
+
+    if(selectSub3Options.isNotEmpty && selectSub3Options["service_sub_3"].length > 0)
+      validateKeys.add('sub3_id');
+
+    if(selectSub4Options.isNotEmpty && selectSub4Options["service_sub_4"].length > 0)
+      validateKeys.add('sub4_id');
 
     for (var key in validateKeys) {
       if (body[key] == null || body[key].isEmpty)
@@ -835,6 +1090,11 @@ class _AddServicesState extends State<AddServices>
 
     print('here_errors: $errors');
     if (errors.keys.length > 0) return;
+
+    var isCountryCityStreet = config['service'][getIndexFromId(config['service'],body['service_id'].toString())]['is_country_city_street'];
+    if(isCountryCityStreet.toString().contains('1') && ((body.containsKey('country_id') && body["country_id"] == null) || (!body.containsKey('country_id')))){
+      body["country_id"] = UserManager.currentUser('country_id');
+    }
 
     List files = [];
 
@@ -855,9 +1115,16 @@ class _AddServicesState extends State<AddServices>
 
     body['offers'] = jsonEncode(offers);
     body['removed_images'] = jsonEncode(removedImagesUpdate);
-    // if (widget.id != null) {
-    //   body['id'] = widget.id.toString();
-    // }
+
+    body.forEach((key, value) {
+      if(value == null)
+        body[key] = value.toString().toUpperCase();
+    });
+
+    // body.removeWhere((key, value) {
+    //   return value == null ? true :  false;
+    // });
+
     Alert.startLoading(context);
     NetworkManager().fileUpload(Globals.baseUrl + "provider/service/update/${widget.data['id']}", files, (p) {},   (r) { // services/add
       Alert.endLoading();
@@ -868,4 +1135,28 @@ class _AddServicesState extends State<AddServices>
       }
     }, body: body);
   }
+
+  getNameFromId(List config, String id) {
+    var name = '';
+    config.forEach((element) {
+      if((element as Map)['id'].toString() == id){
+        name =  (element as Map)['name'];
+        return name;
+      }
+    });
+    return name;
+  }
+
+  getIndexFromId(List config, String id) {
+    var index = 0, i = 0;
+    config.forEach((element) {
+      if((element as Map)['id'].toString() == id){
+        index =  i;
+        return index;
+      }
+      i++;
+    });
+    return index;
+  }
+
 }

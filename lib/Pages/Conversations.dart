@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
@@ -6,7 +8,9 @@ import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Components/Recycler.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
+import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +28,7 @@ class _ConversationsState extends State<Conversations> {
   Map<int, List> data = {};
   int page = 0;
   bool isLoading;
+  var responseBody;
 
   @override
   void initState() {
@@ -39,6 +44,7 @@ class _ConversationsState extends State<Conversations> {
       setState(() { isLoading = false; });
 
       if (r['state'] == true) {
+        responseBody = r;
         setState(() {
           // page++;
           data[page] = r['data'];// data[r['page']] = r['data'];
@@ -100,7 +106,7 @@ class _ConversationsState extends State<Conversations> {
     List<Widget> items = [];
     for (var page in data.keys) {
       for (var item in data[page]) {
-        items.add(getConversationItem(item));
+        items.add(getConversationItem(item, items.length));
       }
     }
 
@@ -124,9 +130,16 @@ class _ConversationsState extends State<Conversations> {
     );
   }
 
-  Widget getConversationItem(item) {
+  Widget getConversationItem(item, int length) {
     return InkWell(
       onTap: () {
+        if (UserManager.currentUser("chat_not_seen").isNotEmpty && item['count_not_seen'] != null )
+            UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) - item['count_not_seen']));
+        Globals.updateNotificationCount();
+        item['count_not_seen'] = 0;
+        setState(() {});
+        responseBody['data'][length] = item;
+        DatabaseManager.save(Globals.baseUrl + "provider/convertations", jsonEncode(responseBody));
         Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["user_id"].toString())));
       },
       child: Container(
@@ -177,6 +190,18 @@ class _ConversationsState extends State<Conversations> {
                       )
               ],
             )),
+            item['count_not_seen'] != null && item['count_not_seen'] > 0 ?
+            Container(
+              margin: EdgeInsets.only(top: 4, left: 5, right: 5),
+              alignment: Alignment.center,
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.blue),
+              child: Text(
+                  item['count_not_seen'] > 99 ? '99+' : item['count_not_seen'].toString(),
+                  style: TextStyle(fontSize: 10, color: Colors.white,fontWeight: FontWeight.w900 ),
+                  textAlign: TextAlign.center),
+            ): Container(),
             Container(
               child: Icon(
                 LanguageManager.getDirection()

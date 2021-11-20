@@ -19,15 +19,21 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
   int iSelectedIndex = 0;
   double homeIconSize;
   int countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
+  int countChatNotSeen = UserManager.currentUser('chat_not_seen').isNotEmpty? int.parse(UserManager.currentUser('chat_not_seen')) : 0;
   @override
   void initState() {
     activeColor = Converter.hexToColor("#2094CD");
     if(widget.page != null) iSelectedIndex = widget.page;
     Globals.updateNotificationCount = ()
     {
+      print('here_not_seen: $mounted');
+
       if(mounted)
         setState(() {
+          print('here_not_seen: $countNotSeen, ${UserManager.currentUser('not_seen')}');
           countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
+          countChatNotSeen = UserManager.currentUser('chat_not_seen').isNotEmpty? int.parse(UserManager.currentUser('chat_not_seen')) : 0;
+          print('here_not_seen: $countNotSeen, ${UserManager.currentUser('not_seen')}');
         });
     };
     super.initState();
@@ -66,15 +72,15 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
 
               createIcon("chat", 250, () { setState(() { iSelectedIndex = 1; });
                 widget.onUpdate(iSelectedIndex);
-              }, iSelectedIndex == 1),
+              }, iSelectedIndex == 1, count: countChatNotSeen),
 
               createIcon("checklist", 35, () { setState(() { iSelectedIndex = 2; });
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 2),
 
-              createIcon("bell", 45, () { setState(() { iSelectedIndex = 3; });
+              createIcon("bell", 45, () {print('here_countNotSeen: $countNotSeen'); setState(() { iSelectedIndex = 3; });
                 widget.onUpdate(iSelectedIndex);
-              }, iSelectedIndex == 3),
+              }, iSelectedIndex == 3, count: countNotSeen),
 
               createIcon("menu", 46, () { setState(() { iSelectedIndex = 4; });
                 widget.onUpdate(iSelectedIndex);
@@ -86,7 +92,7 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
     );
   }
 
-  Widget createIcon(icon, text, onTap, isActive, {isBig = false}) {
+  Widget createIcon(icon, text, onTap, isActive, {isBig = false, count = 0}) {
     if (!isBig)
       return InkWell(
           onTap: onTap,
@@ -95,22 +101,22 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
               alignment: Alignment.topRight,
               children: [
                 Container(
-                  padding: text == 45? EdgeInsets.only(top: 2): EdgeInsets.zero,
-                    width: homeIconSize * (text != 45? 0.15: 0.20), // 20.2
-                    height: homeIconSize * (text != 45? 0.15: 0.16), // 17.7
+                  padding: count >0 ? EdgeInsets.only(top: 2): EdgeInsets.zero,
+                    width: homeIconSize * (count == 0? 0.15: 0.20), // 20.2
+                    height: homeIconSize * (count == 0? 0.15: 0.16), // 17.7
                     child: SvgPicture.asset(
                       "assets/icons/$icon.svg",
                       color: isActive ? activeColor : Colors.grey,
                       fit: BoxFit.contain,
                     )),
-                text == 45 && countNotSeen > 0
+                count > 0
                 ? Container(
                   alignment: Alignment.center,
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.red),
                   child: Text(
-                    countNotSeen > 99 ? '99+' : countNotSeen.toString(),
+                    count > 99 ? '99+' : count.toString(),
                     style: TextStyle(fontSize: 6, color: Colors.white,fontWeight: FontWeight.w900 ),
                   textAlign: TextAlign.center,),
                 )

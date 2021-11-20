@@ -20,14 +20,14 @@ class Globals {
   static var urlServerGlobal = "https://drtech.takiddine.co";
   static String authoKey = "Authorization"; // x-autho
   static String baseUrl = isLocal ? "$urlServerLocal/api/" : "$urlServerGlobal/api/";
-  static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal/"; // https://server.drtechapp.com/
+  static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/
   static String shareUrl = "https://share.drtechapp.com/";
   static String appFont = "Cario";
   static SharedPreferences sharedPreferences;
   static dynamic data = [];
   // Callbacks
   static Function updateInCartCount;
-  static Function updateNotificationCount = (){};
+  static Function updateNotificationCount = (){print('here_not_seen');};
   static var settings;
   // Chat + Notification
   static String currentConversationId = '';

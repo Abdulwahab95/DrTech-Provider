@@ -66,7 +66,10 @@ class _JoinRequestState extends State<JoinRequest> {
                     textDirection: LanguageManager.getTextDirection(),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      InkWell(onTap: () {Navigator.pop(context);}, child: Icon(
+                      InkWell(
+                          onTap: () {
+                            //Navigator.pop(context);
+                            }, child: Icon(
                             LanguageManager.getDirection()
                                 ? FlutterIcons.chevron_right_fea
                                 : FlutterIcons.chevron_left_fea,
@@ -80,7 +83,8 @@ class _JoinRequestState extends State<JoinRequest> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold),
                       ),
-                      NotificationIcon(),
+                      Container()
+                      // NotificationIcon(),
                     ],
                   ))),
           Expanded(child: getFormContent()) //          Expanded(child: isLoading ? Center(child: CustomLoading()) : getFormContent()) // -------------

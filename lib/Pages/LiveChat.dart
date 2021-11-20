@@ -47,7 +47,8 @@ class _LiveChatState extends State<LiveChat> {
       visibleoptions = false,
       isOpenPicks = false,
       isTyping = false,
-      typingNotifyer = false;
+      typingNotifyer = false,
+      allowEmptyOffer = true;
   Timer timer;
   Widget ui;
   int page = 0;
@@ -58,6 +59,7 @@ class _LiveChatState extends State<LiveChat> {
   void initState() {
     LiveChat.callback = onReciveNotic;
     loadConfig();
+    print('here_seen_3');
     load();
     super.initState();
     print('heree: reminderScreenNavigatorKey ${LocalNotifications.reminderScreenNavigatorKey.currentState}');
@@ -148,6 +150,7 @@ class _LiveChatState extends State<LiveChat> {
       isTyping = false;
       data.values.last.add(paylaod);
       scrollDown();
+      print('here_seen_1');
       sendSeenFlag();// sendSeenFlag(paylaod['id'].toString());
     });
   }
@@ -170,16 +173,19 @@ class _LiveChatState extends State<LiveChat> {
             data['0'] = r['data']['convertation']; // r['page']
             user = r['data']['with'];
           });
+          print('here_seen_2');
           sendSeenFlag();
         } else if (r['message'] != null) {
           Navigator.pop(context);
         } else {
           setState(() {
+            print('here_seen_4');
             ui = BrokenPage(load);
           });
         }
       } catch (e) {
         setState(() {
+          print('here_seen_5');
           ui = BrokenPage(load);
         });
       }
@@ -470,7 +476,7 @@ class _LiveChatState extends State<LiveChat> {
                           ),
                         ),
                         InkWell(
-                                onTap: addOffer,
+                                onTap: (){print('here_on_tap:'); allowEmptyOffer = true; addOffer();},
                                 child: Container(
                                   child: Column(
                                     children: [
@@ -1609,8 +1615,8 @@ class _LiveChatState extends State<LiveChat> {
     Map<String, String> body = {};
     // body['message_id'] = id;
     // body['id'] = widget.id.toString();
-    body['provider_id'] = widget.id.toString();
-    body['user_id'] = UserManager.currentUser("id").toString();
+    body['provider_id'] = UserManager.currentUser("id").toString();
+    body['user_id'] = widget.id.toString();
     NetworkManager.httpPost(Globals.baseUrl + "convertation/seen",  context, (r) {}, body: body); // chat/seen
   }
 
@@ -1740,7 +1746,7 @@ class _LiveChatState extends State<LiveChat> {
     offer['user_id'] = widget.id.toString();
     offer['provider_id'] = UserManager.currentUser("id").toString();
     offer['send_by'] = UserManager.currentUser("id").toString();
-    offer['provider_service_id'] = '1';
+    //offer['provider_service_id'] = '1';
 
     NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) {// chat/offer
       if (r['state'] == true) {
@@ -1823,7 +1829,10 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   void addOffer() {
-    offer = {};
+    if(allowEmptyOffer) {
+      selectedTexts["service"] = null;
+      offer = {};
+    }
     setState(() {
       isOpenPicks = false;
     });
@@ -1868,6 +1877,7 @@ class _LiveChatState extends State<LiveChat> {
               print('here_service: $v');
 
               setState(() {
+                allowEmptyOffer = false;
                 // Alert.alertSetState();
                 selectedTexts["service"] = v['title'];
                 offer['provider_service_id'] = v['id'].toString();
@@ -1884,7 +1894,7 @@ class _LiveChatState extends State<LiveChat> {
 
             }): Container(),
             Container(
-              margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+              margin: EdgeInsets.only(left: 20, right: 20, top: 7, bottom: 7),
               padding: EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
@@ -1896,7 +1906,7 @@ class _LiveChatState extends State<LiveChat> {
                 },
                 textDirection: LanguageManager.getTextDirection(),
                 keyboardType: TextInputType.multiline,
-                maxLines: 4,
+                maxLines: 3,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(vertical: 0),
                     border: InputBorder.none,
@@ -1906,11 +1916,8 @@ class _LiveChatState extends State<LiveChat> {
               ),
             ),
             Container(
-              height: 10,
-            ),
-            Container(
               margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.symmetric(horizontal: 5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Converter.hexToColor("#F2F2F2"),
@@ -2155,13 +2162,14 @@ class _LiveChatState extends State<LiveChat> {
   }
 
   void loadConfig() {
-    // NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // services/configuration
-    //   if (r['state'] == true) {
-    //     setState(() {
-    //       config = r['data'];
-    //     });
-    //   }
-    // }, cashable: true);
+    NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // services/configuration
+      if (r['state'] == true) {
+        setState(() {
+          config = r['data'];
+          print('here_config: $config');
+        });
+      }
+    }, cashable: true);
   }
 
   String getDisCount() {

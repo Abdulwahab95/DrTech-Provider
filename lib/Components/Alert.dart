@@ -345,10 +345,11 @@ class _AlertState extends State<Alert> {
 
   void close() {
     Timer(Duration(milliseconds: 250), () {
+      if(mounted)
       Navigator.pop(context);
     });
-    controller.animateTo(0,
-        duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
+    if(mounted)
+    controller.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
   }
 
 }
