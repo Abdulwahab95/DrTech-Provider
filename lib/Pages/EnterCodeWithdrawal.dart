@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dr_tech/Components/Alert.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -73,25 +74,9 @@ class _EnterCodeWithdrawalState extends State<EnterCodeWithdrawal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          centerTitle: true,
-          toolbarHeight: 70,
-          title: Container(
-            margin: EdgeInsets.only(top: 15),
-            child: Text(
-              LanguageManager.getText(198),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-          elevation: 1.5,
-          backgroundColor: Converter.hexToColor("#2094cd"),
-        ),
         body: Column(
           children: [
+            TitleBar((){Navigator.pop(context);}, 198, without: true),
             Container(
                 height: MediaQuery.of(context).size.height * 0.4,
                 child: Column(

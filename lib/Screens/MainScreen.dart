@@ -1,16 +1,23 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Pages/Conversations.dart';
+import 'package:dr_tech/Pages/JoinRequest.dart';
+import 'package:dr_tech/Pages/Login.dart';
 import 'package:dr_tech/Pages/Orders.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MainScreen extends StatefulWidget {
   final slider;
-  const MainScreen(this.slider);
+  final goToNotification;
+  const MainScreen(this.slider, this.goToNotification);
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -45,14 +52,46 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget getServices() {
+
     List<Widget> items = [];
+
     items.add(createServices("checklist", 35, () {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => Orders()));
+      UserManager.currentUser("id").isNotEmpty
+          ? Navigator.push(context, MaterialPageRoute(builder: (_) => Orders()))
+          : goLogin();
     }));
+
     items.add(createServices("chat", 36, () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (_) => Conversations()));
+      UserManager.currentUser("id").isNotEmpty
+          ? Navigator.push(context, MaterialPageRoute(builder: (_) => Conversations()))
+          : goLogin();
     }));
+
+    items.add(createServices(FlutterIcons.server_fea, 61, () { // سجل كمزود خدمة
+      Navigator.push(context, MaterialPageRoute(builder: (_) => JoinRequest()));
+    }));
+
+    items.add(createServices("bell", 45, () { // الإشعارات
+      widget.goToNotification();
+    }));
+
+    items.add(createServices(FlutterIcons.share_fea, 64, () { // شارك التطبيق
+      Alert.show(context,
+          Container(
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                        LanguageManager.getText(64),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue)),
+                    getShearinIcons(),
+                  ])),
+          type: AlertType.WIDGET);
+    }));
+
     // items.add(createServices("product", 37, () {
     //   Navigator.push(
     //       context, MaterialPageRoute(builder: (_) => UserProducts()));
@@ -78,6 +117,14 @@ class _MainScreenState extends State<MainScreen> {
             children: items,
           )),
     );
+  }
+
+    void goLogin() {
+    Alert.show(context, LanguageManager.getText(298),
+        premieryText: LanguageManager.getText(30),
+        onYes: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => Login()));
+        }, onYesShowSecondBtn: false);
   }
 
   Widget createServices(icon, titel, onTap) {
@@ -107,10 +154,16 @@ class _MainScreenState extends State<MainScreen> {
                       width: height * 0.8,
                       height: height * 0.8,
                       alignment: Alignment.center,
-                      child: SvgPicture.asset(
+                      child: icon.runtimeType == String
+                      ? SvgPicture.asset(
                         "assets/icons/$icon.svg",
                         width: height * 0.4,
                         height: height * 0.4,
+                        color: Converter.hexToColor("#344f64"),
+                      )
+                      :Icon(
+                        icon,
+                        color: Converter.hexToColor("#344f64"),
                       ),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
@@ -160,6 +213,35 @@ class _MainScreenState extends State<MainScreen> {
                     spreadRadius: 1)
               ]),
         ),
+      ),
+    );
+  }
+
+  Widget getShearinIcons() {
+    List<Widget> shearIcons = [];
+    if (Globals.getConfig("sharing") != "")
+      for (var item in Globals.getConfig("sharing")) {
+        shearIcons.add(GestureDetector(
+          onTap: () async {
+            launch(item['url']);
+          },
+          child: Container(
+            width: 40,
+            height: 40,
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    fit: BoxFit.contain,
+                    image: CachedNetworkImageProvider(Globals.correctLink(item["icon"])))),
+          ),
+        ));
+      }
+    return Container(
+      padding: EdgeInsets.all(5),
+      margin: EdgeInsets.only(bottom: 25),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: shearIcons,
       ),
     );
   }

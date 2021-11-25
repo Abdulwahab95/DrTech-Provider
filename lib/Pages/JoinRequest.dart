@@ -1,11 +1,10 @@
 import 'dart:io';
 
-import 'package:dr_tech/Components/NotificationIcon.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class JoinRequest extends StatefulWidget {
@@ -27,40 +26,8 @@ class _JoinRequestState extends State<JoinRequest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
         body: Column(children: [
-          Container(
-              decoration: BoxDecoration(color: Converter.hexToColor("#2094cd")),
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-              child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  padding:
-                      EdgeInsets.only(left: 25, right: 25, bottom: 15, top: 30),
-                  child: Row(
-                    textDirection: LanguageManager.getTextDirection(),
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Icon(
-                            LanguageManager.getDirection()
-                                ? FlutterIcons.chevron_right_fea
-                                : FlutterIcons.chevron_left_fea,
-                            color: Colors.white,
-                            size: 26,
-                          )),
-                      Text(
-                        LanguageManager.getText(175),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      NotificationIcon(),
-                    ],
-                  ))),
+          TitleBar(() {Navigator.pop(context);}, 175),
           Expanded(
               child: getJoinLink())//isLoading ? Center(child: CustomLoading()) : getFormContent())
         ]));

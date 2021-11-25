@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
@@ -11,7 +12,6 @@ import 'package:dr_tech/Pages/EnterCode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:vibration/vibration.dart';
 
 import 'ExtraPages/Terms.dart';
 
@@ -60,22 +60,9 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-        appBar: AppBar(
-          centerTitle: true,
-          toolbarHeight: 70,
-          title: Container(
-            margin: EdgeInsets.only(top: 15),
-            child: Text(
-                LanguageManager.getText(276), // أدخل رقم هاتفك
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
-          elevation: 1.5,
-          backgroundColor: Converter.hexToColor("#2094cd"),
-        ),
-
         body: Column(
           children: [
+            TitleBar((){Navigator.pop(context);}, 276, without: true), // أدخل رقم هاتفك
             AnimatedContainer(
               duration: Duration(milliseconds: 150),
               alignment: Alignment.center,

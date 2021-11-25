@@ -25,6 +25,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
       child: Column(
         children: [
           widget.slider,
+          Globals.showNotOriginal()
+              ? Container(
+                  padding: EdgeInsets.all(15),
+                  child: Text(
+                    Converter.getRealText(318),
+                    style: TextStyle(color: Colors.red),
+                    textDirection: LanguageManager.getTextDirection(),
+                  ),
+                )
+              :Container(),
           getServices(),
         ],
       ),

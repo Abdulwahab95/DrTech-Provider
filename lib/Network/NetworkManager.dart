@@ -6,6 +6,7 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
@@ -103,6 +104,10 @@ class NetworkManager {
       }else if (context != null && response.body != null
           && json.decode(response.body)['state'] != null
           && json.decode(response.body)['state'] == false) {
+
+        // if(json.decode(response.body)['code'] == '401'){
+        //   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Login()), (Route<dynamic> route) => false);
+        // }
 
         var r = json.decode(response.body);
         // r['message_code'] = 10;

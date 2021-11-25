@@ -156,8 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           })
           :Container(),
           getProfileItem(FlutterIcons.share_fea, 64, () {
-            Alert.show(
-                context,
+            Alert.show(context,
                 Container(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -167,12 +166,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue),
-                      ),
+                            color: Colors.blue)),
                       getShearinIcons(),
-                    ],
-                  ),
-                ),
+                    ])),
                 type: AlertType.WIDGET);
           }),
           UserManager.currentUser("id").isNotEmpty?
@@ -183,11 +179,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           :Container(),
           UserManager.currentUser("id").isNotEmpty?
           getProfileItem(FlutterIcons.log_out_fea, 66, () {
-            Alert.startLoading(context);
-            UserManager.logout((){
-              Alert.endLoading();
-              main();
-            });
+            Alert.show(context, 319, onYes: (){
+              print('here_logout confirm');
+              Alert.startLoading(context);
+              UserManager.logout((){
+                Alert.endLoading();
+                main();
+              });
+            }, secondaryText: 156, premieryText: 155);
           }, withArraw: false)
           :Container(),
         ],

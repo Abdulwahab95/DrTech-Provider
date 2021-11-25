@@ -46,6 +46,9 @@ class UserManager {
         if (userInfo['state'] == true) {
           UserManager.proccess(userInfo['data']);
           if (callBack != null) callBack();
+          Globals.updateNotificationCount();
+          Globals.updateChatCount();
+          Globals.updateConversationCount();
         } else
           UserManager.logout((){});
       } catch (e) {
@@ -55,21 +58,37 @@ class UserManager {
   }
 
   static void update(key, value, BuildContext context ,callback, {Map mapBody}) {
+    print('here_update');
     Map<String, String> body = {"key": key, key: value};
 
     NetworkManager.httpPost(Globals.baseUrl + "users/account/update", context,(r) { // user/update
       callback(r['state']);
       if (r['state'] == true) {
-        UserManager.proccess(r['user']);
+        print('here_update: if');
+        if(r['data']['user'] != null) {
+          print('here_update: if2');
+          UserManager.proccess(r['data']['user']);
+        } else {
+          print('here_update: else2');
+          UserManager.proccess(r['data']);
+        }
       }
     }, body: mapBody != null ? mapBody :body);
   }
 
   static void updateBody(body, BuildContext context ,callback) {
+    print('here_updateBody');
     NetworkManager.httpPost(Globals.baseUrl + "users/account/update", context,(r) { // user/update
       callback(r);
       if (r['state'] == true) {
-        UserManager.proccess(r['data']);
+        print('here_updateBody: if');
+        if(r['data']['user'] != null) {
+          print('here_updateBody: if2');
+          UserManager.proccess(r['data']['user']);
+        } else {
+          print('here_updateBody: else2');
+          UserManager.proccess(r['data']);
+        }
       }
     }, body: body);
   }

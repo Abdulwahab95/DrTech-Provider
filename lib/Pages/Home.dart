@@ -171,17 +171,19 @@ class _HomeState extends State<Home> {
                         color: Colors.white),
                   )
                       : Row(
-                    textDirection: LanguageManager.getTextDirection(),
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                          (Globals.isPM()? LanguageManager.getText(292): LanguageManager.getText(32)) +
-                            " - " + nameUserTxt,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
+                        textDirection: LanguageManager.getTextDirection(),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                              (Globals.isPM()
+                                      ? LanguageManager.getText(292)
+                                      : LanguageManager.getText(32)) +
+                                  (nameUserTxt.length > 0 ? " - " : '') + nameUserTxt,
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
                       // InkWell(
                       //   onTap: () {
                       //     var cities = DatabaseManager.liveDatabase['country_cities'];
@@ -232,7 +234,11 @@ class _HomeState extends State<Home> {
               ),
               Expanded(
                   child: [
-                    MainScreen(homeSlider),
+                    MainScreen(homeSlider, (){
+                      setState(() {
+                        iScreenIndex = 2;
+                      });
+                    }),
                     ServicesScreen(homeSlider),
                     NotificationsScreen(),
                     ProfileScreen(() {

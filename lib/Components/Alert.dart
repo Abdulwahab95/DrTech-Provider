@@ -21,11 +21,13 @@ class Alert extends StatefulWidget {
       content,
       onSelected,
       onYes,
+      onClickSecond,
       premieryText,
       secondaryText,
       isDismissible,
       onYesShowSecondBtn;
-  const Alert(this.content, this.onSelected, this.onYes, this.premieryText,
+
+  const Alert(this.content, this.onSelected, this.onYes, this.premieryText, this.onClickSecond,
       this.secondaryText, this.type, this.isDismissible, this.onYesShowSecondBtn);
 
   @override
@@ -34,6 +36,7 @@ class Alert extends StatefulWidget {
   static void show(context, content,
       {onSelected,
       onYes,
+      onClickSecond,
       premieryText,
       secondaryText,
       type = AlertType.TEXT,
@@ -41,7 +44,7 @@ class Alert extends StatefulWidget {
       onYesShowSecondBtn : true}) {
     showDialog(
         context: context,
-        builder: (c) => Alert(content, onSelected, onYes, premieryText,
+        builder: (c) => Alert(content, onSelected, onYes, premieryText,onClickSecond,
             secondaryText, type, isDismissible, onYesShowSecondBtn));
   }
 
@@ -201,7 +204,7 @@ class _AlertState extends State<Alert> {
           ),
           Container(height: 10),
           Text(
-            widget.content.toString(),
+            Converter.getRealText(widget.content),
             textDirection: LanguageManager.getTextDirection(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
             textAlign: TextAlign.center,
@@ -221,8 +224,8 @@ class _AlertState extends State<Alert> {
                       alignment: Alignment.center,
                       child: Text(
                         widget.premieryText != null
-                            ? widget.premieryText
-                            : LanguageManager.getText(22),
+                            ? Converter.getRealText(widget.premieryText)
+                            : Converter.getRealText(22),
                         style: TextStyle(color: Colors.white),
                       ),
                       decoration: BoxDecoration(
@@ -243,13 +246,15 @@ class _AlertState extends State<Alert> {
                 Expanded(
                     child: widget.onYes != null && widget.onYesShowSecondBtn
                         ? InkWell(
-                            onTap: close,
+                            onTap: widget.onClickSecond != null? widget.onClickSecond : close,
                             child: Container(
                               width: 90,
                               height: 45,
                               alignment: Alignment.center,
                               child: Text(
-                                LanguageManager.getText(21),
+                                widget.secondaryText != null
+                                    ? Converter.getRealText(widget.secondaryText)
+                                    : Converter.getRealText(21),
                                 style: TextStyle(color: Colors.white),
                               ),
                               decoration: BoxDecoration(

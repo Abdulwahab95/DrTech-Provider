@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/NotificationIcon.dart';

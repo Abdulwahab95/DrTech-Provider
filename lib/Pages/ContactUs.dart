@@ -1,4 +1,5 @@
 import 'package:dr_tech/Components/Alert.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -17,24 +18,13 @@ class _ContactUsState extends State<ContactUs> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          centerTitle: true,
-          toolbarHeight: 70,
-          title: Container(
-            margin: EdgeInsets.only(top: 15),
-            child: Text(
-              LanguageManager.getText(63),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-          elevation: 1.5,
-          backgroundColor: Converter.hexToColor("#2094cd"),
-        ),
-        body: getBodyContents());
+        body: Column(
+          textDirection: LanguageManager.getTextDirection(),
+          children: [
+            TitleBar((){Navigator.pop(context);}, 63, without: true),
+            Expanded(child: getBodyContents()),
+          ],
+        ));
   }
 
   Widget getBodyContents() {
@@ -82,6 +72,7 @@ class _ContactUsState extends State<ContactUs> {
       ),
     ));
     return ListView(
+      padding: EdgeInsets.symmetric(vertical: 0),
       children: items,
     );
   }

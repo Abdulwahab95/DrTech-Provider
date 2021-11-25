@@ -2,8 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
-import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Components/RateStars.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -74,45 +74,11 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
             children: [
-              Container(
-                  decoration:
-                      BoxDecoration(color: Converter.hexToColor("#2094cd")),
-                  padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: EdgeInsets.only(
-                          left: 25, right: 25, bottom: 10, top: 25),
-                      child: Row(
-                        textDirection: LanguageManager.getTextDirection(),
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Icon(
-                                LanguageManager.getDirection()
-                                    ? FlutterIcons.chevron_right_fea
-                                    : FlutterIcons.chevron_left_fea,
-                                color: Colors.white,
-                                size: 26,
-                              )),
-                          Text(
-                            widget.title,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          NotificationIcon(),
-                        ],
-                      ))),
+              TitleBar(() {Navigator.pop(context);}, widget.title),
               getSearchAndFilter(),
               Expanded(
                 child: getServicesList(),

@@ -6,33 +6,52 @@ import 'package:dr_tech/Pages/Welcome.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'Config/Globals.dart';
 import 'Models/Firebase.dart';
 import 'Models/LocalNotifications.dart';
+import 'Pages/Home.dart';
 import 'Pages/LiveChat.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   Globals.logNotification('onBackgroundMessage', message);
-
-  // Map dataa = json.decode(message.data['payload']);
-  // if (message.data != null && dataa.containsKey('id')) {
-  //     LocalNotifications.send('message', message.data['message']);
-  // }
 }
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    'This channel is used for important notifications.', // description
+    importance: Importance.max,
+    sound: RawResourceAndroidNotificationSound('special'),
+    playSound: true,
+  );
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   Initialization(() {
     UserManager.refrashUserInfo();
     runApp(App());
   });
+
   runApp(Loading());
+
 }
 
 class App extends StatelessWidget {
@@ -45,6 +64,7 @@ class App extends StatelessWidget {
       routes: {
         "WelcomePage": (context) => MessageHandler(child: Welcome()),
         "LiveChat": (context) => LiveChat(Globals.currentConversationId),
+        "Notifications": (context) => Home(page: 2),
       },
       initialRoute: "WelcomePage",
     );

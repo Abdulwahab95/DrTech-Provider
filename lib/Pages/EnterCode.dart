@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dr_tech/Components/Alert.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
@@ -11,6 +13,7 @@ import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/Home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:vibration/vibration.dart';
 
@@ -93,22 +96,9 @@ class _EnterCodeState extends State<EnterCode> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          centerTitle: true,
-          toolbarHeight: 70,
-          title: Container(
-            margin: EdgeInsets.only(top: 15),
-            child: Text(
-              LanguageManager.getText(16),//تاكيد رقم الهاتف
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-          elevation: 1.5,
-          backgroundColor: Converter.hexToColor("#2094cd"),
-        ),
         body: Column(
           children: [
+            TitleBar((){Navigator.pop(context);}, 16, without: true),
             Container(
                 height: MediaQuery.of(context).size.height * 0.45,
                 child: Column(
@@ -343,11 +333,18 @@ class _EnterCodeState extends State<EnterCode> {
         NetworkManager.httpPost(Globals.baseUrl + "users/login", context ,(r) { // user/login
           Alert.endLoading();
           if (r['state'] == true) {
+
             DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
             DatabaseManager.save(Globals.authoKey, r['data']['token']);
             UserManager.proccess(r['data']['user']);
 
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+            if (UserManager.currentUser('is_blocked') == '1') {
+              Alert.endLoading();
+              Alert.show(context, 313, onYes: () {
+                Platform.isIOS ? exit(0) : SystemNavigator.pop();
+              }, onYesShowSecondBtn: false, isDismissible: false);
+            } else
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
           }
         }, body: widget.body);
 

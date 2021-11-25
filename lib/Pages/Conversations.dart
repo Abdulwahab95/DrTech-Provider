@@ -2,11 +2,10 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
-import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Components/Recycler.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
@@ -27,7 +26,7 @@ class Conversations extends StatefulWidget {
   _ConversationsState createState() => _ConversationsState();
 }
 
-class _ConversationsState extends State<Conversations> {
+class _ConversationsState extends State<Conversations>   with WidgetsBindingObserver {
   Map<int, List> data = {};
   int page = 0;
   bool isLoading;
@@ -35,10 +34,41 @@ class _ConversationsState extends State<Conversations> {
 
   @override
   void initState() {
+    print('here_Lifecycle: initState $mounted');
+    WidgetsBinding.instance.addObserver(this);
     load();
+    Globals.updateConversationCount = (){if(mounted)load();};
     super.initState();
   }
+  @override
+  void dispose() {
+    print('here_Lifecycle: dispose $mounted');
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('here_Lifecycle: didChangeAppLifecycleState $state , mounted: $mounted');
+    if (state == AppLifecycleState.resumed) {
+      load();
+    }
+  }
+  @override
+  void didChangeDependencies() {
+    print('here_Lifecycle: didChangeDependencies, mounted: $mounted');
+    super.didChangeDependencies();
+  }
+  @override
+  void didUpdateWidget(covariant Conversations oldWidget) {
+    print('here_Lifecycle: didUpdateWidget $oldWidget, mounted: $mounted');
+    super.didUpdateWidget(oldWidget);
+  }
+  @override
+  void deactivate() {
+    print('here_Lifecycle: deactivate, mounted: $mounted');
+    super.deactivate();
+  }
   void load() {
     setState(() {isLoading = true;});
 
@@ -58,6 +88,8 @@ class _ConversationsState extends State<Conversations> {
 
   @override
   Widget build(BuildContext context) {
+    print('here_Lifecycle: build, mounted: $mounted');
+
     return WillPopScope(
       onWillPop: _close,
       child: Scaffold(
@@ -65,38 +97,7 @@ class _ConversationsState extends State<Conversations> {
           children: [
             widget.noheader == true
                 ? Container()
-                : Container(
-                    decoration:
-                        BoxDecoration(color: Converter.hexToColor("#2094cd")),
-                    padding:
-                        EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                    child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        padding: EdgeInsets.only(
-                            left: 25, right: 25, bottom: 10, top: 25),
-                        child: Row(
-                          textDirection: LanguageManager.getTextDirection(),
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                                onTap: _close,
-                                child: Icon(
-                                  LanguageManager.getDirection()
-                                      ? FlutterIcons.chevron_right_fea
-                                      : FlutterIcons.chevron_left_fea,
-                                  color: Colors.white,
-                                  size: 26,
-                                )),
-                            Text(
-                              LanguageManager.getText(36),
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            NotificationIcon(),
-                          ],
-                        ))),
+                : TitleBar(_close, 36),
             Expanded(
               child: getChatConversations(),
             )
@@ -138,7 +139,7 @@ class _ConversationsState extends State<Conversations> {
 
   Widget getConversationItem(item, int length) {
     return InkWell(
-      onTap: () {
+      onTap: () async {
         if (UserManager.currentUser("chat_not_seen").isNotEmpty && item['count_not_seen'] != null )
             UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) - item['count_not_seen']));
        Globals.updateChatCount();
@@ -147,7 +148,9 @@ class _ConversationsState extends State<Conversations> {
         responseBody['data'][length] = item;
         print('----------> $length, ${responseBody.runtimeType}');
         DatabaseManager.save(Globals.baseUrl + "user/convertations", jsonEncode(responseBody));
-        Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["engineer_id"].toString())));
+        final result = await  Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["engineer_id"].toString())));
+        if(result == true)
+          load();
       },
       child: Container(
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
@@ -229,8 +232,8 @@ class _ConversationsState extends State<Conversations> {
 
   Future<bool> _close() async{
     if(Navigator.canPop(context)) {
-      Navigator.pop(context);
-      return true;
+        Navigator.pop(context);
+        return true;
     } else
       return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home()), (Route<dynamic> route) => false);
   }

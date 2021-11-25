@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
-import 'package:dr_tech/Pages/Login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'Home.dart';
 import 'LiveChat.dart';
@@ -276,6 +279,31 @@ class _WelcomeState extends State<Welcome> {
 
   void close() {
     DatabaseManager.save("welcome", true);
+
+    var forceUpdate = Globals.getValueInConfigSetting('is_force_update_client');
+    var blocked     = UserManager.currentUser('is_blocked');
+
+    if (blocked == '1')
+      Alert.show(context, 313, onYes: () {
+        Platform.isIOS ? exit(0) : SystemNavigator.pop();
+      }, onYesShowSecondBtn: false, isDismissible: false);
+    else if (forceUpdate == '1' && isExistUpdateClient())
+      Alert.show(context, 314, onYes: (){
+        launch(Globals.getConfig('client_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
+      },onYesShowSecondBtn: false, isDismissible: false);
+    else if (isExistUpdateClient())
+      Alert.show(context, 315, onYes: (){
+        launch(Globals.getConfig('client_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
+      }, premieryText: 316, secondaryText: 317,onClickSecond: (){
+        Navigator.pop(context);
+        goToNext();
+      }, isDismissible: false);
+    else
+      goToNext();
+
+  }
+
+  void goToNext() {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -284,9 +312,25 @@ class _WelcomeState extends State<Welcome> {
                 ? WebBrowser(Globals.getWebViewUrl(), '')
                 :
             // UserManager.currentUser("id").isNotEmpty?
-            Globals.isOpenFromNotification
+            Globals.isLiveChatOpenFromNotification
                 ? LiveChat(Globals.currentConversationId)
+                : Globals.isNotificationOpenFromNotification
+                ? Home(page: 2)
                 : Home(page: UserManager.currentUser("id").isNotEmpty ? 0 : 1)));
-                // : Login()));
+    // : Login()));
+  }
+
+  bool isExistUpdateClient() {
+    String version = Globals.getValueInConfigSetting(Platform.isIOS ? 'client_last_version_ios' : 'client_last_version_android').toString();
+    print('here_version: server_version: $version');
+    version = version.replaceAll('.', '');
+    if(version.length > 0){
+      var last    = int.parse(version);
+      var current = int.parse((Platform.isIOS ? Globals.buildNumber : Globals.version).replaceAll('.', ''));
+      print('here_version: current_version: ios:${Globals.buildNumber}, android: ${Globals.version}');
+      if(last > current)
+        return true;
+    }
+    return false;
   }
 }

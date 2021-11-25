@@ -2,11 +2,9 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
-import 'package:dr_tech/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'Alert.dart';
 
 class NavBar extends StatefulWidget {
   final onUpdate;
@@ -64,15 +62,14 @@ class _NavBarState extends State<NavBar> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // Home
-              createIcon("home", 43, () {
-                UserManager.currentUser("id").isNotEmpty ? setState(() {iSelectedIndex = 0;}) : goLogin();
+              createIcon("home", 43, () {setState(() {iSelectedIndex = 0;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 0, isBig: true),
               createIcon("services", 44, () {setState(() {iSelectedIndex = 1;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 1),
-              createIcon("bell", 45, () {setState(() {iSelectedIndex = 2;});
-                widget.onUpdate(iSelectedIndex);
+              createIcon("bell", 45, () {
+                goToNotification();
               }, iSelectedIndex == 2),
               createIcon("menu", 46, () {setState(() {iSelectedIndex = 3;});
                 widget.onUpdate(iSelectedIndex);
@@ -169,11 +166,10 @@ class _NavBarState extends State<NavBar> {
     );
   }
 
-  void goLogin() {
-    Alert.show(context, LanguageManager.getText(298),
-        premieryText: LanguageManager.getText(30),
-        onYes: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => Login()));
-        }, onYesShowSecondBtn: false);
+
+   goToNotification(){
+    setState(() {iSelectedIndex = 2;});
+    widget.onUpdate(iSelectedIndex);
   }
+
 }

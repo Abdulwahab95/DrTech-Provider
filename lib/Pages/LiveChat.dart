@@ -37,7 +37,7 @@ class LiveChat extends StatefulWidget {
   static Function callback;
 }
 
-class _LiveChatState extends State<LiveChat> {
+class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   Map user = {}, data = {}, body = {}, offer = {};
   Map<int, Uint8List> images = {};
   Map<int, bool> files = {};
@@ -55,6 +55,7 @@ class _LiveChatState extends State<LiveChat> {
   final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     LiveChat.callback = onReciveNotic;
     load();
     super.initState();
@@ -62,9 +63,17 @@ class _LiveChatState extends State<LiveChat> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     LiveChat.currentConversationId = null;
     LiveChat.callback = null;
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      load();
+    }
   }
 
   void onReciveNotic(payloadTarget, paylaod) {
@@ -216,23 +225,28 @@ class _LiveChatState extends State<LiveChat> {
                     child: Container(
                         width: MediaQuery.of(context).size.width,
                         padding: EdgeInsets.only(
-                            left: 25, right: 25, bottom: 20, top: 25),
+                            left: LanguageManager.getDirection()?25:0,
+                            right: LanguageManager.getDirection()?0:25,
+                            bottom: 20, top: 25),
                         child: Row(
                           textDirection: LanguageManager.getTextDirection(),
                           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
-                              onTap: _close,
-                              child: Container(
-                                width: 20,
-                                child: Icon(
-                                  LanguageManager.getDirection()
-                                      ? FlutterIcons.chevron_right_fea
-                                      : FlutterIcons.chevron_left_fea,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                                onTap: _close,
+                                child: Container(
+                                  padding: EdgeInsets.only(
+                                    left: LanguageManager.getDirection()?0:25,
+                                    right: LanguageManager.getDirection()?25:0,
+                                  ),
+                                  child: Icon(
+                                    LanguageManager.getDirection()
+                                        ? FlutterIcons.chevron_right_fea
+                                        : FlutterIcons.chevron_left_fea,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                )),
                             Container(width: 25),
                             Text(
                               isTyping
@@ -2076,8 +2090,9 @@ class _LiveChatState extends State<LiveChat> {
 
 
   Future<bool> _close() async{
+    UserManager.refrashUserInfo();
     if(Navigator.canPop(context)) {
-      Navigator.pop(context);
+      Navigator.pop(context, true);
       return true;
     } else
       return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Conversations()), (Route<dynamic> route) => false);
