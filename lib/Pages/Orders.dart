@@ -179,7 +179,10 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     }
     return NotificationListener(
         child: ScrollConfiguration(
-            behavior: CustomBehavior(), child: ListView(children: items)));
+            behavior: CustomBehavior(), child: ListView(
+            padding: EdgeInsets.symmetric(vertical: 0),
+            children: items
+        )));
   }
 
   Widget getTabTitle(title, index) {

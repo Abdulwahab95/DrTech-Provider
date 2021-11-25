@@ -181,6 +181,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return true;
       },
       child: ListView(
+        padding: EdgeInsets.symmetric(vertical: 0),
         children: items,
       ),
     );

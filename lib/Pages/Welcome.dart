@@ -1,15 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
-import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'Home.dart';
+import 'JoinRequest.dart';
 import 'LiveChat.dart';
 import 'Login.dart';
 import 'WebBrowser.dart';
@@ -277,7 +281,30 @@ class _WelcomeState extends State<Welcome> {
 
   void close() {
     DatabaseManager.save("welcome", true);
-    print('heree: identity ${UserManager.currentUser("identity")}');
+
+    var forceUpdate = Globals.getValueInConfigSetting('is_force_update_provider');
+    var blocked = UserManager.currentUser('is_blocked');
+
+    if (blocked == '1')
+      Alert.show(context, 313, onYes: () {
+        Platform.isIOS ? exit(0) : SystemNavigator.pop();
+      }, onYesShowSecondBtn: false, isDismissible: false);
+    else if (forceUpdate == '1' && isExistUpdateProvider())
+      Alert.show(context, 314, onYes: (){
+        launch(Globals.getConfig('provider_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
+      },onYesShowSecondBtn: false, isDismissible: false);
+    else if (isExistUpdateProvider())
+      Alert.show(context, 315, onYes: (){
+        launch(Globals.getConfig('provider_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
+      }, premieryText: 316, secondaryText: 317,onClickSecond: (){
+        Navigator.pop(context);
+        goToNext();
+      }, isDismissible: false);
+    else
+      goToNext();
+  }
+
+  void goToNext() {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -285,10 +312,26 @@ class _WelcomeState extends State<Welcome> {
                 Globals.checkUpdate() && Globals.getWebViewUrl().isNotEmpty
                     ? WebBrowser(Globals.getWebViewUrl(), '')
                     :
-                UserManager.currentUser("id").isNotEmpty
-                    ? UserManager.currentUser("identity").isEmpty? JoinRequest() //
-                    : Globals.isOpenFromNotification? LiveChat(Globals.currentConversationId) : Home()
-                    : Login())
+                UserManager.currentUser("id").isEmpty
+                    ? Login()
+                    : UserManager.currentUser("identity").isEmpty? JoinRequest() //
+                    : Globals.isLiveChatOpenFromNotification? LiveChat(Globals.currentConversationId)
+                    : Globals.isNotificationOpenFromNotification? Home(page: 3) : Home()
+        )
     );
+  }
+
+  bool isExistUpdateProvider() {
+    String version = Globals.getValueInConfigSetting(Platform.isIOS ? 'provider_last_version_ios' : 'provider_last_version_android').toString();
+    print('here_version: server_version: $version');
+    version = version.replaceAll('.', '');
+    if(version.length > 0){
+      var last    = int.parse(version);
+      var current = int.parse((Platform.isIOS ? Globals.buildNumber : Globals.version).replaceAll('.', ''));
+      print('here_version: current_version: ios:${Globals.buildNumber}, android: ${Globals.version}');
+      if(last > current)
+        return true;
+    }
+    return false;
   }
 }

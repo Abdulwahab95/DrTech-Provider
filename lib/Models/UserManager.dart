@@ -1,4 +1,3 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
@@ -24,7 +23,8 @@ class UserManager {
   static void updateSp(key, value) {
     DatabaseManager.save(key, value);
     if(key == 'not_seen' && value > 0){
-      AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/received.mp3"));
+      print('here_play: updateSp');
+      // AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/received.mp3"));
     }
   }
 
@@ -49,6 +49,7 @@ class UserManager {
         if (userInfo['state'] == true) {
           UserManager.proccess(userInfo['data']);
           if (callBack != null) callBack();
+          Globals.updateNotificationCount();
         } else
           UserManager.logout((){});
       } catch (e) {

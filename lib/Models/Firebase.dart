@@ -33,21 +33,35 @@ class MessageHandlerState extends State<MessageHandler> {
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) { // onReusem
       Globals.logNotification('onMessageOpenedApp', message);
-      Globals.currentConversationId = message.data["conversation_id"];
-      Globals.isOpenFromNotification = true;
-      Navigator.of(LocalNotifications.reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+
+      if(message.data != null && message.data['screen'] != null){
+        if(message.data['screen'] == 'LiveChat'){
+          Globals.currentConversationId = message.data["conversation_id"];
+          Globals.isLiveChatOpenFromNotification = true;
+          Navigator.of(LocalNotifications.reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+        } else if(message.data['screen'] == 'Notifications'){
+          Globals.isNotificationOpenFromNotification = true;
+          Navigator.of(LocalNotifications.reminderScreenNavigatorKey.currentState.context).pushNamed("Notifications");
+        } else{
+          Navigator.of(LocalNotifications.reminderScreenNavigatorKey.currentState.context).pushNamed("WelcomePage");
+        }
+      }
     });
 
 
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage message) { // onOpen
       Globals.logNotification('getInitialMessage', message);
       if(message != null) {
+
         String screen = message.data['screen']; print(screen);
         if (screen.contains("LiveChat")) {
           print('heree: LiveChat');
-          Globals.isOpenFromNotification = true;
+          Globals.isLiveChatOpenFromNotification = true;
           Globals.currentConversationId = message.data["conversation_id"];
           // Navigator.of(context).pushNamed("LiveChat");
+        }else if(screen.contains("Notifications")){
+          print('heree: Notifications');
+          Globals.isNotificationOpenFromNotification = true;
         }
       }
     });
@@ -131,6 +145,16 @@ class MessageHandlerState extends State<MessageHandler> {
       } else if (data != null && payload != null && payload['type'] != null && payload['type'] == 'seen'){ // seen
         // seen and user not on screen liveChat => don't show notification
       } else if (data != null) {
+        if (UserManager.currentUser("chat_not_seen").isNotEmpty && data['screen'] == 'LiveChat') {
+          print('here_timer: chat if');
+          UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) + 1));
+        } else if (UserManager.currentUser("not_seen").isNotEmpty && data['screen'] == 'Notifications') {
+          print('here_timer: not_seen');
+          UserManager.updateSp("not_seen", (int.parse(UserManager.currentUser("not_seen")) + 1));
+        }
+        Globals.updateConversationCount();
+        Globals.updateNotificationCount();
+
         print('here_timer: else 2');
         LocalNotifications.send(data['title'],data['message_txt'], payload);
       }

@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:dr_tech/Config/Converter.dart';
-
 import 'package:dr_tech/Config/Globals.dart';
-import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -27,8 +25,9 @@ class LocalNotifications {
   static void send(title, message, Map<String, dynamic> paylaod) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         "NOTIC", "NOTIC", "NOTIC",
-        importance: Importance.max, priority: Priority.high, ticker: 'ticker');
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+        importance: Importance.max, priority: Priority.high, ticker: 'ticker',
+        sound: RawResourceAndroidNotificationSound('special'), playSound: true);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: 'special');
     var platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: iOSPlatformChannelSpecifics);
@@ -42,10 +41,13 @@ class LocalNotifications {
 
     Map valueMap = json.decode(payload);
 
-    if(valueMap['send_by'] != null) {
+    if(valueMap['screen'] != null && valueMap['screen'] == 'LiveChat') {
       Globals.currentConversationId = valueMap['send_by'].toString();
-      Globals.isOpenFromNotification = true;
+      Globals.isLiveChatOpenFromNotification = true;
       Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("LiveChat");
+    }else if(valueMap['screen'] != null && valueMap['screen'] == 'Notifications'){
+      Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("Notifications");
+      Globals.isNotificationOpenFromNotification = true;
     }else{
       Navigator.of(reminderScreenNavigatorKey.currentState.context).pushNamed("WelcomePage");
     }

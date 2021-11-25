@@ -34,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return ScrollConfiguration(
       behavior: CustomBehavior(),
       child: ListView(
+        padding: EdgeInsets.symmetric(vertical: 30),
         children: [
           getProfileHeader(),
           Container(height: 10,),

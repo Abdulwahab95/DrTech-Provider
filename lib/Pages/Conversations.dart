@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
-import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Components/Recycler.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
@@ -24,17 +23,40 @@ class Conversations extends StatefulWidget {
   _ConversationsState createState() => _ConversationsState();
 }
 
-class _ConversationsState extends State<Conversations> {
+class _ConversationsState extends State<Conversations>   with WidgetsBindingObserver {
   Map<int, List> data = {};
   int page = 0;
   bool isLoading;
   var responseBody;
 
+  _onLayoutDone(_) {
+    //do your stuff
+    print('here_: _onLayoutDone');
+  }
+
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback(_onLayoutDone);
+    WidgetsBinding.instance.addObserver(this);
+    Globals.updateConversationCount = (){if(mounted)load();};
     load();
     super.initState();
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      load();
+    }
+  }
+
+
 
   void load() {
     setState(() { isLoading = true; });
@@ -56,49 +78,7 @@ class _ConversationsState extends State<Conversations> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          widget.noheader == true
-              ? Container()
-              : Container(
-                  decoration:
-                      BoxDecoration(color: Converter.hexToColor("#2094cd")),
-                  padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: EdgeInsets.only(
-                          left: 25, right: 25, bottom: 10, top: 25),
-                      child: Row(
-                        textDirection: LanguageManager.getTextDirection(),
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Icon(
-                                LanguageManager.getDirection()
-                                    ? FlutterIcons.chevron_right_fea
-                                    : FlutterIcons.chevron_left_fea,
-                                color: Colors.white,
-                                size: 26,
-                              )),
-                          Text(
-                            LanguageManager.getText(36),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          NotificationIcon(),
-                        ],
-                      ))),
-          Expanded(
-            child: getChatConversations(),
-          )
-        ],
-      ),
+      body: getChatConversations(),
     );
   }
 
@@ -132,7 +112,7 @@ class _ConversationsState extends State<Conversations> {
 
   Widget getConversationItem(item, int length) {
     return InkWell(
-      onTap: () {
+      onTap: () async {
         if (UserManager.currentUser("chat_not_seen").isNotEmpty && item['count_not_seen'] != null )
             UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) - item['count_not_seen']));
         Globals.updateNotificationCount();
@@ -140,7 +120,9 @@ class _ConversationsState extends State<Conversations> {
         setState(() {});
         responseBody['data'][length] = item;
         DatabaseManager.save(Globals.baseUrl + "provider/convertations", jsonEncode(responseBody));
-        Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["user_id"].toString())));
+        final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["user_id"].toString())));
+        if(result == true)
+          load();
       },
       child: Container(
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),

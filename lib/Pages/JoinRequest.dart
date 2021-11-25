@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
-import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -262,7 +261,10 @@ class _JoinRequestState extends State<JoinRequest> {
     ));
     return ScrollConfiguration(
       behavior: CustomBehavior(),
-      child: ListView(children: items),
+      child: ListView(
+          padding: EdgeInsets.symmetric(vertical: 0),
+          children: items
+      ),
     );
   }
 

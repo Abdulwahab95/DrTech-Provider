@@ -1,4 +1,5 @@
 import 'package:dr_tech/Components/CustomLoading.dart';
+import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -44,29 +45,13 @@ class _FrequentlyAskedQuestionsState extends State<FrequentlyAskedQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          centerTitle: true,
-          toolbarHeight: 70,
-          title: Container(
-            margin: EdgeInsets.only(top: 15),
-            child: Text(
-              LanguageManager.getText(62),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-          elevation: 1.5,
-          backgroundColor: Converter.hexToColor("#2094cd"),
-        ),
-        body: Container(
-            child: isLoading
-                ? Center(
-                    child: CustomLoading(),
-                  )
-                : getBodyContents()));
+        body: Column(
+          textDirection: LanguageManager.getTextDirection(),
+          children: [
+            TitleBar((){Navigator.pop(context);}, 62, without: true),
+            Expanded(child: Container(child: isLoading ? Center(child: CustomLoading(),) : getBodyContents())),
+          ],
+        ));
   }
 
   Widget getBodyContents() {
@@ -77,6 +62,7 @@ class _FrequentlyAskedQuestionsState extends State<FrequentlyAskedQuestions> {
     }
 
     return ListView(
+      padding: EdgeInsets.symmetric(vertical: 0),
       children: items,
     );
   }
@@ -100,33 +86,33 @@ class _FrequentlyAskedQuestionsState extends State<FrequentlyAskedQuestions> {
                       blurRadius: 2,
                       spreadRadius: 2)
                 ]),
-            child: Row(
-              textDirection: LanguageManager.getTextDirection(),
-              children: [
-                Expanded(
-                  child: Text(
-                    item['title'],
-                    textDirection: LanguageManager.getTextDirection(),
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Converter.hexToColor("#2094CD"),
-                        fontWeight: FontWeight.bold),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  item['opened'] = item['opened'] == true ? false : true;
+                });
+              },
+              child: Row(
+                textDirection: LanguageManager.getTextDirection(),
+                children: [
+                  Expanded(
+                    child: Text(
+                      item['title'],
+                      textDirection: LanguageManager.getTextDirection(),
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Converter.hexToColor("#2094CD"),
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      item['opened'] = item['opened'] == true ? false : true;
-                    });
-                  },
-                  child: Icon(
+                  Icon(
                     item['opened'] == true
                         ? FlutterIcons.chevron_up_fea
                         : FlutterIcons.chevron_down_fea,
                     size: 24,
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
           item['opened'] == true

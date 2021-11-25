@@ -12,8 +12,8 @@ import 'package:vibration/vibration.dart';
 class Globals {
   static String deviceToken = "";
   static Map deviceInfo = {};
-  static String version = "0.0.1";
-  static String buildNumber = "1";
+  static String version = "1.0.4";
+  static String buildNumber = "74";
   static var config;
   static var isLocal = false;
   static var urlServerLocal = "http://192.168.43.152";
@@ -28,10 +28,12 @@ class Globals {
   // Callbacks
   static Function updateInCartCount;
   static Function updateNotificationCount = (){print('here_not_seen');};
+  static Function updateConversationCount = (){};
   static var settings;
   // Chat + Notification
   static String currentConversationId = '';
-  static bool isOpenFromNotification = false;
+  static bool isLiveChatOpenFromNotification = false;
+  static bool isNotificationOpenFromNotification = false;
   static bool isOpenFromTerminate = false;
   static var pagesRouteFactories;
 
@@ -52,11 +54,20 @@ class Globals {
 
   static bool checkUpdate(){
     for (var item in settings) {
-      if(item['name'] == 'under_maintenance' && item['value'] == 'true'){
+      if(item['name'] == 'provider_under_maintenance_show_webview' && item['value'] == 'true'){
         return true;
       }
     }
     return false;
+  }
+
+  static String getValueInConfigSetting(name){
+    for (var item in settings) {
+      if(item['name'] == name){
+        return item['value'].toString();
+      }
+    }
+    return '';
   }
 
   static double getDefaultCommission(){
@@ -81,7 +92,7 @@ class Globals {
   static String getWebViewUrl() {
     String url = "";
     for (var item in settings) {
-      if(item['name'] == 'webview_url'){
+      if(item['name'] == 'webview_url_provider'){
         url = item['value'];
       }
     }

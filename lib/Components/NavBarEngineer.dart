@@ -1,9 +1,9 @@
 import 'package:dr_tech/Config/Converter.dart';
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:dr_tech/Config/Globals.dart';
 
 class NavBarEngineer extends StatefulWidget {
   final onUpdate;
