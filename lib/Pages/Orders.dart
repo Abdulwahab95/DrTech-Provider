@@ -10,6 +10,7 @@ import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/OrderDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'LiveChat.dart';
 
@@ -387,53 +388,67 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                       )
                     ],
                   ),
-                  Container(
-                    height: 7,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Call Action
+                  Container(height: 7),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+
+                    Container(height: 10),
+
+                    customButton(96, () {// Call Action
+                      launch('tel:${item['number_phone']}');
+                    }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco),
+
+                    customButton(117, () {// Call Action
                       Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item['provider_id'].toString())));
-                    },
-                    child: Container(
-                      width: (LanguageManager.getText(117).length * (LanguageManager.getDirection()? 15 : 10)).toDouble(),
-                      height: 34,
-                      alignment: Alignment.center,
-                      child: Row(
-                        textDirection: LanguageManager.getTextDirection(),
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            LanguageManager.getDirection()? FlutterIcons.message_text_mco:FlutterIcons.message_reply_text_mco,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                          Container(width: 7.5),
-                          Text(
-                            LanguageManager.getText(117),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withAlpha(15),
-                                spreadRadius: 2,
-                                blurRadius: 2)
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                          color: Converter.hexToColor("#344f64")),
-                    ),
-                  ),
-                  Container(
-                    height: 10,
-                  ),
+                    }, FlutterIcons.message_text_mco, FlutterIcons.message_reply_text_mco),
+
+                  ]),
+
+                  Container(height: 10),
+
                 ],
               ),
             )
           ],
         ),
+      ),
+    );
+  }
+
+  customButton(int text, Function() onTap, IconData arIc, IconData enIc) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: (LanguageManager.getText(text).length * (LanguageManager.getDirection()? 15 : 10)).toDouble(),
+        height: 34,
+        alignment: Alignment.center,
+        child: Row(
+          textDirection: LanguageManager.getTextDirection(),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              LanguageManager.getDirection()? arIc:enIc,
+              size: 18,
+              color: Colors.white,
+            ),
+            Container(width: 7.5),
+            Text(
+              LanguageManager.getText(text),
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withAlpha(15),
+                  spreadRadius: 2,
+                  blurRadius: 2)
+            ],
+            borderRadius: BorderRadius.circular(8),
+            color: Converter.hexToColor("#344f64")),
       ),
     );
   }
@@ -448,4 +463,5 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     }[status.toString().toUpperCase()] ??
         92);
   }
+
 }

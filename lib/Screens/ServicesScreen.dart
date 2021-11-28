@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Config/Converter.dart';
@@ -49,10 +50,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
     // var numItemAdd = 0;
     // var numItemInactive = 0;
     for (var item in servicesApi) {
-
+      print('here_row_item: ${item['name']}');
       // if (item["status"] != "inactive"){
         if (lastInsert.length < 3) {
-          // print('item: $item');
+          print('here_row < 3: ${item['name']}, lastInsert: ${lastInsert.length}');
           lastInsert.add(createService(item["icon"], Globals.isRtl()? item["name"]: item["name_en"], () {
             if (item["target"].toString() == "0") {
               Navigator.push(context, MaterialPageRoute(builder: (_) => Store()));
@@ -65,37 +66,42 @@ class _ServicesScreenState extends State<ServicesScreen> {
             Navigator.push(context, MaterialPageRoute(
                     builder: (_) => Service(item['id'], Globals.isRtl()? item["name"]: item["name_en"])));
           }, () {Alert.show(context, item['description']);}));
+          print('here_row_length: ${rows.length}, lastInsert: ${lastInsert.length}');
         }
 
       if (lastInsert.length == 1) {
-        // print('row1: $item');
+        print('here_row == 1: ${item['name']}');
         lastInsert.add(Container(width: 20,));
+        print('here_row_length: ${rows.length}, lastInsert: ${lastInsert.length}');
       }
       if (lastInsert.length == 3) {
         // numItemAdd += 2;
-        // print('row: $item');
+        print('here_row == 3: ${item['name']}');
         rows.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           textDirection: LanguageManager.getTextDirection(),
           children: lastInsert,
         ));
         rows.add(Container(height: 20,));
+        print('here_row_length: ${rows.length}, lastInsert: ${lastInsert.length}');
         lastInsert = [];
       }
 
     // } else numItemInactive++;
     //
     }
+    print('here_length: rows: ${rows.length}, items: ${(servicesApi as List).length}');
 
     // if ((servicesApi.length - numItemInactive) % 2 != 0 && servicesApi.length - numItemInactive - 1 == numItemAdd ){
-    //   rows.add(Row(
-    //     mainAxisAlignment: MainAxisAlignment.end,
-    //     textDirection: LanguageManager.getTextDirection(),
-    //     children: lastInsert,
-    //   ));
-    //   lastInsert.add(Container(width: 7,));
-    //   rows.add(Container(height: 20,));
-    // }
+    if(rows.length < (servicesApi as List).length){
+      rows.add(Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        textDirection: LanguageManager.getDirection() ? TextDirection.ltr : TextDirection.rtl,
+        children: lastInsert,
+      ));
+      lastInsert.add(Container(width: 7,));
+      rows.add(Container(height: 20,));
+    }
 
     return Expanded(
       child: Container(
@@ -133,12 +139,21 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   width: size * 0.35,
                   height: size * 0.35,
                   alignment: Alignment.center,
-                  child: SvgPicture.network(
-                    icon,
-                    width: size * 0.2,
-                    height: size * 0.2,
-                  ),
+                  child: icon.toString().toLowerCase().contains('svg')
+                      ? SvgPicture.network(
+                          icon,
+                          width: size * 0.2,
+                          height: size * 0.2,
+                        )
+                      : Container()
+                  ,
                   decoration: BoxDecoration(
+                      image: !icon.toString().toLowerCase().contains('svg')
+                          ? DecorationImage(
+                        fit: BoxFit.fill,
+                              image: CachedNetworkImageProvider(
+                                  Globals.correctLink(icon)))
+                          : null,
                       color: Converter.hexToColor("#F2F2F2"),
                       borderRadius: BorderRadius.circular(10)),
                 ),

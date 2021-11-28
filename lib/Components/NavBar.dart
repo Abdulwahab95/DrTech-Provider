@@ -65,7 +65,7 @@ class _NavBarState extends State<NavBar> {
               createIcon("home", 43, () {setState(() {iSelectedIndex = 0;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 0, isBig: true),
-              createIcon("services", 44, () {setState(() {iSelectedIndex = 1;});
+              createIcon("services", 35, () {setState(() {iSelectedIndex = 1;});
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 1),
               createIcon("bell", 45, () {

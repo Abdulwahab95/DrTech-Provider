@@ -162,7 +162,7 @@ class _HomeState extends State<Home> {
                   iScreenIndex != 0 ?
                   Text(
                     LanguageManager.getText(
-                        [43, 44, 45, 46][iScreenIndex]),
+                        [43, 35, 45, 46][iScreenIndex]),
                     // [43, 45, 46][iScreenIndex]),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -234,12 +234,12 @@ class _HomeState extends State<Home> {
               ),
               Expanded(
                   child: [
+                    ServicesScreen(homeSlider),
                     MainScreen(homeSlider, (){
                       setState(() {
                         iScreenIndex = 2;
                       });
                     }),
-                    ServicesScreen(homeSlider),
                     NotificationsScreen(),
                     ProfileScreen(() {
                       setState(() {});

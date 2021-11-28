@@ -133,6 +133,38 @@ class _ServicePageState extends State<ServicePage>
                           Container(
                             height: 10,
                           ),
+                          Container(
+                            padding: EdgeInsets.only(left: 10, right: 10),
+                            child: Text(
+                              LanguageManager.getText(119),
+                              textDirection:
+                              LanguageManager.getTextDirection(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue),
+                            ),
+                          ),
+                          Container(
+                            height: 10,
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(left: 20, right: 20),
+                            child: Text(
+                              //'هاني القحطاني فني جوالات خبرة ٤ سنوات لكل الأعطال يعمل مع شركة الحلول التنفيذية التجارية',
+                              data['about_provider'].toString(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Converter.hexToColor("#727272")),
+                            ),
+                          ),
+
+
+                          Container(
+                            height: 10,
+                          ),
                           // Row(
                           //   textDirection: LanguageManager.getTextDirection(),
                           //   children: [
