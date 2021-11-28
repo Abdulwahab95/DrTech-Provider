@@ -111,7 +111,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         Converter.getRealText(item[
                             LanguageManager.getDirection()
                                 ? "title"
-                                : "title_en"]),
+                                : item['title_en'].toString().toLowerCase() == 'null'? 'title' : "title_en"]),
                         textDirection: LanguageManager.getTextDirection(),
                         style: TextStyle(
                             fontSize: 14,
@@ -122,7 +122,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         Converter.getRealText(item[
                             LanguageManager.getDirection()
                                 ? "message"
-                                : "message_en"]),
+                                : item['message_en'].toString().toLowerCase() == 'null'? 'message' : "message_en"]),
                         textDirection: LanguageManager.getTextDirection(),
                         style: TextStyle(
                             fontSize: 12,

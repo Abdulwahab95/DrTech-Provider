@@ -172,12 +172,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           //   Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
           // }, withArraw: false),
           getProfileItem(FlutterIcons.log_out_fea, 66, () {
-            Alert.startLoading(context);
-            UserManager.logout((){
-              Alert.endLoading();
-              main();
-            });
-          }, withArraw: false),
+            Alert.show(context, 319, onYes: (){
+              print('here_logout confirm');
+              Alert.startLoading(context);
+              UserManager.logout((){
+                Alert.endLoading();
+                main();
+              });
+            }, secondaryText: 156, premieryText: 155);
+          }, withArraw: false)
         ],
       ),
     );

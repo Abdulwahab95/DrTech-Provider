@@ -4,19 +4,19 @@ import 'package:flutter_icons/flutter_icons.dart';
 class RateStars extends StatefulWidget {
   final double size, spacing;
   final Function onUpdate;
-  final int stars;
-  const RateStars(this.size,
-      {this.spacing = 0.1, this.onUpdate, this.stars = 0});
+  var stars;
+  RateStars(this.size,
+      {this.spacing = 0.1, this.onUpdate, this.stars });
 
   @override
   _RateStarsState createState() => _RateStarsState();
 }
 
 class _RateStarsState extends State<RateStars> {
-  int stars = 0;
+  var stars ;
   @override
   void initState() {
-    stars = widget.stars;
+    stars = widget.stars ;
     super.initState();
   }
 
@@ -64,7 +64,7 @@ class _RateStarsState extends State<RateStars> {
         child: Icon(
           FlutterIcons.star_faw,
           size: widget.size,
-          color: (index + 1) <= stars ? Colors.orange : Colors.grey,
+          color: (index + 1) <= (stars??0) ? Colors.orange : Colors.grey,
         ),
       ),
     );

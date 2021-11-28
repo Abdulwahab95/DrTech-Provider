@@ -26,6 +26,7 @@ dependencies:
   firebase_core:
   firebase_messaging: ^10.0.7
   firebase_analytics:
+  firebase_crashlytics:
   assets_audio_player:
   share:
   # Pickers
