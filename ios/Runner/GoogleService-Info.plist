@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>573995175331-77c4kgrmd580idr563aakkg06b69lh5p.apps.googleusercontent.com</string>
+	<string>499525300846-0bhb67lkmmha6u8tt1u129g61djqfnjg.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.573995175331-77c4kgrmd580idr563aakkg06b69lh5p</string>
+	<string>com.googleusercontent.apps.499525300846-0bhb67lkmmha6u8tt1u129g61djqfnjg</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>573995175331-5jf11ov93g1kb1pj3ipl4t32ftn3kfdn.apps.googleusercontent.com</string>
+	<string>499525300846-96gjtpsuk3p4ar5ctsuas41rqam4svli.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAkpav6ieY4p3pb4d6CEZf2JMa5LjxKQvc</string>
+	<string>AIzaSyARYrPLRH66wiBzn9JZfkM2hAImZINbgnU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>573995175331</string>
+	<string>499525300846</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.mitdone.projects.doctortec</string>
 	<key>PROJECT_ID</key>
-	<string>doctortec-19bb8</string>
+	<string>doctortec-7603c</string>
 	<key>STORAGE_BUCKET</key>
-	<string>doctortec-19bb8.appspot.com</string>
+	<string>doctortec-7603c.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,8 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:573995175331:ios:7c7fa0537a52d5ff61de16</string>
+	<string>1:499525300846:ios:352947108ce12a76</string>
 	<key>DATABASE_URL</key>
-	<string>https://doctortec-19bb8.firebaseio.com</string>
+	<string>https://doctortec-7603c.firebaseio.com</string>
 </dict>
 </plist>

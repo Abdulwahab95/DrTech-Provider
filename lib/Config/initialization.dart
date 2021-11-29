@@ -1,3 +1,6 @@
+
+import 'dart:io';
+
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/Firebase.dart';
@@ -9,19 +12,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Initialization {
   Initialization(callback) {
-    FlutterSimCountryCode.simCountryCode.then((value) {
-    //   print('$value');
-      DatabaseManager.liveDatabase["country"] = value.toString(); // "DZ";
-      FirebaseClass(() {
-        PackageInfo.fromPlatform().then((info) {
-          Globals.version = info.version;
-          Globals.buildNumber = info.buildNumber;
-          this.init(callback);
-          print('heree: ${Globals.version}');
-          print('heree: ${Globals.buildNumber}');
+    if (!Platform.isIOS)
+      FlutterSimCountryCode.simCountryCode.then((value) {
+      //   print('$value');
+        DatabaseManager.liveDatabase["country"] = value.toString(); // "DZ";
+        FirebaseClass(() {
+          PackageInfo.fromPlatform().then((info) {
+            Globals.version = info.version;
+            Globals.buildNumber = info.buildNumber;
+            this.init(callback);
+            print('heree: ${Globals.version}');
+            print('heree: ${Globals.buildNumber}');
+          });
         });
       });
-    });
+    else
+      {
+        DatabaseManager.liveDatabase["country"] = 'SA'; // "DZ";
+        FirebaseClass(() {
+          PackageInfo.fromPlatform().then((info) {
+            Globals.version = info.version;
+            Globals.buildNumber = info.buildNumber;
+            this.init(callback);
+            print('heree: ${Globals.version}');
+            print('heree: ${Globals.buildNumber}');
+          });
+        });
+      }
   }
   void init(callback) async {
     Globals.sharedPreferences = await SharedPreferences.getInstance();
