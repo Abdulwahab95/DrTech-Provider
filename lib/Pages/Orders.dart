@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
-import 'package:dr_tech/Components/TitleBar.dart';
+import 'package:dr_tech/Components/NotificationIcon.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -15,7 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'LiveChat.dart';
 
 class Orders extends StatefulWidget {
-  final status = ['PENDING', 'COMPLETED', 'CANCELED'];
+    final status = ['PENDING', 'COMPLETED', 'CANCELED'];
   final bool noheader;
   Orders({this.noheader = false});
 
@@ -37,15 +37,15 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
       print('here_listener_index: ${tabController.index}');
       print('here_listener_index: indexIsChanging ${tabController.indexIsChanging}');
 
-      if (tabController.indexIsChanging) {
-        load();
-      } else {
-        setState(() {
-          tabController.animateTo(tabController.index);
-          data = [];
-          load();
-        });
-      }
+     if (tabController.indexIsChanging) {
+       load();
+     } else {
+       setState(() {
+         tabController.animateTo(tabController.index);
+         data = [];
+         load();
+       });
+     }
     });
     print('here_initState_index: ${tabController.index}');
     load();
@@ -69,16 +69,16 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     // if (pages.containsKey(status)) {
     //   page = pages[status] + 1;
     // }
-    Function callback = (r) {
+    Function callback =  (r) {
       if (r['state'] == true) {
-        data = r['data'];
-        print('here_callback: ${data.runtimeType}');
-        // pages[r['filter']] = r['page'];
-        // if (!data.containsKey(r['filter'])) {
-        //   data[r['filter']] = {r["page"]: r['data']};
-        // } else {
-        //   data[r['filter']][r["page"]] = r['data'];
-        // }
+          data = r['data'];
+          print('here_callback: ${data.runtimeType}');
+          // pages[r['filter']] = r['page'];
+          // if (!data.containsKey(r['filter'])) {
+          //   data[r['filter']] = {r["page"]: r['data']};
+          // } else {
+          //   data[r['filter']][r["page"]] = r['data'];
+          // }
       }
       setState(() {
         print('here_setState: from here 3');
@@ -86,11 +86,9 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
       });
 
     };
-
     NetworkManager.httpGet(
         Globals.baseUrl + "orders/?status=$status", context, callback,// orders/load?page=$page&status=$status
         cashable: false);
-
   }
 
   @override
@@ -100,7 +98,40 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
         children: [
           widget.noheader == true
               ? Container()
-              : TitleBar(() {Navigator.pop(context);}, 35),
+              : Container(
+                  decoration:
+                      BoxDecoration(color: Converter.hexToColor("#2094cd")),
+                  padding:
+                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      padding: EdgeInsets.only(
+                          left: 25, right: 25, bottom: 10, top: 25),
+                      child: Row(
+                        textDirection: LanguageManager.getTextDirection(),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Icon(
+                                LanguageManager.getDirection()
+                                    ? FlutterIcons.chevron_right_fea
+                                    : FlutterIcons.chevron_left_fea,
+                                color: Colors.white,
+                                size: 26,
+                              )),
+                          Text(
+                            LanguageManager.getText(35),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          NotificationIcon(),
+                        ],
+                      ))),
           Row(
             textDirection: LanguageManager.getTextDirection(),
             children: [
@@ -111,14 +142,14 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
           ),
           Expanded(
               child: TabBarView(
-                controller: tabController,
-                physics: NeverScrollableScrollPhysics(),
-                children: widget.status.map((e) {
-                  print('here_TabBarView: $e , arrayIndex: ${widget.status.indexOf('$e')}');
+            controller: tabController,
+            physics: NeverScrollableScrollPhysics(),
+            children: widget.status.map((e) {
+              print('here_TabBarView: $e , arrayIndex: ${widget.status.indexOf('$e')}');
 
-                  return getPage(e.toLowerCase());
-                }).toList(),
-              ))
+              return getPage(e.toLowerCase());
+            }).toList(),
+          ))
         ],
       ),
     );
@@ -130,12 +161,12 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     List<Widget> items = [];
 
     if(status == widget.status[tabController.index].toLowerCase())
-      // if (data[status] != null) {
-      //   for (var pageIndex in data[status].keys) {
-      for (var item in data) {
-        print('here_loop: $item');
-        items.add(createOrderItem(item));
-      }
+    // if (data[status] != null) {
+    //   for (var pageIndex in data[status].keys) {
+        for (var item in data) {
+          print('here_loop: $item');
+          items.add(createOrderItem(item));
+        }
     //   }
     // }
 
@@ -149,9 +180,10 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     }
     return NotificationListener(
         child: ScrollConfiguration(
-            behavior: CustomBehavior(),
-            child: ListView(
-                padding: EdgeInsets.symmetric(vertical: 0), children: items)));
+            behavior: CustomBehavior(), child: ListView(
+            padding: EdgeInsets.symmetric(vertical: 0),
+            children: items
+        )));
   }
 
   Widget getTabTitle(title, index) {
@@ -196,13 +228,11 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
   }
 
   Widget createOrderItem(item) {
-    print('here_createOrderItem: ${item["service_name"].toString().length}');
-
+    print('here_createOrderItem: $item');
     double size = 90;
     return InkWell(
       onTap: () async {
         var results = await Navigator.push(context, MaterialPageRoute(builder: (_) => OrderDetails(item)));
-        print('here_1: $results');
 
         if (results == true) {
           setState(() {
@@ -240,10 +270,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                   color: Converter.hexToColor("#F2F2F2"),
                 image: DecorationImage(
                     // fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(Globals.correctLink(item['service_icon'])))
-
-              ),
-              // child: ,
+                    image: CachedNetworkImageProvider(Globals.correctLink(item['service_icon']))))
             ),
             Expanded(
               child: Column(
@@ -256,28 +283,28 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                     children: [
                       Expanded(
                         child: item["service_name"].toString().length < 25 &&
-                                item["service_name"].toString().length > 18
+                            item["service_name"].toString().length > 18
                             ? FittedBox(
-                                fit: BoxFit.contain,
-                                child: Text(
-                                  item["service_name"].toString(),
-                                  textDirection:
-                                      LanguageManager.getTextDirection(),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Converter.hexToColor("#2094CD")),
-                                ),
-                              )
+                          fit: BoxFit.contain,
+                          child: Text(
+                            item["service_name"].toString(),
+                            textDirection:
+                            LanguageManager.getTextDirection(),
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Converter.hexToColor("#2094CD")),
+                          ),
+                        )
                             : Text(
-                                item["service_name"].toString(),
-                                textDirection:
-                                    LanguageManager.getTextDirection(),
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Converter.hexToColor("#2094CD")),
-                              ),
+                          item["service_name"].toString(),
+                          textDirection:
+                          LanguageManager.getTextDirection(),
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Converter.hexToColor("#2094CD")),
+                        ),
                       ),
                       Container(
                         width: LanguageManager.getDirection()? 5 : 10,
@@ -303,8 +330,8 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                                     item["status"] == 'CANCELED'
                                         ? "#f00000"
                                         : item["status"] == 'WAITING'
-                                          ? "#0ec300"
-                                          : "#2094CD"),
+                                        ? "#0ec300"
+                                        : "#2094CD"),
                                 borderRadius: LanguageManager.getDirection()
                                     ? BorderRadius.only(
                                     topRight: Radius.circular(15),
@@ -388,26 +415,29 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                       )
                     ],
                   ),
-                  Container(height: 7),
+                  Container(
+                    height: 7,
+                  ),
 
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
 
-                    Container(height: 10),
+                        Container(height: 10),
 
-                    customButton(96, () {// Call Action
-                      launch('tel:${item['number_phone']}');
-                    }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco),
+                        customButton(96, () {// Call Action
+                          launch('tel:${item['number_phone']}');
+                        }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco),
 
-                    customButton(117, () {// Call Action
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item['provider_id'].toString())));
-                    }, FlutterIcons.message_text_mco, FlutterIcons.message_reply_text_mco),
+                        customButton(117, () {// Call Action
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item['provider_id'].toString())));
+                        }, FlutterIcons.message_text_mco, FlutterIcons.message_reply_text_mco),
 
-                  ]),
+                      ]),
 
-                  Container(height: 10),
-
+                  Container(
+                    height: 10,
+                  ),
                 ],
               ),
             )
@@ -456,12 +486,11 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
   String getStatusText(status) {
     print('here_status: $status');
     return LanguageManager.getText({
-      'PENDING': 93,
-      'WAITING': 92,
-      'COMPLETED': 94,
-      'CANCELED': 184
-    }[status.toString().toUpperCase()] ??
+          'PENDING': 93,
+          'WAITING': 92,
+          'COMPLETED': 94,
+          'CANCELED': 184
+        }[status.toString().toUpperCase()] ??
         92);
   }
-
 }

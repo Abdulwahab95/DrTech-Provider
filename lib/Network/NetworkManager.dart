@@ -6,8 +6,7 @@ import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart' as http_parser;
@@ -30,16 +29,10 @@ class NetworkManager {
       if (responseBody == null) return;
 
       try {
-        log('try');
         var jsonData = json.decode(responseBody);
-        // log('try: $jsonData');
         try {
-          // log('try2:');
-          // log('try2_jsonData: $jsonData');
-          // log('try2_payloadStorageKey: $payloadStorageKey');
           return callback(jsonData, payloadStorageKey);
         } catch (e) {
-          // log('catch1: $e');
           return callback(jsonData);
         }
       } catch (e) {
@@ -47,17 +40,11 @@ class NetworkManager {
         if (onError != null)
           onError('Error trying parsing server responce . ');
         else
-          log('1onError: $e');
+          log('onError: $e');
 
-        if (context != null) {
+        if(context != null) {
           Alert.endLoading();
-          if (json.decode(responseBody)['state'] != null && json.decode(responseBody)['state'] == false) {
-            if (json.decode(responseBody)['message_code'] != null && json.decode(responseBody)['message_code'] != -1)
-              Alert.show(context, LanguageManager.getText(int.parse(json.decode(responseBody)['message_code'].toString())));
-            else
-              Alert.show(context, Converter.getRealText(json.decode(responseBody)['message']));
-          } else
-            Alert.show(context, responseBody);
+          Alert.show(context, responseBody);
         }
       }
     };
@@ -77,22 +64,9 @@ class NetworkManager {
       else
         response = await http.get(Uri.parse(url), headers: header);
 
-      // log
-      try{
-        log("----------START---------");
-        log('url: $url');
-        log('form-data: $body');
-        log('header: $header');
-        log('response.body: ${response.body}');
-        log("-----------END--------");
-      }catch(e){
-        print('heree: catch: $e');
-      }
-
       if (response == null) {
         if (onError != null) onError("Null Responce");
       }
-
       final int statusCode = response.statusCode;
       if (statusCode < 200 || statusCode > 400) {
         if (onError != null) onError("Error while fetching data");
@@ -100,32 +74,46 @@ class NetworkManager {
           Alert.endLoading();
           Alert.show(context, response.body.toString().length == 0? '$url\n--------\nstatusCode: ${response.statusCode}': response.body);
         }
+        print('here_serverCall: statusCode: ${response.statusCode}');
+        print('here_serverCall: body: ${response.body}');
+        print('here_serverCall: url: $url');
         throw new Exception("Error while fetching data");
       }else if (context != null && response.body != null
           && json.decode(response.body)['state'] != null
           && json.decode(response.body)['state'] == false) {
 
-        // if(json.decode(response.body)['code'] == '401'){
-        //   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Login()), (Route<dynamic> route) => false);
-        // }
-
         var r = json.decode(response.body);
         // r['message_code'] = 10;
-          Alert.endLoading();
-        if(notInAllow(r, url)){
-          if (r['message_code'] != null && r['message_code'] != -1)
-            Alert.show(context, LanguageManager.getText(int.parse(r['message_code'].toString())));
-          else
-            Alert.show(context, Converter.getRealText(r['message']));
-        }
+        Alert.endLoading();
+        if (r['message_code'] != null && r['message_code'] != -1)
+          Alert.show(context, LanguageManager.getText(int.parse(r['message_code'].toString())));
+        else
+          Alert.show(context, Converter.getRealText(r['message']));
       }
-
 
       if (asyncValidator[payloadInfo['url']] != payloadInfo['validatorKey']) {
         return null;
       }
 
       try {
+        // log
+        log("----------START---------");
+        log('url: $url');
+        log('form-data: $body');
+        log('header: $header');
+        log('response.body: ${response.body}');
+        log("-----------END--------");
+
+        // if (response.body != null && json.decode(response.body).containsKey('code') && json.decode(response.body)['code'] != "200") {
+        //   var dataMap = json.decode(response.body);
+        //   if(context != null) {
+        //     Alert.endLoading();
+        //     if(dataMap.containsKey('message') && dataMap['message'] != null && dataMap['message'].toString().isNotEmpty)
+        //       Alert.show(context, dataMap['message']);
+        //     else
+        //       Alert.show(context, response.body);
+        //   }
+        // }
 
         if (cachable == true) {
           DatabaseManager.save(payloadInfo['localStorageKey'], response.body);
@@ -136,7 +124,7 @@ class NetworkManager {
         };
       } catch (e) {
         if (onError != null) onError("Error in the server responce format");
-        throw Exception("Error in the server responce format");
+        throw Exception("Error in the server responce format\n$e");
       }
     }
 
@@ -163,12 +151,7 @@ class NetworkManager {
     return storageKey;
   }
 
-  void fileUpload(url, List filesData, onProgress, callback, {body}) async {
-    log("----------START---------");
-    log('url: $url');
-    log('form-data: $body');
-    log("-----------END--------");
-
+  void fileUpload(url, List filesData, onProgress, callback, {body, context}) async {
     final request = MultipartRequest(
       'POST',
       Uri.parse(url),
@@ -178,6 +161,7 @@ class NetworkManager {
         onProgress(progress);
       },
     );
+    print('here_request: $request');
     var header = Globals.header();
     for (var key in header.keys) {
       request.headers[key] = header[key];
@@ -190,13 +174,35 @@ class NetworkManager {
     for (var fileData in filesData) {
       request.files.add(http.MultipartFile.fromBytes(
           fileData['name'], fileData['file'],
-          contentType: http_parser.MediaType(
-              fileData["type_name"], fileData["file_type"]),
+          contentType: http_parser.MediaType(fileData["type_name"], fileData["file_type"]),
           filename: fileData['file_name']));
+      print('here_fileData: ${request.files[0].length}');
     }
 
+    log("----------START---------");
+    log('url: $url');
+    log('form-data: $body');
+    log('header: $header');
+    log("-----------END--------");
+
+
     StreamedResponse streamedResponse = await request.send();
-    final responceBody = await streamedResponse.stream.bytesToString();
+
+    // StreamedResponse streamedResponse = await request.send().then((value) {
+      print('here_statusCode: ${streamedResponse.statusCode}');
+      print('here_reasonPhrase: ${streamedResponse.reasonPhrase}');
+      print('here_persistentConnection: ${streamedResponse.persistentConnection}');
+    //   // print('here_request: ${value.request}');
+    //    print('here_stream: ${value.stream.transform(utf8.decoder).join().then((value) {
+    //       print('here_stream_then: $value');
+    //     })}');
+    //   // print('here_stream: ${value.stream.bytesToString().then((value) {
+    //   //   print('here_stream: $value');
+    //   // })}');
+    //   return;
+    // });
+
+    final responceBody = await streamedResponse.stream.transform(utf8.decoder).join();
     try {
       var jsonResponce = json.decode(responceBody);
 
@@ -207,11 +213,21 @@ class NetworkManager {
       log('response.body: $jsonResponce');
       log("-----------END--------");
 
+      if (jsonResponce != null && jsonResponce.containsKey('code') && jsonResponce['code'] != "200") {
+        if(context != null) {
+          Alert.endLoading();
+          if(jsonResponce.containsKey('message') && jsonResponce['message'] != null && jsonResponce['message'].toString().isNotEmpty)
+            Alert.show(context, jsonResponce['message']);
+          else
+            Alert.show(context, jsonResponce);
+        }
+      }
 
       callback(jsonResponce);
     } catch (e) {
       print(responceBody);
     }
+
   }
 
   static void httpGet(String url, BuildContext context, Function callback,
@@ -236,13 +252,6 @@ class NetworkManager {
   static log(e) {
     print(e);
   }
-
-  bool notInAllow(r, String url) {
-    if(r['message'].toString() == 'api.failed.unauthenticated' && url.endsWith('api/notifications'))
-      return false;
-    else
-      return true;
-  }
 }
 
 class MultipartRequest extends http.MultipartRequest {
@@ -261,6 +270,8 @@ class MultipartRequest extends http.MultipartRequest {
     final byteStream = super.finalize();
     if (onProgress == null) return byteStream;
 
+    print('here_this: $this');
+    print('here_this: ${this.contentLength}');
     final total = this.contentLength;
     int bytes = 0;
 

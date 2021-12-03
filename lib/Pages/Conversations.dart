@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/EmptyPage.dart';
 import 'package:dr_tech/Components/Recycler.dart';
-import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
@@ -15,8 +14,6 @@ import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-
-import 'Home.dart';
 
 class Conversations extends StatefulWidget {
   final bool noheader;
@@ -32,50 +29,42 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
   bool isLoading;
   var responseBody;
 
+  _onLayoutDone(_) {
+    //do your stuff
+    print('here_: _onLayoutDone');
+  }
+
   @override
   void initState() {
-    print('here_Lifecycle: initState $mounted');
+    WidgetsBinding.instance.addPostFrameCallback(_onLayoutDone);
     WidgetsBinding.instance.addObserver(this);
-    load();
     Globals.updateConversationCount = (){if(mounted)load();};
+    load();
     super.initState();
   }
+
   @override
   void dispose() {
-    print('here_Lifecycle: dispose $mounted');
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('here_Lifecycle: didChangeAppLifecycleState $state , mounted: $mounted');
     if (state == AppLifecycleState.resumed) {
       load();
     }
   }
-  @override
-  void didChangeDependencies() {
-    print('here_Lifecycle: didChangeDependencies, mounted: $mounted');
-    super.didChangeDependencies();
-  }
-  @override
-  void didUpdateWidget(covariant Conversations oldWidget) {
-    print('here_Lifecycle: didUpdateWidget $oldWidget, mounted: $mounted');
-    super.didUpdateWidget(oldWidget);
-  }
-  @override
-  void deactivate() {
-    print('here_Lifecycle: deactivate, mounted: $mounted');
-    super.deactivate();
-  }
-  void load() {
-    setState(() {isLoading = true;});
 
-    NetworkManager.httpGet(Globals.baseUrl + "user/convertations", context, (r) { // chat/conversations?page=$page
-      setState(() {
-        isLoading = false;
-      });
+
+
+  void load() {
+    setState(() { isLoading = true; });
+
+    NetworkManager.httpGet(Globals.baseUrl + "provider/convertations",  context, (r) { // chat/conversations?page=$page
+
+      setState(() { isLoading = false; });
+
       if (r['state'] == true) {
         responseBody = r;
         setState(() {
@@ -83,27 +72,13 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
           data[page] = r['data'];// data[r['page']] = r['data'];
         });
       }
-    },cashable: true);
+    }, cashable: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    print('here_Lifecycle: build, mounted: $mounted');
-
-    return WillPopScope(
-      onWillPop: _close,
-      child: Scaffold(
-        body: Column(
-          children: [
-            widget.noheader == true
-                ? Container()
-                : TitleBar(_close, 36),
-            Expanded(
-              child: getChatConversations(),
-            )
-          ],
-        ),
-      ),
+    return Scaffold(
+      body: getChatConversations(),
     );
   }
 
@@ -111,11 +86,9 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
     List<Widget> items = [];
     for (var page in data.keys) {
       for (var item in data[page]) {
-        // print('here_getChatConversations: $item');
         items.add(getConversationItem(item, items.length));
       }
     }
-    print('here_getChatConversations: items: $items , isLoading: $isLoading, data: $data');
 
     if (items.length == 0 && isLoading) {
       return Container(
@@ -129,10 +102,10 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
     return Recycler(
       children: items,
       onScrollDown: () {
-      //   if (!isLoading) { //--------------------------------------------------------------- re**
-      //     if (data.length == 0) return; // data.length > 0 && data[0].length == 0
-      //     load();
-      //   }
+        // if (!isLoading) {
+        //   if (data.length > 0 && data[0].length == 0) return;
+        //   load();
+        // }
       },
     );
   }
@@ -142,13 +115,12 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
       onTap: () async {
         if (UserManager.currentUser("chat_not_seen").isNotEmpty && item['count_not_seen'] != null )
             UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) - item['count_not_seen']));
-       Globals.updateChatCount();
+        Globals.updateNotificationCount();
         item['count_not_seen'] = 0;
         setState(() {});
         responseBody['data'][length] = item;
-        print('----------> $length, ${responseBody.runtimeType}');
-        DatabaseManager.save(Globals.baseUrl + "user/convertations", jsonEncode(responseBody));
-        final result = await  Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["engineer_id"].toString())));
+        DatabaseManager.save(Globals.baseUrl + "provider/convertations", jsonEncode(responseBody));
+        final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item["user_id"].toString())));
         if(result == true)
           load();
       },
@@ -172,7 +144,7 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
               height: 50,
               width: 50,
               decoration: BoxDecoration(
-                  image: DecorationImage(image: CachedNetworkImageProvider(Globals.correctLink(item['user']['image']))),//----------------------- re**
+                  image: DecorationImage(image: CachedNetworkImageProvider(Globals.correctLink(item['user']['image']))),
                   borderRadius: BorderRadius.circular(10)),
             ),
             Expanded(
@@ -181,7 +153,7 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
               textDirection: LanguageManager.getTextDirection(),
               children: [
                 Text(
-                  item['user']['name'].toString(),//item['user']['name'],
+                  item['user']['name']??'',
                   textDirection: LanguageManager.getTextDirection(),
                   style: TextStyle(
                       fontSize: 16,
@@ -229,13 +201,4 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
       ),
     );
   }
-
-  Future<bool> _close() async{
-    if(Navigator.canPop(context)) {
-        Navigator.pop(context);
-        return true;
-    } else
-      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home()), (Route<dynamic> route) => false);
-  }
-
 }

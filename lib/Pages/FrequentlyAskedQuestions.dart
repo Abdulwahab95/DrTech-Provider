@@ -29,7 +29,8 @@ class _FrequentlyAskedQuestionsState extends State<FrequentlyAskedQuestions> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "faq", context, (r) {//information/FrequentlyAskedQuestions
+    NetworkManager.httpGet(
+        Globals.baseUrl + "faq",  context, (r) {//information/FrequentlyAskedQuestions
       setState(() {
         isLoading = false;
       });

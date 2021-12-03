@@ -6,17 +6,17 @@ class RateStars extends StatefulWidget {
   final Function onUpdate;
   var stars;
   RateStars(this.size,
-      {this.spacing = 0.1, this.onUpdate, this.stars});
+      {this.spacing = 0.1, this.onUpdate, this.stars });
 
   @override
   _RateStarsState createState() => _RateStarsState();
 }
 
 class _RateStarsState extends State<RateStars> {
-  var stars;
+  var stars ;
   @override
   void initState() {
-    stars = widget.stars;
+    stars = widget.stars ;
     super.initState();
   }
 

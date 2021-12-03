@@ -1,8 +1,6 @@
-
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:flutter/cupertino.dart';
 
 class UserManager {
   static bool checkLogin() {
@@ -24,7 +22,12 @@ class UserManager {
 
   static void updateSp(key, value) {
     DatabaseManager.save(key, value);
+    if(key == 'not_seen' && value > 0){
+      print('here_play: updateSp');
+      // AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/received.mp3"));
+    }
   }
+
 
   static void logout(callback) {
     NetworkManager.httpGet(Globals.baseUrl + "users/logout", null, (userInfo) {
@@ -41,14 +44,12 @@ class UserManager {
 
   static void refrashUserInfo({callBack}) {
     if (!UserManager.checkLogin()) return;
-    NetworkManager.httpGet(Globals.baseUrl + "users/profile", null, (userInfo) {// user/info
+    NetworkManager.httpGet(Globals.baseUrl + "users/profile", null, (userInfo) { // user/info
       try {
         if (userInfo['state'] == true) {
           UserManager.proccess(userInfo['data']);
           if (callBack != null) callBack();
           Globals.updateNotificationCount();
-          Globals.updateChatCount();
-          Globals.updateConversationCount();
         } else
           UserManager.logout((){});
       } catch (e) {
@@ -57,38 +58,26 @@ class UserManager {
     });
   }
 
-  static void update(key, value, BuildContext context ,callback, {Map mapBody}) {
-    print('here_update');
-    Map<String, String> body = {"key": key, key: value};
+  static void update(key, value, context, callback) {
+    Map<String, String> body = {key: value};
 
-    NetworkManager.httpPost(Globals.baseUrl + "users/account/update", context,(r) { // user/update
-      callback(r['state']);
-      if (r['state'] == true) {
-        print('here_update: if');
-        if(r['data']['user'] != null) {
-          print('here_update: if2');
-          UserManager.proccess(r['data']['user']);
-        } else {
-          print('here_update: else2');
-          UserManager.proccess(r['data']);
-        }
+    var url =  'users/account/update';
+    if(key == 'active')
+      url = 'provider/status/update';
+
+    NetworkManager.httpPost(Globals.baseUrl + url,  context, (r) { // user/update
+      callback(r);
+      if (r['state'] == true && key != 'active') {
+        UserManager.proccess(r['data']);
       }
-    }, body: mapBody != null ? mapBody :body);
+    }, body: body);
   }
 
-  static void updateBody(body, BuildContext context ,callback) {
-    print('here_updateBody');
-    NetworkManager.httpPost(Globals.baseUrl + "users/account/update", context,(r) { // user/update
-      callback(r);
+  static void updateBody(body, context,callback) {
+    NetworkManager.httpPost(Globals.baseUrl + "users/account/update",  context, (r) { // user/update
+      callback(r['state']);
       if (r['state'] == true) {
-        print('here_updateBody: if');
-        if(r['data']['user'] != null) {
-          print('here_updateBody: if2');
-          UserManager.proccess(r['data']['user']);
-        } else {
-          print('here_updateBody: else2');
-          UserManager.proccess(r['data']);
-        }
+        UserManager.proccess(r['data']);
       }
     }, body: body);
   }

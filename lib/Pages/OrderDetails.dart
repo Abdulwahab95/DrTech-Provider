@@ -6,7 +6,6 @@ import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:dr_tech/Pages/OrderSetRating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -43,7 +42,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                 width: MediaQuery.of(context).size.width * 0.95,
                 height: MediaQuery.of(context).size.width * 0.455,
                 margin:
-                EdgeInsets.all(MediaQuery.of(context).size.width * 0.025),
+                    EdgeInsets.all(MediaQuery.of(context).size.width * 0.025),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Converter.hexToColor("#F2F2F2"),
@@ -57,8 +56,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                   children: [
                     Container(
                       height: 30,
-                      padding: EdgeInsets.only(left: 5, right: 10),
                       // width: 60,
+                      padding: EdgeInsets.only(left: 5, right: 10),
                       margin: EdgeInsets.only(top: 5),
                       alignment: Alignment.center,
                       child: Text(
@@ -73,15 +72,15 @@ class _OrderDetailsState extends State<OrderDetails> {
                               widget.data["status"] == 'CANCELED'
                                   ? "#f00000"
                                   : widget.data["status"] == 'WAITING'
-                                    ? "#0ec300"
-                                    : "#2094CD"),
+                                  ? "#0ec300"
+                                  : "#2094CD"),
                           borderRadius: LanguageManager.getDirection()
                               ? BorderRadius.only(
-                              topRight: Radius.circular(15),
-                              bottomRight: Radius.circular(15))
+                                  topRight: Radius.circular(15),
+                                  bottomRight: Radius.circular(15))
                               : BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              bottomLeft: Radius.circular(15))),
+                                  topLeft: Radius.circular(15),
+                                  bottomLeft: Radius.circular(15))),
                     ),
                   ],
                 ),
@@ -128,7 +127,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 Text(
                                   widget.data["price"].toString(),
                                   textDirection:
-                                  LanguageManager.getTextDirection(),
+                                      LanguageManager.getTextDirection(),
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -140,7 +139,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 Text(
                                   widget.data["unit"].toString(),
                                   textDirection:
-                                  LanguageManager.getTextDirection(),
+                                      LanguageManager.getTextDirection(),
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.normal,
@@ -181,7 +180,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontWeight: FontWeight.normal,
                                     fontSize: 14),
                                 textDirection:
-                                LanguageManager.getTextDirection(),
+                                    LanguageManager.getTextDirection(),
                               )
                             ],
                           ),
@@ -203,7 +202,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                               // ),
                               InkWell(
                                 onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(widget.data['provider_id'].toString())));
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(widget.data['user_id'].toString())));
                                 },
                                 child: Icon(
                                   Icons.message,
@@ -230,77 +229,72 @@ class _OrderDetailsState extends State<OrderDetails> {
                   ),
                 ),
               ),
-              // widget.data['status'] != 'PENDING' &&
-              //     widget.data['status'] != 'WAITING'
-              //     ? Container()
-              //     :
               Row(
-                textDirection: LanguageManager.getTextDirection(),
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(width: 30),
-                widget.data['status'] == 'WAITING'
-                  ? Expanded(
-                  flex: 1,
-                    child: InkWell(
-                      onTap: completedOrder,
-                      child: Container(
-                        height: 45,
-                        alignment: Alignment.center,
-                        child: Text(
-                          LanguageManager.getText(179), // استلام الطلب
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                      textDirection: LanguageManager.getTextDirection(),
+                      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(width: 30),
+                        widget.data['status'] != 'PENDING'
+                        ? Container()
+                        : Expanded(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: completedOrder,
+                            child: Container(
+                              height: 45,
+                              alignment: Alignment.center,
+                              child: Text(
+                                LanguageManager.getText(294), // تسليم الطلب
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withAlpha(15),
+                                        spreadRadius: 2,
+                                        blurRadius: 2)
+                                  ],
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Converter.hexToColor("#2094CD")),
+                            ),
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black.withAlpha(15),
-                                  spreadRadius: 2,
-                                  blurRadius: 2)
-                            ],
-                            borderRadius: BorderRadius.circular(8),
-                            color: Converter.hexToColor("#0ec300")),
-                      ),
+                        widget.data['status'] != 'PENDING'
+                            ? Container()
+                            : Container(width: 15),
+                        widget.data['status'] == 'PENDING' || widget.data['status'] == 'WAITING'
+                        ? Expanded(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              cancelOrder();
+                            },
+                            child: Container(
+                              height: 45,
+                              alignment: Alignment.center,
+                              child: Text(
+                                LanguageManager.getText(180), // الغاء الطلب
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withAlpha(15),
+                                        spreadRadius: 2,
+                                        blurRadius: 2)
+                                  ],
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Converter.hexToColor("#FF0000")),
+                            ),
+                          ),
+                        ) :Container(),
+                        Container(width: 30),
+                      ],
                     ),
-                  )
-                    :Container(),
-                  widget.data['status'] != 'WAITING'
-                      ? Container()
-                      : Container(width: 15),
-                  widget.data['status'] == 'PENDING' || widget.data['status'] == 'WAITING'
-                  ? Expanded(
-                    flex: 1,
-                    child: InkWell(
-                      onTap: () {
-                        cancelOrder();
-                      },
-                      child: Container(
-                        height: 45,
-                        alignment: Alignment.center,
-                        child: Text(
-                          LanguageManager.getText(180), // الغاء الطلب
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black.withAlpha(15),
-                                  spreadRadius: 2,
-                                  blurRadius: 2)
-                            ],
-                            borderRadius: BorderRadius.circular(8),
-                            color: Converter.hexToColor("#FF0000")),
-                      ),
-                    ),
-                  )
-                :Container(),
-                  Container(width: 30),
-                ],
-              ),
               Container(
                 height: 15,
               )
@@ -321,8 +315,6 @@ class _OrderDetailsState extends State<OrderDetails> {
       Alert.callSetState();
     }
 
-    print('here_cancelOrderConferm: cancel: $cancel ${cancel.isEmpty}, errors: $errors');
-
     if (errors.keys.length > 0) {
       Globals.vibrate();
       return;
@@ -339,26 +331,22 @@ class _OrderDetailsState extends State<OrderDetails> {
         Navigator.of(context).pop(true);
       }
     }, body: cancel);
+
   }
 
   void completedOrderConferm() {
     Alert.startLoading(context);
-    // Map<String, String> body = {"id": widget.data['id'].toString()};
-    NetworkManager.httpPost(Globals.baseUrl + "orders/status/${widget.data['id']}", context ,(r) async { //orders/completed
+    NetworkManager.httpPost(Globals.baseUrl + "orders/status/${widget.data['id']}",  context, (r) { // orders/completed
       Alert.endLoading();
       if (r['state'] == true) {
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => OrderSetRating(widget.data['id'])));
-        var results = await Navigator.push(context, MaterialPageRoute(builder: (_) => OrderSetRating(widget.data['id'])));
-        print('here_2: $results');
-        if (results == true) {
-            Navigator.of(context).pop(true);
-            Alert.show(context, Converter.getRealText(237));
-        }
+        Navigator.of(context).pop(true);
       }
-    }, body: {"status":"COMPLETED"});
+    }, body: {"status":"WAITING"});
   }
 
   getCancelWidget() {
+    print('here_cancelOrderConferm: cancel: $cancel ${cancel.isEmpty}, errors: $errors ${errors['canceled_reason'] == true}');
+
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -525,7 +513,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                 height: 30,
               ),
               Text(
-                LanguageManager.getText(181),
+                LanguageManager.getText(295), // هل أنت متأكد من تسليم الطلب؟
                 style: TextStyle(
                     color: Converter.hexToColor("#707070"),
                     fontWeight: FontWeight.bold),
@@ -571,7 +559,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                       height: 45,
                       alignment: Alignment.center,
                       child: Text(
-                        LanguageManager.getText(182),
+                        LanguageManager.getText(294),
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold),
                       ),
@@ -596,12 +584,11 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   String getStatusText(status) {
     return LanguageManager.getText({
-      'PENDING': 93,
-      'WAITING': 92,
-      'COMPLETED': 94,
-      'CANCELED': 184
-    }[status.toString().toUpperCase()] ??
+          'PENDING': 93,
+          'WAITING': 92,
+          'COMPLETED': 94,
+          'CANCELED': 184
+        }[status.toString().toUpperCase()] ??
         92);
   }
-
 }

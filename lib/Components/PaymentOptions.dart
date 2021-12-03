@@ -5,15 +5,14 @@ import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:dr_tech/Pages/Orders.dart';
 import 'package:dr_tech/Pages/WebBrowser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class PaymentOptions extends StatefulWidget {
-  final id, messageId, liveChatContext;
-  PaymentOptions(this.id, this.messageId, this.liveChatContext);
+  final id, messageId;
+  PaymentOptions(this.id, this.messageId);
 
   @override
   _PaymentOptionsState createState() => _PaymentOptionsState();
@@ -29,16 +28,13 @@ class _PaymentOptionsState extends State<PaymentOptions> {
   }
 
   void load() {
-        setState(() { data = ["CACH"]; });
-    // NetworkManager.httpGet(Globals.baseUrl + "payment/load", (r) {
-    //   if (r['state'] == true) {
-    //     setState(() {
-    //       data = r['data'];
-    //     });
-    //   } else if (r['message'] != null) {
-    //     Alert.show(context, Converter.getRealText(r['message']));
-    //   }
-    // }, cashable: true);
+    NetworkManager.httpGet(Globals.baseUrl + "payment/load",  context, (r) {
+      if (r['state'] == true) {
+        setState(() {
+          data = r['data'];
+        });
+      }
+    }, cashable: true);
   }
 
   @override
@@ -119,7 +115,7 @@ class _PaymentOptionsState extends State<PaymentOptions> {
   Widget getPaymentMethod(itemKey) {
     switch (itemKey) {
       case "CACH":
-        return getPaymentOption(134, "cach", "CACH");
+        return getPaymentOption(134, "payment-cash", "CACH");
         break;
       case "CARD":
         return getPaymentOption(135, "visa", "CARD");
@@ -206,10 +202,14 @@ class _PaymentOptionsState extends State<PaymentOptions> {
     else {
       String url = [
         Globals.baseUrl,
-        "payment/offer/?user=", UserManager.currentUser(Globals.authoKey),
-        "&id=", widget.id,
-        "&message_id=", widget.messageId,
-        "&method=", "2"
+        "payment/offer/?user=",
+        UserManager.currentUser(Globals.authoKey),
+        "&id=",
+        widget.id,
+        "&message_id=",
+        widget.messageId,
+        "&method=",
+        "2"
       ].join();
 
       var results = await Navigator.push(
@@ -226,27 +226,20 @@ class _PaymentOptionsState extends State<PaymentOptions> {
 
   void offerAccept(paymentToken) {
     Map<String, String> body = {
-      "message_id": widget.messageId.toString(),
-      "offer_id": widget.id.toString(),
+      "message_id": widget.messageId,
+      "id": widget.id,
       "token": paymentToken
     };
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "orders/create",context, (r) { // orders/set
+    NetworkManager.httpPost(Globals.baseUrl + "orders/set",  context, (r) {
       Alert.endLoading();
-      onResponce(r);
+      onResponce (r);
     }, body: body);
   }
 
-  void onResponce(r) {
+  void onResponce  (r) {
     if (r['state'] == true) {
       Navigator.of(context).pop(true);
-      Alert.show(widget.liveChatContext, Converter.getRealText(299),
-          onYesShowSecondBtn: false,
-          premieryText: Converter.getRealText(300),
-          onYes: () {
-            Navigator.of(widget.liveChatContext).pop(true);
-            Navigator.push(widget.liveChatContext, MaterialPageRoute(builder: (_) => Orders()));
-          });
     }
   }
 }

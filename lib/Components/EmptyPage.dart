@@ -27,6 +27,7 @@ class _EmptyPageState extends State<EmptyPage> {
           padding: const EdgeInsets.all(10.0),
           child: Text(
             LanguageManager.getText(widget.message),
+            textDirection: LanguageManager.getTextDirection(),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16),
           ),

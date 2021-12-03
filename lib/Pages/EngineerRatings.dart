@@ -60,7 +60,7 @@ class _EngineerRatingsState extends State<EngineerRatings> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "service/ratings/${widget.id}" ,  context, (r) { // user/ratings?id=${widget.id}&page$page
+        Globals.baseUrl + "provider/service/ratings/${widget.id}" ,  context, (r) { // user/ratings?id=${widget.id}&page$page
       setState(() {
         isLoading = false;
       });
@@ -69,6 +69,8 @@ class _EngineerRatingsState extends State<EngineerRatings> {
           page++;
           data[r["pgae"]] = r['data'];
         });
+      } else {
+          Navigator.pop(context);
       }
     });
   }
@@ -81,15 +83,13 @@ class _EngineerRatingsState extends State<EngineerRatings> {
           data[0] != null && data[0].isEmpty
               ? EmptyPage("reviews", LanguageManager.getText(122))
               : Expanded(
-              child: isLoading && data.isEmpty
-                  ? Container(
-                alignment: Alignment.center,
-                child: CustomLoading(),
-              )
-                  : Recycler(
-                children: getComments(),
-              ))
-        ]));
+                  child: isLoading && data.isEmpty
+                      ? Container(
+                          alignment: Alignment.center,
+                          child: CustomLoading(),
+                        )
+                      : Recycler(children: getComments()))
+    ]));
   }
 
   List<Widget> getComments() {
@@ -134,10 +134,10 @@ class _EngineerRatingsState extends State<EngineerRatings> {
                         textDirection: LanguageManager.getTextDirection(),
                         children: [
                           Icon(
-                            (item['stars'] != null? item['stars'] : 5) > 2
+                            item['stars'] > 2
                                 ? FlutterIcons.like_fou
                                 : FlutterIcons.dislike_fou,
-                            color: (item['stars'] != null? item['stars'] : 5) > 2 ? Colors.orange : Colors.grey ,
+                            color: item['stars'] > 2 ? Colors.orange : Colors.grey ,
                             size: 20,
                           ),
                           Container(

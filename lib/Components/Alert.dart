@@ -10,9 +10,11 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class Alert extends StatefulWidget {
+
   static Function publicClose;
   static Function setStateCall;
   static Function callSetState;
+
   static var staticContent;
   static bool currentLoader = false;
   static BuildContext currentLoaderContext;
@@ -57,7 +59,9 @@ class Alert extends StatefulWidget {
         context: context,
         builder: (_) {
           return WillPopScope(
-              onWillPop: () async {return false;},
+              onWillPop: () async {
+                return false;
+              },
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 body: Container(
@@ -108,7 +112,6 @@ class _AlertState extends State<Alert> {
     if(setStateCallBack != null) Alert.callSetState = setStateCallBack;
 
     super.initState();
-
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
@@ -132,9 +135,10 @@ class _AlertState extends State<Alert> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    print('here_BuildContext_alert');
     Widget content = Scaffold(
       backgroundColor: Colors.transparent,
       body: ScrollConfiguration(
@@ -147,7 +151,11 @@ class _AlertState extends State<Alert> {
               Container(
                 height: MediaQuery.of(context).size.height,
               ),
-              getAlertBody()]))),
+              getAlertBody()
+            ],
+          ),
+        ),
+      ),
     );
     if (widget.isDismissible)
       return GestureDetector(
@@ -158,7 +166,6 @@ class _AlertState extends State<Alert> {
     return content;
   }
 
-  bool isBlack = false;
   Widget getAlertBody() {
     return Container(
       height: MediaQuery.of(context).size.height,
@@ -167,7 +174,7 @@ class _AlertState extends State<Alert> {
         padding: EdgeInsets.all(10),
         child: getContent(),
         decoration: BoxDecoration(
-            color: isBlack?Colors.black:Colors.white,
+            color: Colors.white,
             borderRadius: true
                 ? BorderRadius.only(
                     topLeft: Radius.circular(15), topRight: Radius.circular(15))
@@ -198,18 +205,25 @@ class _AlertState extends State<Alert> {
             children: [
               InkWell(
                 onTap: close,
-                child: Icon(FlutterIcons.close_ant,size: 24),
+                child: Icon(
+                  FlutterIcons.close_ant,
+                  size: 24,
+                ),
               )
             ],
           ),
-          Container(height: 10),
+          Container(
+            height: 10,
+          ),
           Text(
             Converter.getRealText(widget.content),
             textDirection: LanguageManager.getTextDirection(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
             textAlign: TextAlign.center,
           ),
-          Container(height: 15),
+          Container(
+            height: 15,
+          ),
           Container(
             margin: EdgeInsets.only(top: 10, bottom: 15),
             child: Row(
@@ -307,11 +321,14 @@ class _AlertState extends State<Alert> {
                     )
                   : Container(),
               Container(
+                color: Colors.transparent,
                 width: 15,
               ),
               Text(
                 Converter.getRealText(
-                    item['name'] != null ? item['name'] : item['text']),
+                    item['name'] != null ? item['name']
+                        : item['title'] != null ? item['title']
+                        : item['text']),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               )
             ],
@@ -334,11 +351,13 @@ class _AlertState extends State<Alert> {
 
   void close() {
     Timer(Duration(milliseconds: 250), () {
+      if(mounted)
       Navigator.pop(context);
     });
-    controller.animateTo(0,
-        duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
+    if(mounted)
+    controller.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
   }
+
 }
 
 enum AlertType { SELECT, TEXT, WIDGET }

@@ -10,7 +10,7 @@ class ServerLogger {
     Map<String, String> body = {};
     body['error'] = DatabaseManager.load("errors_log");
 
-    NetworkManager.httpPost(Globals.baseUrl + "AppLogger/flush", null ,(r) {
+    NetworkManager.httpPost(Globals.baseUrl + "AppLogger/flush",  null, (r) {
       if (r['state'] == true) {
         DatabaseManager.unset("errors_log");
       }

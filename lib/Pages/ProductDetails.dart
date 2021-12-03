@@ -218,7 +218,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         createSpecificationsItem(widget.args['brand'], FlutterIcons.star_ant));
 
     items.add(createSpecificationsItem(
-        LanguageManager.getText(widget.args['status'] == 'NEW' ? 142 : 143),
+        LanguageManager.getText(widget.args['state'] == 'NEW' ? 142 : 143),
         FlutterIcons.box_ent));
 
     if (widget.args['is_guaranteed'] == "1")

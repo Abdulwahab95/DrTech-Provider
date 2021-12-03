@@ -35,11 +35,13 @@ class _EngineerPageState extends State<EngineerPage> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "user/engineer?id=${widget.id}&service_id=${widget.serviceId}", context, (r) {
+        Globals.baseUrl +
+            "user/engineer?id=${widget.id}&service_id=${widget.serviceId}",
+         context, (r) {
       setState(() {
         isLoading = false;
       });
-      if (r["status"] == true) {
+      if (r['state'] == true) {
         setState(() {
           user = r['user'];
         });
@@ -489,7 +491,7 @@ class _EngineerPageState extends State<EngineerPage> {
 
   void startNewConversation(id) {
     Alert.startLoading(context);
-    NetworkManager.httpGet(Globals.baseUrl + "chat/add?id=$id", context, (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "chat/add?id=$id",  context, (r) {
       Alert.endLoading();
       if (r['state'] == true) {
         Navigator.push(context,

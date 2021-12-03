@@ -42,7 +42,7 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
 
   void getConfig() {
     NetworkManager.httpGet(
-        Globals.baseUrl + "services/filters?target=${widget.id}", context, (r) {
+        Globals.baseUrl + "services/filters?target=${widget.id}",  context, (r) {
       if (r['state'] == true) {
         setState(() {
           configFilters = r['data'];
@@ -59,7 +59,7 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
 
     NetworkManager.httpGet(
         Globals.baseUrl +
-            "services/onlineServices?target=${widget.id}&page$page", context, (r) {
+            "services/onlineServices?target=${widget.id}&page$page",  context, (r) {
       setState(() {
         isLoading = false;
       });
@@ -74,6 +74,7 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
@@ -456,8 +457,8 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
                         : Container(),
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(
-                                Globals.correctLink(item['image'].toString()))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(
+                                item['image'].toString()))),
                         borderRadius: BorderRadius.circular(10),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -683,7 +684,7 @@ class _OnlineEngineerServicesState extends State<OnlineEngineerServices> {
   void startNewConversation(id, serviceId) {
     Alert.startLoading(context);
     NetworkManager.httpGet(
-        Globals.baseUrl + "chat/add?id=$id&service_id=$serviceId", context, (r) {
+        Globals.baseUrl + "chat/add?id=$id&service_id=$serviceId",  context, (r) {
       Alert.endLoading();
       if (r['state'] == true) {
         Navigator.push(context,

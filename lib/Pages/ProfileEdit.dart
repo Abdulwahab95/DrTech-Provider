@@ -27,11 +27,11 @@ class _ProfileEditState extends State<ProfileEdit> {
 
   @override
   void initState() {
-    selectedTexts["username"] = UserManager.currentUser("username");
-
-    if(selectedTexts["username"].toString().length == 0)
-      selectedTexts["username"] = null;
-
+    selectedTexts["full_name"] = UserManager.currentUser("first_name") +
+        " " +
+        UserManager.currentUser("second_name") +
+        " " +
+        UserManager.currentUser("last_name");
     selectedTexts["email"] = UserManager.currentUser("email")??'';
     selectedTexts["about"] = UserManager.currentUser("about")??'';
     super.initState();
@@ -42,98 +42,98 @@ class _ProfileEditState extends State<ProfileEdit> {
     var imageSize = MediaQuery.of(context).size.width * 0.32;
     return Scaffold(
       body:
-      Column(textDirection: LanguageManager.getTextDirection(), children: [
-        TitleBar(() {Navigator.pop(context);}, 269),
-        Expanded(
-            child: ScrollConfiguration(
-                behavior: CustomBehavior(),
-                child: ListView(
-                  padding: EdgeInsets.symmetric(vertical: 0),
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.all(15),
-                      child: InkWell(
-                        onTap: () async {
-                          if (isUploading) return;
-                          await pickImage(ImageSource.gallery);
-                          if(selectedImage != null) updateImage();
-                        },
-                        child: Container(
-                            width: imageSize,
-                            height: imageSize,
-                            child: isUploading
-                                ? Container(
+          Column(textDirection: LanguageManager.getTextDirection(), children: [
+            TitleBar(() {Navigator.pop(context);}, 269),
+            Expanded(
+                child: ScrollConfiguration(
+                    behavior: CustomBehavior(),
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(vertical: 0),
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.all(15),
+                          child: InkWell(
+                            onTap: () async {
+                              if (isUploading) return;
+                              await pickImage(ImageSource.gallery);
+                              if(selectedImage != null) updateImage();
+                            },
+                            child: Container(
+                                width: imageSize,
+                                height: imageSize,
+                                child: isUploading
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                            color: Converter.hexToColor("#000000")
+                                                .withAlpha(70),
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        alignment: Alignment.center,
+                                        child: CustomLoading())
+                                    : Container(),
                                 decoration: BoxDecoration(
-                                    color: Converter.hexToColor("#000000")
-                                        .withAlpha(70),
-                                    borderRadius:
-                                    BorderRadius.circular(10)),
-                                alignment: Alignment.center,
-                                child: CustomLoading())
-                                : Container(),
-                            decoration: BoxDecoration(
-                              color: Converter.hexToColor("#F2F2F2"),
-                              borderRadius: BorderRadius.circular(10),
-                              image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: CachedNetworkImageProvider(
-                                      Globals.correctLink(UserManager.currentUser("avatar")))),
-                            )),
-                      ),
-                    ),
-                    createInput("username", 243, readOnly: selectedTexts['username'] != null ? true : false),
-                    // createInput("first_name", 206),
-                    // createInput("second_name", 207),
-                    // createInput("last_name", 208),
-                    createInput("email", 246),
-                    // createInput("specialty", 270, readOnly: true),
-                    // createInput("city", 271, readOnly: true),
-                    Container(
-                      margin: EdgeInsets.only(left: 10, right: 10, top: 10),
-                      child: Text(
-                        LanguageManager.getText(272),
-                        textDirection: LanguageManager.getTextDirection(),
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Converter.hexToColor("#2094CD")),
-                      ),
-                    ),
-                    createInput("about", 0, maxLines: 3, maxInput: 250, textType: TextInputType.multiline),
-                  ],
-                ))),
-        InkWell(
-          onTap: update,
-          child: Container(
-            margin: EdgeInsets.all(10),
-            height: 45,
-            alignment: Alignment.center,
-            child: Text(
-              LanguageManager.getText(170),
-              style:
-              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withAlpha(15),
-                      spreadRadius: 2,
-                      blurRadius: 2)
-                ],
-                borderRadius: BorderRadius.circular(8),
-                color: Converter.hexToColor("#344f64")),
-          ),
-        )
+                                  color: Converter.hexToColor("#F2F2F2"),
+                                  borderRadius: BorderRadius.circular(10),
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: CachedNetworkImageProvider(
+                                          Globals.correctLink(UserManager.currentUser("avatar")))),
+                                )),
+                          ),
+                        ),
+                        createInput("full_name", 243, readOnly: true),
+                        // createInput("first_name", 206),
+                        // createInput("second_name", 207),
+                        // createInput("last_name", 208),
+                        createInput("email", 246),
+                        // createInput("specialty", 270, readOnly: true),
+                        // createInput("city", 271, readOnly: true),
+                        Container(
+                          margin: EdgeInsets.only(left: 10, right: 10, top: 10),
+                          child: Text(
+                            LanguageManager.getText(272),
+                            textDirection: LanguageManager.getTextDirection(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Converter.hexToColor("#2094CD")),
+                          ),
+                        ),
+                        createInput("about", 0, maxLines: 3, maxInput: 250, textType: TextInputType.multiline),
+                      ],
+                    ))),
+            InkWell(
+              onTap: update,
+              child: Container(
+                margin: EdgeInsets.all(10),
+                height: 45,
+                alignment: Alignment.center,
+                child: Text(
+                  LanguageManager.getText(170),
+                  style:
+                      TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withAlpha(15),
+                          spreadRadius: 2,
+                          blurRadius: 2)
+                    ],
+                    borderRadius: BorderRadius.circular(8),
+                    color: Converter.hexToColor("#344f64")),
+              ),
+            )
       ]),
     );
   }
 
   Widget createInput(key, titel,
       {maxInput,
-        TextInputType textType: TextInputType.text,
-        maxLines,
-        bool readOnly: false}) {
+      TextInputType textType: TextInputType.text,
+      maxLines,
+      bool readOnly: false}) {
     if (controllers[key] == null) {
       controllers[key] = TextEditingController(
           text: selectedTexts[key] != null ? selectedTexts[key] : "");
@@ -143,7 +143,7 @@ class _ProfileEditState extends State<ProfileEdit> {
       padding: EdgeInsets.only(left: 7, right: 7),
       decoration: BoxDecoration(
           color:
-          Converter.hexToColor(errors[key] != null ? "#E9B3B3" : "#F2F2F2"),
+              Converter.hexToColor(errors[key] != null ? "#E9B3B3" : "#F2F2F2"),
           borderRadius: BorderRadius.circular(12)),
       child: TextField(
         onChanged: (t) {
@@ -198,7 +198,8 @@ class _ProfileEditState extends State<ProfileEdit> {
 
     if(body.length > 0) {
       Alert.startLoading(context);
-      UserManager.updateBody(body, context ,(r) {
+      body["username"] = UserManager.currentUser("first_name") + " " +UserManager.currentUser("last_name");
+      UserManager.updateBody(body,  context, (r) {
         Alert.endLoading();
       });
     }else{
@@ -228,6 +229,8 @@ class _ProfileEditState extends State<ProfileEdit> {
       });
       if (r['state'] == true) {
         UserManager.proccess(r['data']);
+      } else if (r["message"] != null) {
+        Alert.show(context, Converter.getRealText(r["message"]));
       }
     }, body: body);
   }

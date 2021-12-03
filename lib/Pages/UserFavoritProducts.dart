@@ -31,7 +31,7 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
       isLoading = true;
     });
     NetworkManager.httpGet(
-        Globals.baseUrl + "product/load?page=$page&type=favorit", context, (r) {
+        Globals.baseUrl + "product/load?page=$page&type=favorit",  context, (r) {
       setState(() {
         isLoading = false;
       });
@@ -126,7 +126,8 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
                     item['isLiked'] = item['isLiked'] != true ? true : false;
                   });
                   NetworkManager.httpGet(
-                      Globals.baseUrl + "product/like?product_id=" + item["id"], context, (r) {
+                      Globals.baseUrl + "product/like?product_id=" + item["id"],
+                       context, (r) {
                     if (r['state'] == true) {
                       setState(() {
                         data[page].removeAt(i);
@@ -175,7 +176,7 @@ class _UserFavoritProductsState extends State<UserFavoritProducts> {
                       alignment: Alignment.center,
                       child: Text(
                         LanguageManager.getText(
-                            item['status'] == 'USED' ? 143 : 142),
+                            item['state'] == 'USED' ? 143 : 142),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,

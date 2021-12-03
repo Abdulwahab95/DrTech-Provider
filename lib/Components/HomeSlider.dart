@@ -1,11 +1,8 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
-import 'package:dr_tech/Config/IconsMap.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomeSlider extends StatefulWidget {
   const HomeSlider();
@@ -51,40 +48,15 @@ class _HomeSliderState extends State<HomeSlider> {
     var slides = Globals.getConfig("slider");
     if (slides != "")
       for (var item in slides) {
-        items.add(Stack(
-          children: [
-            Container(
-              width: width - 10,
-              height: height,
-              margin: EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
-            ),
-            item['visitableBtn'] == 'true'? Align(
-                alignment: Alignment.bottomLeft,
-                child: InkWell(
-                  onTap: () => _launchURL(item['url']),
-                  child: Container(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    decoration: BoxDecoration(color: Converter.hexToColor('#344f64') , borderRadius: BorderRadius.only(topRight: Radius.circular(15), bottomRight: Radius.circular(15))),
-                    margin: EdgeInsets.only(bottom: 20, left: 5),
-                    child: Row(
-                      children: [
-                        Text(Globals.isRtl()? item['text']: item['text_en'] , style: TextStyle(color: Colors.white)), // 'اتصل بالمعلن'
-                        Container(width: 5, height: 30),
-                        Icon(
-                          IconsMap.from[item['icon']],
-                          color: Colors.grey,
-                          size: 15,)
-                      ],
-                    ),
-                  ),
-                ))
-                :Container()
-          ],
+        items.add(Container(
+          width: width - 10,
+          height: height,
+          margin: EdgeInsets.all(5),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(Globals.correctLink(item['image'])))),
         ));
       }
     return Container(
@@ -102,9 +74,4 @@ class _HomeSliderState extends State<HomeSlider> {
       ),
     );
   }
-
-  Future<void> _launchURL(_url) async {
-    await launch(_url);
-  }
-
 }

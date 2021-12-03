@@ -43,7 +43,7 @@ class _SubscriptionState extends State<Subscription> {
       isLoading = true;
     });
 
-    NetworkManager.httpGet(Globals.baseUrl + "subscription/Config", context, (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "subscription/Config",  context, (r) {
       setState(() {
         isLoading = false;
       });
@@ -62,7 +62,7 @@ class _SubscriptionState extends State<Subscription> {
     });
 
     NetworkManager.httpGet(Globals.baseUrl + "subscription/userSubscriptions",
-        context, (r) {
+         context, (r) {
       setState(() {
         isLoading = false;
       });
@@ -88,9 +88,10 @@ class _SubscriptionState extends State<Subscription> {
     hideKeyBoard();
     Map<String, String> body = {"code": code.toString()};
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "subscription/checkPromoCode", context ,(r) {
+    NetworkManager.httpPost(Globals.baseUrl + "subscription/checkPromoCode",
+         context, (r) {
       Alert.endLoading();
-      if (r['status']) {
+      if (r['state']) {
         if (r['valid'] == true) {
           String cutValue = r["code"]["amount"].toString();
           cutValue +=
@@ -127,6 +128,7 @@ class _SubscriptionState extends State<Subscription> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
           textDirection: LanguageManager.getTextDirection(),
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -761,10 +763,5 @@ class _SubscriptionState extends State<Subscription> {
         MaterialPageRoute(
             builder: (_) => WebBrowser(url, LanguageManager.getText(228))));
     print(results);
-    if (results['status'] == false) {
-      if (results['message'] != null) {
-        Alert.show(context, Converter.getRealText(results['message']));
-      }
-    }
   }
 }

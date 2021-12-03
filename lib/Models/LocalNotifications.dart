@@ -1,8 +1,11 @@
 import 'dart:convert';
 
+import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 class LocalNotifications {
 
@@ -28,11 +31,12 @@ class LocalNotifications {
     var platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(0, title, message, platformChannelSpecifics, payload: json.encode(paylaod));
+    await flutterLocalNotificationsPlugin.show(0, title,  Converter.getRealText(message), platformChannelSpecifics, payload: json.encode(paylaod));
   }
 
   static Future<dynamic> onSelectReminderNotification([String payload]) async {
     print('heree: _onSelectNotification $payload');
+    print('heree: pagesRouteFactories ${Globals.pagesRouteFactories}');
     print('heree: reminderScreenNavigatorKey ${reminderScreenNavigatorKey.currentState}');
 
     Map valueMap = json.decode(payload);
@@ -49,5 +53,6 @@ class LocalNotifications {
     }
 
   }
+
 
 }

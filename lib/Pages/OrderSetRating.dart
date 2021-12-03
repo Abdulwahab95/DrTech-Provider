@@ -6,7 +6,6 @@ import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
-import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +24,7 @@ class _OrderSetRatingState extends State<OrderSetRating> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.white,
         body: Column(
             textDirection: LanguageManager.getTextDirection(),
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +109,7 @@ class _OrderSetRatingState extends State<OrderSetRating> {
                             borderRadius: BorderRadius.circular(12)),
                         child: TextField(
                           onChanged: (t) {
-                            body["content"] = t.toString();
+                            body["note"] = t.toString();
                           },
                           keyboardType: TextInputType.text,
                           maxLines: 4,
@@ -189,23 +189,13 @@ class _OrderSetRatingState extends State<OrderSetRating> {
       Alert.show(context, LanguageManager.getText(236));
       return;
     }
-    try{
-      body["rate"] =
-          ((int.parse(body["exp"] ) +
-            int.parse(body["pref"]) +
-            int.parse(body["time"]) ) / 3)
-              .toString();
-    }catch(e){
-      body["rate"] = body["exp"];
-      print('ratings_create_error: $e');
-    }
-    body["order_id"] = widget.id.toString();
-    body["rated_by"] = UserManager.currentUser("id");
+    body["id"] = widget.id.toString();
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "ratings/create", context ,(r) { // orders/rate
+    NetworkManager.httpPost(Globals.baseUrl + "orders/rate",  context, (r) {
       Alert.endLoading();
       if (r['state'] == true) {
-        Navigator.of(context).pop(true);
+        Navigator.pop(context);
+        Alert.show(context, Converter.getRealText(237));
       }
     }, body: body);
   }

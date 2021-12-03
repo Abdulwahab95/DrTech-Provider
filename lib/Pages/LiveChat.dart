@@ -13,6 +13,7 @@ import 'package:dr_tech/Components/PaymentOptions.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/LocalNotifications.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:file_picker/file_picker.dart';
@@ -22,9 +23,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'Conversations.dart';
+import 'Home.dart';
 
-class LiveChat extends StatefulWidget {
+class LiveChat extends StatefulWidget{
   final String id;
   LiveChat(this.id) {
     LiveChat.currentConversationId = this.id;
@@ -46,7 +47,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       visibleoptions = false,
       isOpenPicks = false,
       isTyping = false,
-      typingNotifyer = false;
+      typingNotifyer = false,
+      allowEmptyOffer = true;
   Timer timer;
   Widget ui;
   int page = 0;
@@ -57,8 +59,11 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     LiveChat.callback = onReciveNotic;
+    loadConfig();
+    print('here_seen_3');
     load();
     super.initState();
+    print('heree: reminderScreenNavigatorKey ${LocalNotifications.reminderScreenNavigatorKey.currentState}');
   }
 
   @override
@@ -72,6 +77,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      //do your stuff
       load();
     }
   }
@@ -90,12 +96,17 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void infoDataNotic(payload) {
+    print('here_timer: type: ${payload['type']}, payload: $payload');
     switch (payload['type']) {
       case "offer":
+        print('here_timer: case offer');
         for (var page in data.keys) {
           for (var i = 0; i < data[page].length; i++) {
             if (data[page][i]["id"].toString() == payload["message_id"]) {
+              print('here_timer: if 1');
               if (data[page][i]["message"].runtimeType != String)
+                print('here_timer: if 2');
+                print('here_timer: ${data[page][i]}');
                 setState(() {
                   data[page][i]["message"]['status'] = payload["status"];
                 });
@@ -144,11 +155,13 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       return;
     }
 
+    print('here_play: chatDataNotic');
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/received.mp3"));
     setState(() {
       isTyping = false;
       data.values.last.add(paylaod);
       scrollDown();
+      print('here_seen_1');
       sendSeenFlag();// sendSeenFlag(paylaod['id'].toString());
     });
   }
@@ -163,55 +176,38 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpPost(Globals.baseUrl + "convertation", context ,(r) { // "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString()
+    NetworkManager.httpPost(Globals.baseUrl + "convertation",  context, (r) { // "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString()
       try {
-        if (r["state"] == true) {
+        if (r['state'] == true) {
           setState(() {
             isLoading = false;
-
-            print('here_convertation: ${r['data']['convertation']}');
-            print('here_with: ${r['data']['with']}');
-
             data['0'] = r['data']['convertation']; // r['page']
             user = r['data']['with'];
-    //         {
-    //     "validation": true,
-    //     "id": "25",
-    //     "phone": "965095703",
-    //     "country": "206",
-    //     "email": "abdulwahab.abdulhadi.95@gmail.com",
-    //     "name": "عبدالوهاب",
-    //     "phone_confirmed": "0",
-    //     "email_confirmed": "0",
-    //     "verified": "0",
-    //     "image": "https://server.drtechapp.com/storage/images/default.jpg",
-    //     "type": "USER",
-    //     "status": "1",
-    //     "created_at": "2021-09-25 16:56:40",
-    //     "unit": "ر.س",
-    //     "validSubscriptions": "",
-    //     "isEngineer": false
-    // } ;//r['sender'];
           });
+          print('here_seen_2');
           sendSeenFlag();
         } else if (r['message'] != null) {
           Navigator.pop(context);
         } else {
           setState(() {
+            print('here_seen_4');
             ui = BrokenPage(load);
           });
         }
       } catch (e) {
         setState(() {
+          print('here_seen_5');
           ui = BrokenPage(load);
         });
       }
-    }, cachable: true, body: {"user_id":UserManager.currentUser('id'),"provider_id":widget.id.toString() });
+    }, cachable: true, body: {"user_id":widget.id.toString() ,"provider_id": UserManager.currentUser('id')});
   }
 
+  int i=0;
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return
+      WillPopScope(
       onWillPop: _close,
       child: Scaffold(
           backgroundColor: Colors.white,
@@ -221,7 +217,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                 Container(
                     decoration: BoxDecoration(color: Converter.hexToColor("#2094cd")),
                     padding:
-                        EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                     child: Container(
                         width: MediaQuery.of(context).size.width,
                         padding: EdgeInsets.only(
@@ -252,7 +248,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                               isTyping
                                   ? LanguageManager.getText(84)
                                   : user.isNotEmpty
-                                      ? user["username"]??''
+                                      ? user["username"]
                                       : "",
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -270,9 +266,10 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                     child: Icon(
                                       FlutterIcons.phone_faw,
                                       size: 24,
-                                      // color: Colors.white,
                                       color: Colors.transparent,
-                                      textDirection: LanguageManager.getTextDirection(),
+                                      // color: Colors.white,
+                                      textDirection:
+                                          LanguageManager.getTextDirection(),
                                     ),
                                   ),
                                 ),
@@ -286,9 +283,10 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                     child: Icon(
                                       FlutterIcons.dots_vertical_mco,
                                       size: 28,
-                                      // color: Colors.white,
                                       color: Colors.transparent,
-                                      textDirection: LanguageManager.getTextDirection(),
+                                      // color: Colors.white,
+                                      textDirection:
+                                          LanguageManager.getTextDirection(),
                                     ),
                                   ),
                                 ),
@@ -494,45 +492,45 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                             ),
                           ),
                         ),
-                      // InkWell(
-                      //           onTap: addPromoCode,
-                      //           child: Container(
-                      //             child: Column(
-                      //               children: [
-                      //                 Container(
-                      //                   width: 50,
-                      //                   height: 50,
-                      //                   padding: EdgeInsets.all(3),
-                      //                   alignment: Alignment.center,
-                      //                   decoration: BoxDecoration(
-                      //                       border: Border.all(
-                      //                           color: Colors.white, width: 2),
-                      //                       color:
-                      //                           Converter.hexToColor("#344F64"),
-                      //                       borderRadius:
-                      //                           BorderRadius.circular(40)),
-                      //                   child: Container(
-                      //                     width: 40,
-                      //                     height: 40,
-                      //                     child: Icon(
-                      //                       FlutterIcons.tag_ant,
-                      //                       color:
-                      //                           Converter.hexToColor("#344F64"),
-                      //                     ),
-                      //                     decoration: BoxDecoration(
-                      //                         borderRadius:
-                      //                             BorderRadius.circular(40),
-                      //                         color: Colors.white),
-                      //                   ),
-                      //                 ),
-                      //                 Text(
-                      //                   LanguageManager.getText(82),
-                      //                   style: TextStyle(color: Colors.white),
-                      //                 )
-                      //               ],
-                      //             ),
-                      //           ),
-                      //         ),
+                        InkWell(
+                                onTap: (){print('here_on_tap:'); allowEmptyOffer = true; addOffer();},
+                                child: Container(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        padding: EdgeInsets.all(3),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.white, width: 2),
+                                            color:
+                                                Converter.hexToColor("#344F64"),
+                                            borderRadius:
+                                                BorderRadius.circular(40)),
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          child: Icon(
+                                            FlutterIcons.gift_faw,
+                                            color:
+                                                Converter.hexToColor("#344F64"),
+                                          ),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(40),
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                      Text(
+                                        LanguageManager.getText(125),
+                                        style: TextStyle(color: Colors.white),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
                         // File
                         InkWell(
                           onTap: () {
@@ -732,12 +730,11 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   Widget getChatMessageUI(item, page, index) {
-    // print('here_getChatMessageUI: item: $item, page: $page, index: $index');
     if(item['type'] == 'offer' && item['message'] == null) {
       item['type'] = 'TEXT';
     }
 
-    if(item.toString().length>0)
+    if(item.toString().length > 0 )
     switch (item["type"].toString().toUpperCase()) {
       case "TEXT":
         return getChatTextMessageUI(item);
@@ -763,7 +760,6 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   Widget getChatFileUploadMessageUI(item) {
-    print('here_getChatFileUploadMessageUI: item: $item');
     return Container(
       margin: EdgeInsets.all(10),
       child: Row(
@@ -868,8 +864,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
 
   Widget getChatOfferMessageUi(item, page, index) {
     bool isFromSender = item["send_by"].toString() == user["id"].toString();
-    TextDirection direction =
-        isFromSender ? TextDirection.ltr : TextDirection.rtl;
+    TextDirection direction = isFromSender ? TextDirection.ltr : TextDirection.rtl;
     return Container(
       margin: EdgeInsets.all(10),
       child: Row(
@@ -934,20 +929,17 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 14,
-                                                    color: Converter.hexToColor("#344F64")),
+                                                    color: Converter.hexToColor(
+                                                        "#344F64")),
                                               ),
                                             ),
                                             Text(
-                                              item['message']['price']
-                                                  .toString(),
+                                              item['message']['price'].toString(),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
-                                                  decoration: item["message"]
-                                                              ["status"] ==
-                                                          "REJECTED"
-                                                      ? TextDecoration
-                                                          .lineThrough
+                                                  decoration: item["message"]["status"] == "REJECTED"
+                                                      ? TextDecoration.lineThrough
                                                       : TextDecoration.none,
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 16,
@@ -958,7 +950,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                               width: 5,
                                             ),
                                             Text(
-                                              Converter.getRealText(UserManager.currentUser("unit")),
+                                                item["message"]['unit'].toString(),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
@@ -976,14 +968,11 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                           ],
                                         ),
                                         Text(
-                                          item['message']['description']
-                                              .toString(),
+                                          item['message']['description'].toString(),
                                           textDirection: LanguageManager
                                               .getTextDirection(),
                                           style: TextStyle(
-                                              decoration: item["message"]
-                                                          ["status"] ==
-                                                      "REJECTED"
+                                              decoration: item["message"]["status"] == "REJECTED"
                                                   ? TextDecoration.lineThrough
                                                   : TextDecoration.none,
                                               fontWeight: FontWeight.w600,
@@ -993,8 +982,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                       ],
                                     ),
                                   ),
-                                  getOfferOptions(
-                                      item, page, index, isFromSender)
+                                  getOfferOptions(item, page, index, isFromSender)
                                 ],
                               ),
                               decoration: BoxDecoration(
@@ -1082,7 +1070,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         Expanded(
           child: InkWell(
             onTap: () {
-                rejectOffer(item["id"], item["message"]['id'], page, index);
+                cancelOffer(item["id"], item["message"]['id'], page, index);
             },
             child: Container(
               height: 40,
@@ -1110,7 +1098,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                 child: InkWell(
                   onTap: () {
                     Alert.show(context,
-                        PaymentOptions(item["message"]['id'], item["id"], context),
+                        PaymentOptions(item["message"]['id'], item["id"]),
                         type: AlertType.WIDGET, isDismissible: false);
                   },
                   child: Container(
@@ -1136,7 +1124,6 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   Widget getChatFileMessageUI(item) {
-    // print('here_getChatFileMessageUI: $item');
     bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
@@ -1202,7 +1189,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                   Expanded(
                                     child: Container(
                                       child: Text(
-                                        item["message"].toString().split('file/')[1],
+                                        item["message"].toString().split('file/')[1],// item["message"]["name"],
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -1264,7 +1251,6 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   Widget getChatImageUploadMessageUI(item) {
-    print('here_getChatImageUploadMessageUI: item: $item, images: $images');
     return Container(
       margin: EdgeInsets.all(10),
       child: Row(
@@ -1281,8 +1267,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                     height: 50,
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(
-                                Globals.correctLink(UserManager.currentUser("avatar")))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(
+                                UserManager.currentUser("avatar")))),
                         borderRadius: BorderRadius.circular(50),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
@@ -1356,7 +1342,6 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   Widget getChatImageMessageUI(item) {
-    // print('here_getChatImageUploadMessageUI: item: $item, images: $images');
     bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
@@ -1449,6 +1434,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   Widget getChatTextMessageUI(item) {
+    // print('here_getChatTextMessageUI: ${item['seen']}');
     bool isFromSender = item["send_by"].toString() == user["id"].toString();
     TextDirection direction =
         isFromSender ? TextDirection.ltr : TextDirection.rtl;
@@ -1646,12 +1632,13 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     Map<String, String> body = {};
     // body['message_id'] = id;
     // body['id'] = widget.id.toString();
-    body['provider_id'] = widget.id.toString();
-    body['user_id'] = UserManager.currentUser("id").toString();
-    NetworkManager.httpPost(Globals.baseUrl + "convertation/seen", context ,(r) {}, body: body); // chat/seen
+    body['provider_id'] = UserManager.currentUser("id").toString();
+    body['user_id'] = widget.id.toString();
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/seen",  context, (r) {}, body: body); // chat/seen
   }
 
   void sendFile(PlatformFile fileData) {
+
     File file = File(fileData.path);
     if (file == null) return;
     int id = files.length;
@@ -1665,22 +1652,23 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     scrollDown();
 
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    NetworkManager().fileUpload( Globals.baseUrl + "convertation/create", // chat/file
+    NetworkManager().fileUpload(Globals.baseUrl + "convertation/create", // chat/file
         [
           {
             "name": "file",
             "file": file.readAsBytesSync(),
             "type_name": "file",
             "file_type": "any",
-            "file_name": fileData.name//"aplication"
+            "file_name":  fileData.name//"aplication"
           }
         ],
         (p) {}, (r) {
-      if (r["state"] == true) {
+            if (r["state"] == true) {
         setState(() {
-          data[page][index] = r['data'][0];
-          int tempId = id;
+          data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
+          int tempId = id; // int tempId = int.parse(r["temp_id"]);
           files[tempId] = null;
+
         });
       } else {
         setState(() {
@@ -1694,8 +1682,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       "file_name": fileData.name,
       "temp_id": id.toString(),
       'type': "FILE".toLowerCase(),
-      'provider_id': widget.id.toString(),
-      'user_id': UserManager.currentUser("id").toString(),
+      'user_id': widget.id.toString(),
+      'provider_id': UserManager.currentUser("id").toString(),
       'send_by': UserManager.currentUser("id").toString(),
     });
   }
@@ -1707,11 +1695,12 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     });
 
     int id = images.length;
-    String page = '0';//data.keys.last;
+    String page = data.keys.last;
     int index = data[data.keys.last].length;
     images[id] = File(imageFile.path).readAsBytesSync();
     setState(() {
-      data[data.keys.last].add({"type": "IMAGE_UPLOAD", "source": id, "prograss": 0});
+      data[data.keys.last]
+          .add({"type": "IMAGE_UPLOAD", "source": id, "prograss": 0});
     });
 
     scrollDown();
@@ -1723,15 +1712,15 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         "file": images[id],
         "type_name": "image",
         "file_type": "png",
-        "file_name": "${DateTime.now().toString().replaceAll(' ', '_').replaceAll(':', '').replaceAll('-', '')}.png"
+        "file_name": "${DateTime.now().toString().replaceAll(' ', '_').replaceAll(':', '').replaceAll('-', '')}.png" ///"image"
       }
     ], (p) {
       setState(() {});
     }, (r) {
-      if (r["state"] == true) {
+      if (r['state'] == true) {
         setState(() {
-          data[page][index] = r['data'][0];//r["message"];
-          int tempId = id;//int.parse(r["temp_id"]);
+          data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
+          int tempId = id; //int tempId = int.parse(r["temp_id"]);
           images[tempId] = null;
         });
       } else {
@@ -1745,8 +1734,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       "page": page,
       "temp_id": id.toString(),
       'type': "IMAGE".toLowerCase(),
-      'provider_id': widget.id.toString(),
-      'user_id': UserManager.currentUser("id").toString(),
+      'user_id': widget.id.toString(),
+      'provider_id': UserManager.currentUser("id").toString(),
       'send_by': UserManager.currentUser("id").toString(),
     });
   }
@@ -1754,7 +1743,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   void sendPromoCode() {
     if (promoCode.isEmpty) return;
     Map<String, String> body = {"code": promoCode};
-    NetworkManager.httpPost(Globals.baseUrl + "chat/promo", context ,(r) {
+    NetworkManager.httpPost(Globals.baseUrl + "chat/promo",  context, (r) {
       if (r['state'] == true) {
         setState(() {
           data.values.last.add(r['message']);
@@ -1768,11 +1757,18 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   void sendOffer() {
     Alert.publicClose();
     if (offer.isEmpty || offer["price"] == null) return;
-    offer['id'] = widget.id;
-    NetworkManager.httpPost(Globals.baseUrl + "chat/offer", context ,(r) {
+    // offer['id'] = widget.id;
+
+    offer['type'] = "OFFER".toLowerCase();
+    offer['user_id'] = widget.id.toString();
+    offer['provider_id'] = UserManager.currentUser("id").toString();
+    offer['send_by'] = UserManager.currentUser("id").toString();
+    //offer['provider_service_id'] = '1';
+
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) {// chat/offer
       if (r['state'] == true) {
         setState(() {
-          data.values.last.add(r['message']);
+          data.values.last.add(r['data'][0]);
         });
       }
     }, body: offer);
@@ -1781,34 +1777,28 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void send() {
-    if(body['text'].toString().replaceAll(new RegExp(r'[^0-9]'),'').length<7) {
-      typingNotifyer = false;
-      if (body.keys.length == 0) return;
-      AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-      body['type'] = "TEXT".toLowerCase();
-      body['provider_id'] = widget.id.toString();
-      body['user_id'] = UserManager.currentUser("id").toString();
-      body['send_by'] = UserManager.currentUser("id").toString();
-      NetworkManager.httpPost(
-          Globals.baseUrl + "convertation/create", context, (r) { // chat/send
-        if (r['state'] == true) {
-          // ifNotSeenSendNotifi();
-          setState(() {
-            data.values.last.add(r['data'][0]);
-          });
-        }
-      }, body: body);
-      setState(() {
-        controller.text = "";
-      });
-      body = {};
-    }else{
-      Alert.show(context, 'لضمان جودة الخدمة لايسمح بتبادل الأرقام');
-    }
+    typingNotifyer = false;
+    if (body.keys.length == 0) return;
+    AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
+    body['type'] = "TEXT".toLowerCase();
+    body['user_id'] = widget.id.toString();
+    body['provider_id'] = UserManager.currentUser("id").toString();
+    body['send_by'] = UserManager.currentUser("id").toString();
+
+    NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) { // chat/send
+      if (r['state'] == true) {
+        setState(() {
+          data.values.last.add(r['data'][0]); // r['message']
+        });
+      }
+    }, body: body);
+    setState(() {
+      controller.text = "";
+    });
+    body = {};
   }
 
-
-  void rejectOffer(messageId, id, page, index) {
+  void cancelOffer(messageId, id, page, index) {
     setState(() {
       data[page][index]["message"]["status"] = "LOADING";
     });
@@ -1817,10 +1807,10 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       "page": page.toString(),
       "index": index.toString(),
       "message_id": messageId.toString(),
-      "status": "REJECTED",
+      "status": "CANCELED",
       'send_to' : widget.id.toString()
     };
-    NetworkManager.httpPost(Globals.baseUrl + "offer/status/$id", context ,(r) { // chat/rejectOffer
+    NetworkManager.httpPost(Globals.baseUrl + "offer/status/$id",  context, (r) { // chat/cancelOffer
       if (r['state'] == true) {
         setState(() {
           data[body['page']][index]["message"]["status"] = r['data']['status'];
@@ -1856,13 +1846,20 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void addOffer() {
+    if(allowEmptyOffer) {
+      selectedTexts["service"] = null;
+      offer = {};
+    }
     setState(() {
       isOpenPicks = false;
     });
-    Alert.show(
-        context,
-        Container(
-            child: Column(
+    Alert.staticContent = getOfferWidget();
+    Alert.show(context, Alert.staticContent, type: AlertType.WIDGET);
+  }
+
+  getOfferWidget () {
+    return Container(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
@@ -1892,8 +1889,29 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                 ],
               ),
             ),
+
+            config != null ?createSelectInput("service", 283, config, onSelected: (v) { // config['service']
+              print('here_service: $v');
+
+              setState(() {
+                allowEmptyOffer = false;
+                // Alert.alertSetState();
+                selectedTexts["service"] = v['title'];
+                offer['provider_service_id'] = v['id'].toString();
+              });
+
+              Timer(Duration(milliseconds: 250), () {
+                Alert.publicClose();
+
+                Timer(Duration(milliseconds: 250), () {
+                  Alert.publicClose();
+                  addOffer();
+                });
+              });
+
+            }): Container(),
             Container(
-              margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+              margin: EdgeInsets.only(left: 20, right: 20, top: 7, bottom: 7),
               padding: EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
@@ -1905,7 +1923,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                 },
                 textDirection: LanguageManager.getTextDirection(),
                 keyboardType: TextInputType.multiline,
-                maxLines: 4,
+                maxLines: 3,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(vertical: 0),
                     border: InputBorder.none,
@@ -1915,11 +1933,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
               ),
             ),
             Container(
-              height: 10,
-            ),
-            Container(
               margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.symmetric(horizontal: 5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Converter.hexToColor("#F2F2F2"),
@@ -1930,7 +1945,10 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                   Expanded(
                     child: TextField(
                       onChanged: (v) {
-                        offer["price"] = v;
+                          offer["price"] = v;
+                          Alert.staticContent = getOfferWidget();
+                          Alert.setStateCall = () {};
+                          Alert.callSetState();
                       },
                       textDirection: LanguageManager.getTextDirection(),
                       keyboardType: TextInputType.number,
@@ -1943,15 +1961,32 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                     ),
                   ),
                   Text(
-                    Converter.getRealText(UserManager.currentUser("unit")),
+                    Converter.getRealText(UserManager.currentUser("unit")) ,
                     style: TextStyle(fontSize: 15),
                   )
                 ],
               ),
             ),
             Container(
-              height: 10,
+              width: double.infinity,
+              margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+              child: Row(
+                textDirection: LanguageManager.getTextDirection(),
+                children: [ // #translae
+                  Text( // صافي المبيع  // بعد خصم
+                    LanguageManager.getText(306) + ' ' + getDisCount() + ' ' + Converter.getRealText(UserManager.currentUser("unit")) + ' ' + LanguageManager.getText(307) + ' ',
+                    style: TextStyle(fontSize: 13),
+                    textDirection: LanguageManager.getTextDirection(),
+                  ),
+                  Text(// عمولة دكتورتك.
+                    ' ' + LanguageManager.getText(308),
+                    style: TextStyle(fontSize: 12, color: Colors.blue),
+                    textDirection: LanguageManager.getTextDirection(),
+                  ),
+                ],
+              ),
             ),
+            Container(height: 10),
             InkWell(
               onTap: sendOffer,
               child: Container(
@@ -1979,8 +2014,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
               height: 10,
             ),
           ],
-        )),
-        type: AlertType.WIDGET);
+        ));
   }
 
   void addPromoCode() {
@@ -2088,13 +2122,87 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         type: AlertType.WIDGET);
   }
 
+  Map<String, String> selectedTexts = {};
+  List config;
+
+  Widget createSelectInput(key, titel, options, {onEmptyMessage, onSelected}) {
+    print('here_selectedTexts: ${selectedTexts[key]}');
+    return GestureDetector(
+      onTap: () {
+        if (options == null) {
+          Alert.show(context, onEmptyMessage);
+          return;
+        }
+        Alert.publicClose();
+        var con = context;
+        Timer(Duration(milliseconds: 500), () {
+          Alert.show(con, options, type: AlertType.SELECT, onSelected: onSelected);
+        });
+      },
+      child: Container(
+        height: 50,
+        margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+        padding: EdgeInsets.only(left: 7, right: 7),
+        decoration: BoxDecoration(
+            color: Converter.hexToColor("#F2F2F2"),// errors[key] != null ? "#E9B3B3" : "#F2F2F2"
+            borderRadius: BorderRadius.circular(12)),
+        child: Row(
+          textDirection: LanguageManager.getTextDirection(),
+          children: [
+            Expanded(
+                child: Text(
+                  selectedTexts[key] != null
+                      ? selectedTexts[key]
+                      : LanguageManager.getText(titel),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: selectedTexts[key] != null ? Colors.black : Colors.grey),
+                )),
+            Icon(
+              FlutterIcons.chevron_down_fea,
+              color: Converter.hexToColor("#727272"),
+              size: 22,
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<bool> _close() async{
+    Alert.staticContent = null;
     UserManager.refrashUserInfo();
     if(Navigator.canPop(context)) {
-      Navigator.pop(context, true);
-      return true;
+       Navigator.pop(context, true);
+       return true;
     } else
-      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Conversations()), (Route<dynamic> route) => false);
+      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(page: 1,)), (Route<dynamic> route) => false);
   }
+
+  void loadConfig() {
+    NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // services/configuration
+      if (r['state'] == true) {
+        setState(() {
+          config = r['data'];
+          print('here_config: $config');
+        });
+      }
+    }, cashable: true);
+  }
+
+  String getDisCount() {
+    // print('here_getDefaultCommission: ${Globals.getDefaultCommission()}');
+    try {
+      double d = double.parse(offer["price"]);
+      // if(d <= 80 )
+      //   d *= 0.8;
+      // else
+        d -= Globals.getDefaultCommission() ;
+      return d.toString().substring(0, d.toString().indexOf('.') + 2 );
+    } catch(e){
+      return '0';
+    }
+  }
+
 }

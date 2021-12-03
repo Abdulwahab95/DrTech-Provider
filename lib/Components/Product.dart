@@ -43,8 +43,8 @@ class _ProductState extends State<Product> {
                   decoration: BoxDecoration(
                       image: DecorationImage(
                           fit: BoxFit.fitWidth,
-                          image: CachedNetworkImageProvider(
-                              Globals.correctLink(widget.item['images'][0]))),
+                          image: CachedNetworkImageProvider(Globals.correctLink(
+                              widget.item['images'][0]))),
                       borderRadius: BorderRadius.circular(5),
                       color: Converter.hexToColor("#F2F2F2")),
                 ),
@@ -60,7 +60,10 @@ class _ProductState extends State<Product> {
                             widget.item['isLiked'] =
                                 widget.item['isLiked'] != true ? true : false;
                           });
-                          NetworkManager.httpGet(Globals.baseUrl + "product/like?product_id=" + widget.item["id"], context, (r) {
+                          NetworkManager.httpGet(
+                              Globals.baseUrl +
+                                  "product/like?product_id=" +
+                                  widget.item["id"],  context, (r) {
                             if (r['state'] == true) {
                               setState(() {
                                 widget.item['isLiked'] = r["data"];
@@ -82,7 +85,7 @@ class _ProductState extends State<Product> {
                         padding: EdgeInsets.all(5),
                         child: Text(
                           LanguageManager.getText(
-                              widget.item['status'] == "USED" ? 142 : 143),
+                              widget.item['state'] == "USED" ? 142 : 143),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),

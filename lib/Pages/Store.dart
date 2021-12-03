@@ -43,7 +43,7 @@ class _StoreState extends State<Store> {
       isConfigLoading = true;
     });
 
-    NetworkManager.httpGet(Globals.baseUrl + "store/configuration", context, (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "store/configuration",  context, (r) {
       setState(() {
         isConfigLoading = false;
       });
@@ -87,7 +87,7 @@ class _StoreState extends State<Store> {
       "product_type_id": selectedSubCatigory['id'],
       "page": pageIndex.toString()
     };
-    NetworkManager.httpGet(Globals.baseUrl + "store/load", context, (r) {
+    NetworkManager.httpGet(Globals.baseUrl + "store/load",  context, (r) {
       setState(() {
         isLoading = false;
       });

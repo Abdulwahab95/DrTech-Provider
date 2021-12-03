@@ -322,7 +322,7 @@ class _WithdrawalState extends State<Withdrawal> {
 
   void withdrawalConferm() {
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawalRequisite", context ,(r) {
+    NetworkManager.httpPost(Globals.baseUrl + "user/withdrawalRequisite",  context, (r) {
       Alert.endLoading();
       if (r['state'] == true) {
         Navigator.push(context,

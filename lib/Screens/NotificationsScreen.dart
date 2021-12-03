@@ -56,11 +56,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   void seen() {
     NetworkManager.httpPost(Globals.baseUrl + "notifications/seen",  context, (r) {
-      setState(() {});
-      if (r['state'] == true) {
-        UserManager.updateSp('not_seen', 0);
-        Globals.updateNotificationCount();
-      }
+        setState(() {});
+        if (r['state'] == true) {
+          UserManager.updateSp('not_seen', 0);
+          Globals.updateNotificationCount();
+        }
     });
   }
 
@@ -104,33 +104,33 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        textDirection: LanguageManager.getTextDirection(),
-                        children: [
-                          Text(
-                            Converter.getRealText(item[
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    textDirection: LanguageManager.getTextDirection(),
+                    children: [
+                      Text(
+                        Converter.getRealText(item[
                             LanguageManager.getDirection()
                                 ? "title"
                                 : item['title_en'].toString().toLowerCase() == 'null'? 'title' : "title_en"]),
-                            textDirection: LanguageManager.getTextDirection(),
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Converter.hexToColor("#2094CD")),
-                          ),
-                          Text(
-                            Converter.getRealText(item[
+                        textDirection: LanguageManager.getTextDirection(),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Converter.hexToColor("#2094CD")),
+                      ),
+                      Text(
+                        Converter.getRealText(item[
                             LanguageManager.getDirection()
                                 ? "message"
                                 : item['message_en'].toString().toLowerCase() == 'null'? 'message' : "message_en"]),
-                            textDirection: LanguageManager.getTextDirection(),
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal,
-                                color: Converter.hexToColor("#707070")),
-                          )
-                        ],
-                      )),
+                        textDirection: LanguageManager.getTextDirection(),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: Converter.hexToColor("#707070")),
+                      )
+                    ],
+                  )),
                   Container(
                     width: 10,
                   ),

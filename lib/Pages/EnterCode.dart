@@ -11,6 +11,7 @@ import 'package:dr_tech/Models/Parser.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/Home.dart';
+import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -145,8 +146,8 @@ class _EnterCodeState extends State<EnterCode> {
                           InkWell(
                             onTap: sendCode,
                             child: Text(
-                                LanguageManager.getText(20),//اعادة ارسال
-                                style: TextStyle(color: Converter.hexToColor("#40746e"))),
+                              LanguageManager.getText(20),//اعادة ارسال
+                              style: TextStyle(color: Converter.hexToColor("#40746e"))),
                           ),
                           Text(
                             countDownTimer,
@@ -163,24 +164,24 @@ class _EnterCodeState extends State<EnterCode> {
             visibleKeyboard
                 ? Container()
                 : Expanded(
-                child: Container(
-                  alignment: Alignment.bottomCenter,
-                  child: InkWell(
-                    onTap: conferm,
                     child: Container(
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Converter.hexToColor("#344f64")),
-                      height: 50,
-                      width: 300,
-                      child: Text(
-                        LanguageManager.getText(21),// تأكيد
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    alignment: Alignment.bottomCenter,
+                    child: InkWell(
+                      onTap: conferm,
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Converter.hexToColor("#344f64")),
+                        height: 50,
+                        width: 300,
+                        child: Text(
+                          LanguageManager.getText(21),// تأكيد
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                  ),
-                )),
+                  )),
             Container(
               height: 20,
             )
@@ -203,8 +204,8 @@ class _EnterCodeState extends State<EnterCode> {
           color: Converter.hexToColor(errorInputOtp
               ? "#ffb6b6"
               : selectedIndex == index
-              ? "#ddeef7"
-              : "#f2f2f2"),
+                  ? "#ddeef7"
+                  : "#f2f2f2"),
           borderRadius: BorderRadius.circular(5)),
       child: TextField(
         onTap: () {
@@ -267,23 +268,7 @@ class _EnterCodeState extends State<EnterCode> {
       Alert.endLoading();
       tick();
     } else
-      sendSms();
-    // NetworkManager.httpPost(Globals.baseUrl + "user/resend", (r) {
-    //   Alert.endLoading();
-    //   if (r['state'] == true) {
-    //     setState(() {
-    //       resendTime = r['time'];
-    //       tick();
-    //     });
-    //     Alert.show(
-    //         context,
-    //         LanguageManager.getText(r['at'] == "PHONE" ? 24 : 25) + "\n" + r["to"] //تم ارسال رمز مكون من 6 ارقام للرقم الجوال التالي
-    //     );
-    //     // success
-    //   } else if (r['message'] != null) {
-    //     Alert.show(context, Converter.getRealText(r['message']));
-    //   }
-    // });
+        sendSms();
   }
 
   Future<void> conferm() async {
@@ -298,14 +283,19 @@ class _EnterCodeState extends State<EnterCode> {
     Alert.startLoading(context);
 
     if(Globals.isLocal){
-      NetworkManager.httpPost(Globals.baseUrl + "users/login", context ,(r) { // user/login
+      NetworkManager.httpPost(Globals.baseUrl + "users/login",  context, (r) { // user/login
         Alert.endLoading();
         if (r['state'] == true) {
           DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
           DatabaseManager.save(Globals.authoKey, r['data']['token']);
           UserManager.proccess(r['data']['user']);
 
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+          if(r['data']['user']['identity'] != null && r['data']['user']['identity'].toString().length>10){
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+          }else{
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => JoinRequest()));
+          }
+
         }
       }, body: widget.body);
     } else
@@ -317,51 +307,42 @@ class _EnterCodeState extends State<EnterCode> {
     var errorStr = '';
     await FirebaseAuth.instance.signInWithCredential(
         PhoneAuthProvider.credential(verificationId: verificationId, smsCode: otp)).
-    onError((error, stackTrace) {errorStr = error.toString(); return;}).
-    then((value) {
-      Alert.endLoading();
-      print('heree: $value');
-      if(errorStr.isNotEmpty){
-        if(errorStr.contains('credential is invalid'))
-          Alert.show(contextPage, LanguageManager.getText(23));
-        else
-          Alert.show(contextPage, errorStr);
-      } else if(value.runtimeType == UserCredential){
-        print('heree: ${value.user.uid}');
-
-        Alert.startLoading(context);
-        NetworkManager.httpPost(Globals.baseUrl + "users/login", context ,(r) { // user/login
+        onError((error, stackTrace) {errorStr = error.toString(); return;}).
+        then((value) {
           Alert.endLoading();
-          if (r['state'] == true) {
+          print('heree: $value');
+          if(errorStr.isNotEmpty){
+            if(errorStr.contains('credential is invalid'))
+              Alert.show(contextPage, LanguageManager.getText(23));
+            else
+              Alert.show(contextPage, errorStr);
+          } else if(value.runtimeType == UserCredential){
 
-            DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
-            DatabaseManager.save(Globals.authoKey, r['data']['token']);
-            UserManager.proccess(r['data']['user']);
-
-            if (UserManager.currentUser('is_blocked') == '1') {
+            print('heree: ${value.user.uid}');
+            Alert.startLoading(context);
+            NetworkManager.httpPost(Globals.baseUrl + "users/login",  context, (r) { // user/login
               Alert.endLoading();
-              Alert.show(context, 313, onYes: () {
-                Platform.isIOS ? exit(0) : SystemNavigator.pop();
-              }, onYesShowSecondBtn: false, isDismissible: false);
-            } else
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
-          }
-        }, body: widget.body);
+              if (r['state'] == true) {
+                DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
+                DatabaseManager.save(Globals.authoKey, r['data']['token']);
+                UserManager.proccess(r['data']['user']);
 
-        // Navigator.pop(context, true);
-        // NetworkManager.httpPost(Globals.baseUrl + "user/active", (r) {
-        //   Alert.endLoading();
-        //   if (r['state'] == true) {
-        //     DatabaseManager.save(Globals.authoKey, r['token']);
-        //     DatabaseManager.save('about', r['about']);
-        //     UserManager.proccess(r['user']);
-        //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home()));
-        //     // success
-        //   } else if (r['message'] != null) {
-        //     Alert.show(context, Converter.getRealText(r['message']));
-        //   }
-        // }, body: {});
-      }
+                if (UserManager.currentUser('is_blocked') == '1') {
+                  Alert.endLoading();
+                  Alert.show(context, 313, onYes: () {
+                    Platform.isIOS ? exit(0) : SystemNavigator.pop();
+                  }, onYesShowSecondBtn: false, isDismissible: false);
+                } else  if(r['data']['user']['identity'] != null && r['data']['user']['identity'].toString().length>10){
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Home()), (route) => false);
+                }else{
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => JoinRequest()));
+                }
+
+              }
+            }, body: widget.body);
+
+
+          }
     });
   }
 
@@ -379,7 +360,7 @@ class _EnterCodeState extends State<EnterCode> {
   }
 
   Future<void> sendSms() async {
-    print('heree: sendSms');
+    print('heree: sendSms ${widget.selectedCountrieCode + widget.body['number_phone']}');
 
     Alert.startLoading(context);
 

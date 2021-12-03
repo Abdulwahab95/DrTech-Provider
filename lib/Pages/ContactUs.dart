@@ -19,7 +19,6 @@ class _ContactUsState extends State<ContactUs> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-          textDirection: LanguageManager.getTextDirection(),
           children: [
             TitleBar((){Navigator.pop(context);}, 63, without: true),
             Expanded(child: getBodyContents()),
@@ -117,10 +116,12 @@ class _ContactUsState extends State<ContactUs> {
         });
     }
 
+    print('here_send_error: $errors');
+
     if (errors.keys.length > 0) return;
 
     Alert.startLoading(context);
-    NetworkManager.httpPost(Globals.baseUrl + "reports/create", context ,(r) { // information/contact
+    NetworkManager.httpPost(Globals.baseUrl + "reports/create",  context, (r) { // information/contact
       Alert.endLoading();
       // if (r['state'] == true) Navigator.pop(context);
       if (r["message"] != null) {

@@ -1,3 +1,4 @@
+
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Config/initialization.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -57,20 +58,21 @@ void main() async {
 
 }
 
+
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: "Cario", primarySwatch: Colors.blue,),
+      theme: ThemeData(fontFamily: "Cario", primarySwatch: Colors.blue),
       navigatorKey: LocalNotifications.reminderScreenNavigatorKey,
+      onGenerateRoute: (route) => Globals.pagesRouteFactories[route.name](),
       routes: {
-        "WelcomePage": (context) => MessageHandler(child: Welcome()),
-        "LiveChat": (context) => LiveChat(Globals.currentConversationId),
-        "Notifications": (context) => Home(page: 2),
+        "WelcomePage":   (context) => MessageHandler(child: Welcome()),
+        "LiveChat":      (context) => LiveChat(Globals.currentConversationId),
+        "Notifications": (context) => Home(page: 3),
       },
-      initialRoute: "WelcomePage",
+        initialRoute: "WelcomePage",
     );
   }
 }
@@ -83,11 +85,15 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(primarySwatch: Colors.blue),
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate

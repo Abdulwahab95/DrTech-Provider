@@ -12,13 +12,13 @@ import 'package:vibration/vibration.dart';
 class Globals {
   static String deviceToken = "";
   static Map deviceInfo = {};
-  static String version = "1.0.3";
+  static String version = "1.0.4";
   static String buildNumber = "74";
   static var config;
   static var isLocal = false;
   static var urlServerLocal = "http://192.168.43.152";
   static var urlServerGlobal = "https://drtech.takiddine.co";
-  static String authoKey = "Authorization";// x-autho
+  static String authoKey = "Authorization"; // x-autho
   static String baseUrl = isLocal ? "$urlServerLocal/api/" : "$urlServerGlobal/api/";
   static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/
   static String shareUrl = "https://share.drtechapp.com/";
@@ -27,16 +27,18 @@ class Globals {
   static dynamic data = [];
   // Callbacks
   static Function updateInCartCount;
-  static Function updateNotificationCount = (){};
-  static Function updateChatCount = (){};
+  static Function updateNotificationCount = (){print('here_not_seen');};
   static Function updateConversationCount = (){};
   static var settings;
   // Chat + Notification
   static String currentConversationId = '';
   static bool isLiveChatOpenFromNotification = false;
   static bool isNotificationOpenFromNotification = false;
+  static bool isOpenFromTerminate = false;
+  static var pagesRouteFactories;
 
   static BuildContext contextLoading;
+
 
   static void logNotification(String s, RemoteMessage message) {
     print('---------------Start--logNotification-- $s --------------------');
@@ -49,63 +51,16 @@ class Globals {
     print('---------------End--logNotification---------------------------');
   }
 
+
   static bool checkUpdate(){
     for (var item in settings) {
-      if(item['name'] == 'client_under_maintenance_show_webview' && item['value'] == 'true'){
+      if(item['name'] == 'provider_under_maintenance_show_webview' && item['value'] == 'true'){
         return true;
       }
     }
     return false;
   }
 
-  static bool isEncodeUrl1(){
-    for (var item in settings) {
-      if(item['name'] == 'encode_url_1' && item['value'] == 'true'){
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static bool isEncodeUrl2(){
-    for (var item in settings) {
-      if(item['name'] == 'encode_url_2' && item['value'] == 'true'){
-        return true;
-      }
-    }
-    return false;
-  }
-
-
-  static String getWhatsappUrl1() {
-    String url = "";
-    for (var item in settings) {
-      if(item['name'] == 'whatsapp_url_1'){
-        url = item['value'];
-      }
-    }
-    print('getWhatsappUrl1: $url');
-    return url.isNotEmpty ?url: "";
-  }
-
-  static String getWhatsappUrl2() {
-    String url = "";
-    for (var item in settings) {
-      if(item['name'] == 'whatsapp_url_2'){
-        url = item['value'];
-      }
-    }
-    print('getWhatsappUrl2: $url');
-    return url.isNotEmpty ?url: "";
-  }
-  static bool showNotOriginal(){
-    for (var item in settings) {
-      if(item['name'] == 'not_original' && item['value'] == 'true'){
-        return true;
-      }
-    }
-    return false;
-  }
   static String getValueInConfigSetting(name){
     for (var item in settings) {
       if(item['name'] == name){
@@ -115,10 +70,29 @@ class Globals {
     return '';
   }
 
+  static double getDefaultCommission(){
+    for (var item in settings) {
+      if(item['name'] == 'default_commission'){
+        return double.parse(item['value']);
+      }
+    }
+    return 20.0;
+  }
+
+  static bool showNotOriginal(){
+    for (var item in settings) {
+      if(item['name'] == 'not_original' && item['value'] == 'true'){
+        return true;
+      }
+    }
+    return false;
+  }
+
+
   static String getWebViewUrl() {
     String url = "";
     for (var item in settings) {
-      if(item['name'] == 'webview_url_client'){
+      if(item['name'] == 'webview_url_provider'){
         url = item['value'];
       }
     }
@@ -135,9 +109,11 @@ class Globals {
       "x-app-version": version,
       "x-build-number": buildNumber,
       "x-token": (isLocal && deviceToken.isEmpty)
-          ?'cGWIGoTDRlunHuhL-UTBRb:APA91bGoDrjEsT8uLq8AqGfCNWfpy2SBsFaiWjKwZrcanQVZWwiNVSPKVfySvsAH10wIBPpO7dFK1sPma9w71Lzbb3MLC8Sm-gyCII4pZjlNitGwoSnU5HRZwb1iasQ0VrFuCFm-xrJm':
+          ?'pGWIGoTDRlunHuhL-UTBRb:APA91bGoDrjEsT8uLq8AqGfCNWfpy2SBsFaiWjKwZrcanQVZWwiNVSPKVfySvsAH10wIBPpO7dFK1sPma9w71Lzbb3MLC8Sm-gyCII4pZjlNitGwoSnU5HRZwb1iasQ0VrFuCFm-xrJm':
       deviceToken,
-      "X-Requested-With": "XMLHttpRequest"
+      "X-Requested-With": "XMLHttpRequest",
+      // "Content-type": "application/json",
+      "Accept": "application/json"
     };
     if (DatabaseManager.liveDatabase[Globals.authoKey] != null) {
       header[Globals.authoKey] = "Bearer " + DatabaseManager.liveDatabase[Globals.authoKey];
@@ -185,11 +161,6 @@ class Globals {
         : item.toString() ?? "";
   }
 
-  static bool isPM(){
-    // print('here_isPM: ${DateTime.now().hour}');
-    return DateTime.now().hour > 3 && DateTime.now().hour < 12;
-  }
-
   static bool isRtl(){
     return LanguageManager.getTextDirection() == TextDirection.rtl;
   }
@@ -206,24 +177,19 @@ class Globals {
 
 
     else  {
-      String url = data.toString();
-      // print('here_correct1: $url');
-      if(!url.contains('http')) {
-        url = imageUrl + data;
-        // print('here_correct2: $url');
+        String url = data.toString();
+        if(!url.contains('http')) {
+          url = imageUrl + data;
       } else if ((url.contains(urlServerGlobal) || url.contains("https://server.drtechapp.com")) && isLocal) {
-        url = data
-            .toString()
-            .replaceFirst(urlServerGlobal, urlServerLocal)
-            .replaceFirst("https://server.drtechapp.com/storage/images/",
-            "http://192.168.43.152/images/sliders/");
-        // print('here_correct3: $url');
+          url = data
+              .toString()
+              .replaceFirst(urlServerGlobal, urlServerLocal)
+              .replaceFirst("https://server.drtechapp.com/storage/images/",
+              "http://192.168.43.152/images/sliders/");
       } else {
-        url = data.toString();
-        // print('here_correct4: $url');
+          url = data.toString();
       }
-      // print('here_correct5: $url');
-      return url;
+        return url;
     }
 
   }
@@ -232,10 +198,6 @@ class Globals {
     if (await Vibration.hasVibrator()) {
       Vibration.vibrate();
     }
-  }
-
-  static checkNullOrEmpty(item) {
-    return !(item == null || (item != null && (item.toString().isEmpty || item.toString().toLowerCase() == 'null')) );
   }
 
 }

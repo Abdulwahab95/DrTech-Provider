@@ -64,25 +64,25 @@ class _RateAppState extends State<RateApp> {
           ),
           Expanded(
               child: Container(
-            alignment: Alignment.bottomCenter,
-            child: InkWell(
-              onTap: send,
-              child: Container(
-                width: 320,
-                height: 56,
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(bottom: 10),
-                child: Text(
-                  LanguageManager.getText(70),
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.normal),
+                alignment: Alignment.bottomCenter,
+                child: InkWell(
+                  onTap: send,
+                  child: Container(
+                    width: 320,
+                    height: 56,
+                    alignment: Alignment.center,
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      LanguageManager.getText(70),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.normal),
+                    ),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Converter.hexToColor("#344F64")),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Converter.hexToColor("#344F64")),
-              ),
-            ),
-          ))
+              ))
         ],
       ),
     );

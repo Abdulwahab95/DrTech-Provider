@@ -28,7 +28,7 @@ class _AboutState extends State<About> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "about", context, (r) { // information/about
+    NetworkManager.httpGet(Globals.baseUrl + "about",  context, (r) { // information/about
       setState(() {
         isLoading = false;
         data = r['data'];
@@ -52,6 +52,7 @@ class _AboutState extends State<About> {
                       child: Container(
                         padding: EdgeInsets.only(left: 10, right: 10),
                         child: ListView(
+                          padding: EdgeInsets.symmetric(vertical: 30),
                           children: [
                             Text(
                               LanguageManager.getText(73),

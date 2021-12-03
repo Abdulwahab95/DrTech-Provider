@@ -13,7 +13,9 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'Home.dart';
+import 'JoinRequest.dart';
 import 'LiveChat.dart';
+import 'Login.dart';
 import 'WebBrowser.dart';
 
 class Welcome extends StatefulWidget {
@@ -280,27 +282,26 @@ class _WelcomeState extends State<Welcome> {
   void close() {
     DatabaseManager.save("welcome", true);
 
-    var forceUpdate = Globals.getValueInConfigSetting('is_force_update_client');
-    var blocked     = UserManager.currentUser('is_blocked');
+    var forceUpdate = Globals.getValueInConfigSetting('is_force_update_provider');
+    var blocked = UserManager.currentUser('is_blocked');
 
     if (blocked == '1')
       Alert.show(context, 313, onYes: () {
         Platform.isIOS ? exit(0) : SystemNavigator.pop();
       }, onYesShowSecondBtn: false, isDismissible: false);
-    else if (forceUpdate == '1' && isExistUpdateClient())
+    else if (forceUpdate == '1' && isExistUpdateProvider())
       Alert.show(context, 314, onYes: (){
-        launch(Globals.getConfig('client_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
+        launch(Globals.getConfig('provider_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
       },onYesShowSecondBtn: false, isDismissible: false);
-    else if (isExistUpdateClient())
+    else if (isExistUpdateProvider())
       Alert.show(context, 315, onYes: (){
-        launch(Globals.getConfig('client_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
+        launch(Globals.getConfig('provider_store_app_link')[Platform.isIOS ?'url_ios':'url_android']);
       }, premieryText: 316, secondaryText: 317,onClickSecond: (){
         Navigator.pop(context);
         goToNext();
       }, isDismissible: false);
     else
       goToNext();
-
   }
 
   void goToNext() {
@@ -308,20 +309,20 @@ class _WelcomeState extends State<Welcome> {
         context,
         MaterialPageRoute(
             builder: (c) =>
-            Globals.checkUpdate() && Globals.getWebViewUrl().isNotEmpty
-                ? WebBrowser(Globals.getWebViewUrl(), '')
-                :
-            // UserManager.currentUser("id").isNotEmpty?
-            Globals.isLiveChatOpenFromNotification
-                ? LiveChat(Globals.currentConversationId)
-                : Globals.isNotificationOpenFromNotification
-                ? Home(page: 2)
-                : Home())); // page: UserManager.currentUser("id").isNotEmpty ? 0 : 1
-    // : Login()));
+                Globals.checkUpdate() && Globals.getWebViewUrl().isNotEmpty
+                    ? WebBrowser(Globals.getWebViewUrl(), '')
+                    :
+                UserManager.currentUser("id").isEmpty
+                    ? Login()
+                    : UserManager.currentUser("identity").isEmpty? JoinRequest() //
+                    : Globals.isLiveChatOpenFromNotification? LiveChat(Globals.currentConversationId)
+                    : Globals.isNotificationOpenFromNotification? Home(page: 3) : Home()
+        )
+    );
   }
 
-  bool isExistUpdateClient() {
-    String version = Globals.getValueInConfigSetting(Platform.isIOS ? 'client_last_version_ios' : 'client_last_version_android').toString();
+  bool isExistUpdateProvider() {
+    String version = Globals.getValueInConfigSetting(Platform.isIOS ? 'provider_last_version_ios' : 'provider_last_version_android').toString();
     print('here_version: server_version: $version');
     version = version.replaceAll('.', '');
     if(version.length > 0){

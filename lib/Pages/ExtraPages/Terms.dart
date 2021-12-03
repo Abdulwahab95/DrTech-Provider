@@ -26,7 +26,7 @@ class _TermsState extends State<Terms> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(Globals.baseUrl + "privacy/policy", context, (r) { // information/terms
+    NetworkManager.httpGet(Globals.baseUrl + "privacy/policy",  context, (r) { // information/terms
       setState(() {
         isLoading = false;
         data = r['data'];
@@ -48,8 +48,9 @@ class _TermsState extends State<Terms> {
                   : ScrollConfiguration(
                       behavior: CustomBehavior(),
                       child: Container(
-                        padding: EdgeInsets.only(left: 10, right: 10),
+                        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
                         child: ListView(
+                          padding: EdgeInsets.symmetric(vertical: 0),
                           children: data.toString().split("\n").map((e) {
                             bool isTitel = e.startsWith("*");
                             return Text(

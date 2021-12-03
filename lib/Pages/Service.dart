@@ -1,10 +1,6 @@
 
-
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
-import 'package:dr_tech/Components/CustomBehavior.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/RateStars.dart';
 import 'package:dr_tech/Components/Recycler.dart';
@@ -16,13 +12,10 @@ import 'package:dr_tech/Models/ShareManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/LiveChat.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import 'Login.dart';
-import 'ServicePage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Service extends StatefulWidget {
   final target, title;
@@ -34,13 +27,11 @@ class Service extends StatefulWidget {
 
 class _ServiceState extends State<Service> {
   Map<String, String> filters = {};
-  Map selectOptions = {};
   Map<String, dynamic> selectedFilters = {};
   Map<String, dynamic> configFilters;
   int page = 0;
   Map<int, List> data = {};
-  bool isLoading = false, isFilterOpen = false, applyFilter = false,
-      showSelectCountry = false, showSelectCity    = false, showSelectStreet  = false;
+  bool isLoading = false, isFilterOpen = false;
 
   ScrollController controller = ScrollController();
 
@@ -52,89 +43,61 @@ class _ServiceState extends State<Service> {
   }
 
   void getConfig() {
-    NetworkManager.httpPost(
-        Globals.baseUrl + "services/filters", context, (r) { // ?target=${widget.target}
+    NetworkManager.httpGet(
+        Globals.baseUrl + "services/filters?target=${widget.target}",  context, (r) {
       if (r['state'] == true) {
         setState(() {
           configFilters = r['data'];
-          List CCS= (r['data']['is_country_city_street'] as String).split('-').toList();
-          showSelectCountry = CCS[0] == '1'?   true : false;
-          showSelectCity    = CCS[1] == '1'?   true : false;
-          showSelectStreet  = CCS[2] == '1'?   true : false;
         });
       }
-    }, cachable: true, body: {'service_id': widget.target.toString()});
+    }, cashable: true);
   }
 
   void load() {
-    print('here_apply_filter: $applyFilter');
-    timerLock = false;
-    // var r = {
-    //   "data": [
-    //     {
-    //       "id": "1",
-    //       "provider_name": "عبدالوهاب عبدالهادي",
-    //       "thumbnail": "https://drtech.takiddine.co/images/avatars/2021-10-16_12:58:21.956758.jpeg",
-    //       "phone": "965095703",
-    //       "provider_services_title": "سوفت وير لكل الهواتف	",
-    //       "city_id": "8363",
-    //       "street_id": "633",
-    //       "stars": 5,
-    //       "city_name": "مكة",
-    //       "street_name": "الرياض",
-    //       "verified": true,
-    //       "available": true
-    //     }
-    //   ]
-    // };
-    //       setState(() {
-    //         data[0] = r['data'];
-    //       });
-    //----------------------
-
     if (isLoading) return;
     setState(() {
       isLoading = true;
     });
 
-    if(filters.isEmpty && UserManager.currentUser('country_id').isNotEmpty)
-      filters['country_id_with_null'] = UserManager.currentUser('country_id');
-
-
-    NetworkManager.httpPost(   // services/load?target=${widget.target}&page$page
-        Globals.baseUrl + "services/details/${widget.target}", context, (r) {
+    NetworkManager.httpGet(
+        Globals.baseUrl + "services/load?target=${widget.target}&page$page",
+         context, (r) {
+      setState(() {
+        isLoading = false;
+      });
       if (r['state'] == true) {
         setState(() {
-          isLoading = false;
-          data[0] = r['data']; // r['page']
+          data[r['page']] = r['data'];
         });
       }
-    }, body: filters, cachable: true);
+    }, body: filters, cashable: true);
   }
 
   void startNewConversation(id) {
-    UserManager.currentUser("id").isNotEmpty
-        ? Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(id.toString())))
-        : Alert.show(context, LanguageManager.getText(298),
-              premieryText: LanguageManager.getText(30),
-              onYes: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => Login()));
-              }, onYesShowSecondBtn: false);
+    Alert.startLoading(context);
+    NetworkManager.httpGet(
+        Globals.baseUrl + "chat/add?id=$id&service_id=${widget.target}",  context, (r) {
+      Alert.endLoading();
+      if (r['state'] == true) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     print('id: ${widget.target}');
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
             children: [
               TitleBar(() {Navigator.pop(context);}, widget.title),
-              data.isNotEmpty && data[0].length != 0 || applyFilter? getSearchAndFilter() : Container(),
+              getSearchAndFilter(),
               Expanded(
-                child:
-                isLoading? Center(child: CustomLoading()) : getEngineersList()
+                child: getEngineersList(),
               )
             ],
           ),
@@ -166,100 +129,51 @@ class _ServiceState extends State<Service> {
                         color: Colors.white,
                       ),
                       width: MediaQuery.of(context).size.width * 0.7,
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              child: Row(
-                                textDirection: LanguageManager.getTextDirection(),
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        isFilterOpen = !isFilterOpen;
-                                      });
-                                    },
-                                    child: Icon(
-                                      FlutterIcons.close_ant,
-                                      size: 20,
-                                    ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(12),
+                            child: Row(
+                              textDirection: LanguageManager.getTextDirection(),
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      isFilterOpen = !isFilterOpen;
+                                    });
+                                  },
+                                  child: Icon(
+                                    FlutterIcons.close_ant,
+                                    size: 20,
                                   ),
-                                  Text(
-                                    LanguageManager.getText(106),
-                                    style: TextStyle(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Container(
-                                    width: 20,
-                                  )
-                                ],
-                              ),
-                            ),
-                            Container(
-                              height: 1,
-                              color: Colors.black.withAlpha(15),
-                            ),
-                            ...(configFilters == null
-                                ? [
-                                    Container(
-                                      height: 150,
-                                      alignment: Alignment.center,
-                                      child: CustomLoading(),
-                                    )
-                                  ]
-                                : [
-                                    Expanded(
-                                      child: ScrollConfiguration(
-                                          behavior: CustomBehavior(),
-                                          child: ListView(
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 0, horizontal: 0),
-                                            children: getFilters(),
-                                          )),
-                                    )
-                                  ]),
-                            Container(
-                              height: 1,
-                              color: Colors.black.withAlpha(15),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(bottom: 10, top: 10),
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    isFilterOpen = false;
-                                    applyFilter = true;
-                                    load();
-                                  });
-                                },
-                                child: Container(
-                                  width: 190,
-                                  height: 45,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    LanguageManager.getText(116), // تطبيق الفلتر
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                  decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black.withAlpha(15),
-                                            spreadRadius: 2,
-                                            blurRadius: 2)
-                                      ],
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Converter.hexToColor("#344f64")),
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
+                                Text(
+                                  LanguageManager.getText(106),
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Container(
+                                  width: 20,
+                                )
+                              ],
+                            ),
+                          ),
+                          Container(
+                            height: 1,
+                            color: Colors.black.withAlpha(15),
+                          ),
+                          ...(configFilters == null
+                              ? [
+                                  Container(
+                                    height: 150,
+                                    alignment: Alignment.center,
+                                    child: CustomLoading(),
+                                  )
+                                ]
+                              : getFilters()),
+                        ],
                       ),
                     ),
                   ),
@@ -271,51 +185,61 @@ class _ServiceState extends State<Service> {
 
   List<Widget> getFilters() {
     List<Widget> items = [];
+    items.add(getFilterOption(107, configFilters['city'], "city"));
+    items.add(getFilterOption(
+        108,
+        selectedFilters['city'] != null
+            ? selectedFilters['city']['children']
+            : LanguageManager.getText(113),
+        "street",
+        message: LanguageManager.getText(113)));
+    items.add(getFilterOption(109, configFilters['device'], "device"));
+    items.add(getFilterOption(
+        110,
+        selectedFilters['device'] != null
+            ? selectedFilters['device']['children']
+            : LanguageManager.getText(114),
+        "brand",
+        message: LanguageManager.getText(114)));
+    items.add(getFilterOption(
+        111,
+        selectedFilters['brand'] != null
+            ? selectedFilters['brand']['children']
+            : LanguageManager.getText(115),
+        "model",
+        message: LanguageManager.getText(115)));
 
-    if(showSelectCountry)
-      items.add(getFilterOption(312, configFilters['countries'], "countries", keyId: 'country_id'));
-    else
-      (configFilters['countries'] as List<dynamic>).forEach((element) {
-        if((element as Map)['id'].toString() == UserManager.currentUser('country_id')) {
-          configFilters['city'] = element['cities'];
-        }else if((element as Map)['id'].toString() == "191") {
-          configFilters['city'] = element['cities'];
-        }
-      });
-
-    if(showSelectCity)
-      items.add(getFilterOption(107, configFilters['city'], "city", keyId: 'city_id'));
-
-    if(showSelectStreet)
-      items.add(getFilterOption(108, selectedFilters['city'] != null
-              ? selectedFilters['city']['street']
-              : LanguageManager.getText(113),
-          "street", keyId:'street_id',
-          message: LanguageManager.getText(113))); // يرجي اختيار المدينة اولا قبل اختيار الحي
-
-    items.add(getFilterOption(283, configFilters['Categories'], "Categories", keyId: 'service_categories_id'));
-
-    items.add(getSelectedOptions('subcategories',  keyId: 'service_subcategories_id'));
-    items.add(getSelectedOptions('service_sub_2',  keyId: 'sub2_id'));
-    items.add(getSelectedOptions('service_sub_3',  keyId: 'sub3_id'));
-    items.add(getSelectedOptions('service_sub_4',  keyId: 'sub4_id'));
-    // items.add(getFilterOption(109, configFilters['device'], "device"));
-    // items.add(getFilterOption(
-    //     110,
-    //     selectedFilters['device'] != null
-    //         ? selectedFilters['device']['children']
-    //         : LanguageManager.getText(114),
-    //     "brand",
-    //     message: LanguageManager.getText(114)));
-    // items.add(getFilterOption(
-    //     111,
-    //     selectedFilters['brand'] != null
-    //         ? selectedFilters['brand']['children']
-    //         : LanguageManager.getText(115),
-    //     "model",
-    //     message: LanguageManager.getText(115)));
-
-   // items.add(Expanded(child: Container()));
+    items.add(Expanded(child: Container()));
+    items.add(Container(
+      margin: EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            isFilterOpen = false;
+            load();
+          });
+        },
+        child: Container(
+          width: 190,
+          height: 45,
+          alignment: Alignment.center,
+          child: Text(
+            LanguageManager.getText(116),
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withAlpha(15),
+                    spreadRadius: 2,
+                    blurRadius: 2)
+              ],
+              borderRadius: BorderRadius.circular(8),
+              color: Converter.hexToColor("#344f64")),
+        ),
+      ),
+    ));
     return items;
   }
 
@@ -328,88 +252,72 @@ class _ServiceState extends State<Service> {
           Container(
             height: 10,
           ),
-          Container(
-            decoration: BoxDecoration(
-                color: Converter.hexToColor("#F2F2F2"),
-                borderRadius: BorderRadius.circular(10)),
-            margin: EdgeInsets.only(left: 12, right: 12, top: 5, bottom: 5),
-            padding: EdgeInsets.only(left: 14, right: 14),
-            child: Row(
-              textDirection: LanguageManager.getTextDirection(),
-              children: [
-                Expanded(
-                  child: TextField(
-                    textInputAction: TextInputAction.search,
-                    textDirection: LanguageManager.getTextDirection(),
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        hintTextDirection: LanguageManager.getTextDirection(),
-                        border: InputBorder.none,
-                        hintText: LanguageManager.getText(102)), // ابحث هنا
-                    onChanged: (value) {
-                      filters['word_search'] = value;
-                      if(value.length == 0)
-                        applyFilter = false;
-                      else
-                        timerLoadLock();
-                      print('here_value: $value');
-                    },
-                    onSubmitted: (value) {
-                      print("here_search $value");
-                      applyFilter = value.length == 0 ? false : true;
-                      load();
-                    },
-                  ),
-                ),
-                InkWell(
-                  onTap: load,
-                  child: Icon(
-                      FlutterIcons.magnifier_sli, // search icon
-                      color: Colors.grey,
-                      size: 20,
-                    ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            height: 10,
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 15, right: 15),
-            child: Row(
-              textDirection: LanguageManager.getTextDirection(),
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  LanguageManager.getText(104), // جميع النتائج
-                  style: TextStyle(
-                      fontSize: 14, color: Converter.hexToColor("#707070")),
-                ),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      isFilterOpen = true;
-                    });
-                  },
-                  child: Row(
-                    textDirection: LanguageManager.getTextDirection(),
-                    children: [
-                      SvgPicture.asset(
-                        "assets/icons/filter.svg",
-                        width: 18,
-                        height: 18,
-                      ),
-                      Text(
-                        LanguageManager.getText(103), // تصفية النتائج
-                        style: TextStyle(fontSize: 14, color: Colors.blue),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
+          // Container(
+          //   decoration: BoxDecoration(
+          //       color: Converter.hexToColor("#F2F2F2"),
+          //       borderRadius: BorderRadius.circular(10)),
+          //   margin: EdgeInsets.only(left: 12, right: 12, top: 5, bottom: 5),
+          //   padding: EdgeInsets.only(left: 14, right: 14),
+          //   child: Row(
+          //     textDirection: LanguageManager.getTextDirection(),
+          //     children: [
+          //       Expanded(
+          //         child: TextField(
+          //           textInputAction: TextInputAction.search,
+          //           textDirection: LanguageManager.getTextDirection(),
+          //           keyboardType: TextInputType.text,
+          //           decoration: InputDecoration(
+          //               hintTextDirection: LanguageManager.getTextDirection(),
+          //               border: InputBorder.none,
+          //               hintText: LanguageManager.getText(102)),
+          //         ),
+          //       ),
+          //       Icon(
+          //         FlutterIcons.magnifier_sli,
+          //         color: Colors.grey,
+          //         size: 20,
+          //       )
+          //     ],
+          //   ),
+          // ),
+          // Container(
+          //   height: 10,
+          // ),
+          // Container(
+          //   padding: EdgeInsets.only(left: 15, right: 15),
+          //   child: Row(
+          //     textDirection: LanguageManager.getTextDirection(),
+          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //     children: [
+          //       Text(
+          //         LanguageManager.getText(104),
+          //         style: TextStyle(
+          //             fontSize: 14, color: Converter.hexToColor("#707070")),
+          //       ),
+          //       InkWell(
+          //         onTap: () {
+          //           setState(() {
+          //             isFilterOpen = true;
+          //           });
+          //         },
+          //         child: Row(
+          //           textDirection: LanguageManager.getTextDirection(),
+          //           children: [
+          //             SvgPicture.asset(
+          //               "assets/icons/filter.svg",
+          //               width: 18,
+          //               height: 18,
+          //             ),
+          //             Text(
+          //               LanguageManager.getText(103),
+          //               style: TextStyle(fontSize: 14, color: Colors.blue),
+          //             ),
+          //           ],
+          //         ),
+          //       )
+          //     ],
+          //   ),
+          // ),
           selectedFilters.keys.length > 0
               ? Container(
                   margin: EdgeInsets.only(top: 5),
@@ -420,10 +328,9 @@ class _ServiceState extends State<Service> {
                       Expanded(
                         child: Text(
                           selectedFilters.values
-                              .map((e) => e["name"])
+                              .map((e) => e["text"])
                               .toList()
-                              .join(" , ")
-                          ,
+                              .join(" , "),
                           textDirection: LanguageManager.getTextDirection(),
                           style: TextStyle(
                               color: Colors.blue,
@@ -435,7 +342,6 @@ class _ServiceState extends State<Service> {
                           setState(() {
                             selectedFilters = {};
                             filters = {};
-                            applyFilter = false;
                             load();
                           });
                         },
@@ -446,48 +352,13 @@ class _ServiceState extends State<Service> {
                       )
                     ],
                   ))
-              : Container() ,
-                Container(height: 5,),
-                Container(height: 1, color: Colors.black.withAlpha(12),),
-                Container(height: 1, color: Colors.black.withAlpha(6),),
-                Container(height: 1, color: Colors.black.withAlpha(3),),
+              : Container()
         ],
       ),
     );
   }
 
   Widget getEngineersList() {
-    // print('here_getEngineersList: ${data[0].length}');
-    if(data[0].length == 0 && !applyFilter){
-      return Column(children: [
-        Expanded(
-          flex: 10,
-          child: Container(
-            width: 300,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage("assets/images/soon.png"))),
-          ),
-        ),
-        Spacer(flex: 1,),
-        Expanded(
-          flex: 9,
-          child: Container(
-            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
-            child: Text(
-              LanguageManager.getText(293), // قريباً...
-              textDirection: LanguageManager.getTextDirection(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Converter.hexToColor("#303030")),
-            ),
-          ),
-        )
-
-      ],);
-    }
     List<Widget> items = [];
 
     for (var page in data.keys) {
@@ -495,26 +366,26 @@ class _ServiceState extends State<Service> {
         items.add(getEngineerUi(item));
       }
     }
-    // if(items.length == 1)
-    // items.add(getEngineerUi({
-    //   "id": "2",
-    //   "name": "\u0645\u0632\u0648\u062f \u062e\u062f\u0645\u0629",
-    //   "image": "https:\/\/server.drtechapp.com\/storage\/images\/610fb357ecdf7.jpg",
-    //   "service_name": "\u0627\u0635\u0644\u0627\u062d \u0627\u0644\u062c\u0648\u0644\u0627\u062a",
-    //   "city_id": "8363",
-    //   "street_id": "633",
-    //   "phone":"+966573284334",
-    //   "rating": 5,
-    //   "city_name": " جدة",
-    //   "street_name": "المدينة المنورة",
-    //   "verified": true,
-    //   "available": true
-    // }));
+    if(items.length == 1)
+    items.add(getEngineerUi({
+      "id": "2",
+      "name": "\u0645\u0632\u0648\u062f \u062e\u062f\u0645\u0629",
+      "image": "https:\/\/server.drtechapp.com\/storage\/images\/610fb357ecdf7.jpg",
+      "service_name": "\u0627\u0635\u0644\u0627\u062d \u0627\u0644\u062c\u0648\u0644\u0627\u062a",
+      "city_id": "8363",
+      "street_id": "633",
+      "phone":"+966573284334",
+      "rating": 5,
+      "city_name": " جدة",
+      "street_name": "المدينة المنورة",
+      "verified": true,
+      "available": true
+    }));
 
-    // widget.target == '2' || widget.target == '3'?Center(child: Text('قريبا...', textDirection: TextDirection.rtl,)):
-    return Recycler(
-      onScrollDown: null,
-      children: items,);
+    return widget.target == '2' || widget.target == '3'?Center(child: Text('قريبا...', textDirection: TextDirection.rtl,)):Recycler(
+      onScrollDown: load,
+      children: items,
+    );
   }
 
   Widget getEngineerUi(item) {
@@ -527,9 +398,10 @@ class _ServiceState extends State<Service> {
       ], borderRadius: BorderRadius.circular(15), color: Colors.white),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => ServicePage(item['id']))); // EngineerPage(item['id'], widget.target)
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (_) => EngineerPage(item['id'], widget.target)));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,12 +415,12 @@ class _ServiceState extends State<Service> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 90,
+                    height: 90,
                     alignment: !LanguageManager.getDirection()
                         ? Alignment.bottomRight
                         : Alignment.bottomLeft,
-                    child: item['profile_verified'] == true
+                    child: item['verified'] == true
                         ? Container(
                             width: 20,
                             height: 20,
@@ -564,23 +436,23 @@ class _ServiceState extends State<Service> {
                         : Container(),
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: CachedNetworkImageProvider(Globals.correctLink(item['thumbnail']))),
+                            image: CachedNetworkImageProvider(Globals.correctLink(item['image']))),
                         borderRadius: BorderRadius.circular(10),
                         color: Converter.hexToColor("#F2F2F2")),
                   ),
                   Container(
-                    height: 15,
+                    height: 30,
                   ),
-                  item['active'] == true
+                  item['available'] == true
                       ? Text(
-                          LanguageManager.getText(100) ,//+ '/' + item['id'].toString() + '/' + item['Country_name'] + '/' + item['service_id'].toString(),
+                          LanguageManager.getText(100),
                           style: TextStyle(
                               fontSize: 18,
                               color: Colors.green,
                               fontWeight: FontWeight.normal),
                         )
                       : Text(
-                          LanguageManager.getText(101) ,//+ '/' + item['id'].toString() + '/' + item['Country_name'] + '/' + item['service_id'].toString(),
+                          LanguageManager.getText(101),
                           style: TextStyle(
                               fontSize: 18,
                               color: Colors.red,
@@ -602,131 +474,69 @@ class _ServiceState extends State<Service> {
                   children: [
                     Expanded(
                         child: Text(
-                      item['provider_name'].toString(),
+                      item['name'],
                       textDirection: LanguageManager.getTextDirection(),
                       style: TextStyle(
                           color: Converter.hexToColor("#2094CD"),
-                          fontSize: 14.5,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold),
                     )),
                     InkWell(
                       onTap: () {
                         ShareManager.shearEngineer(
-                            item['id'], item['provider_name'], item['provider_services_title']);
+                            item['id'], item['name'], item['service_name']);
                       },
-                      child: Container(
-                        // margin: EdgeInsets.only(top: 10),
-                        child: Icon(
-                          FlutterIcons.share_2_fea,
-                          color: Converter.hexToColor("#344F64"),
-                        ),
+                      child: Icon(
+                        FlutterIcons.share_2_fea,
+                        color: Converter.hexToColor("#344F64"),
                       ),
                     )
                   ],
                 ),
-
+                Text(
+                  LanguageManager.getText(98) +
+                      " " +
+                      item['service_name'].toString(),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
+                ),
+                Container(
+                  height: 5,
+                ),
+                RateStars(
+                  13,
+                  stars: item['rating'].toInt(),
+                ),
+                Container(
+                  height: 5,
+                ),
                 Row(
                   textDirection: LanguageManager.getTextDirection(),
                   children: [
-                    RateStars(
-                      12,
-                      stars: item['stars'].toInt(),
+                    SvgPicture.asset(
+                      "assets/icons/services.svg",
+                      width: 15,
+                      height: 15,
+                      color: Colors.grey,
                     ),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      child: Text(
-                        Converter.format(item['stars']),
-                        textDirection: LanguageManager.getTextDirection(),
-                        style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
+                      width: 5,
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          LanguageManager.getText(99) +
+                              " " +
+                              item['service_name'].toString(),
+                          textDirection: LanguageManager.getTextDirection(),
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal, fontSize: 12),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Container(height: 5),
-
-                Globals.checkNullOrEmpty(item['specializ'])?
-                Row(
-                  textDirection: LanguageManager.getTextDirection(),
-                  children: [
-                    Icon(
-                      FlutterIcons.md_person_ion,
-                      color: Colors.grey,
-                      size: 15,
-                    ),
-                    Container(
-                      width: 5,
-                    ),
-                    Expanded(
-                      child: Container(
-                        child: Text(
-                          LanguageManager.getText(270) +
-                              "   " +
-                              item['specializ'].toString(),
-                          textDirection: LanguageManager.getTextDirection(),
-                          style: TextStyle(
-                              fontWeight: FontWeight.normal, fontSize: 11),
-                        ),
-                      ),
-                    ),
-                  ],
-                ) : Container(),
-
-                Globals.checkNullOrEmpty(item['brand'])?
-                Row(
-                  textDirection: LanguageManager.getTextDirection(),
-                  children: [
-                    Container(
-                      margin: LanguageManager.getDirection()? EdgeInsets.only(right: 2, left: 5) : EdgeInsets.only(right: 6, left: 0),
-                      child: SvgPicture.asset(
-                        "assets/icons/services.svg",
-                        width: 13,
-                        height: 13,
-                        color: Colors.grey,
-                      ),
-                    ),
-
-                    Expanded(
-                      child: Container(
-                        child: Text(
-                          LanguageManager.getText(310) +
-                              "   " +
-                              item['brand'].toString(),
-                          textDirection: LanguageManager.getTextDirection(),
-                          style: TextStyle(
-                              fontWeight: FontWeight.normal, fontSize: 11),
-                        ),
-                      ),
-                    ),
-                  ],
-                ) : Container(),
-
-                Globals.checkNullOrEmpty(item['provider_services_title'])?
-                Row(
-                  textDirection: LanguageManager.getTextDirection(),
-                  children: [
-                    Icon(
-                      FlutterIcons.md_cog_ion,
-                      color: Colors.grey,
-                      size: 15,
-                    ),
-                    Container(
-                      width: 5,
-                    ),
-                    Expanded(
-                      child: Container(
-                        child: Text(
-                          LanguageManager.getText(309) +
-                              "   " +
-                              item['provider_services_title'].toString(),
-                          textDirection: LanguageManager.getTextDirection(),
-                          style: TextStyle(
-                              fontWeight: FontWeight.normal, fontSize: 11),
-                        ),
-                      ),
-                    ),
-                  ],
-                ) : Container(),
-                Globals.checkNullOrEmpty(item['city_name'])?
                 Row(
                   textDirection: LanguageManager.getTextDirection(),
                   children: [
@@ -740,25 +550,161 @@ class _ServiceState extends State<Service> {
                     ),
                     Expanded(
                       child: Container(
+                        padding: EdgeInsets.only(bottom: 0),
                         child: Text(
-                                item['city_name'].toString() +
-                                    (item['street_name'].toString().isEmpty
-                                        ? ""
-                                        : ("  -  " + item['street_name'].toString())),
-                                textDirection: LanguageManager.getTextDirection(),
+                          item['city_name'].toString() +
+                              "  - " +
+                              item['street_name'].toString(),
+                          textDirection: LanguageManager.getTextDirection(),
                           style: TextStyle(
-                              fontWeight: FontWeight.normal, fontSize: 11),
+                              fontWeight: FontWeight.normal, fontSize: 12),
                         ),
                       ),
                     ),
                   ],
-                ) : Container(),
+                ),
                 Container(
                   height: 10,
                 ),
                 Row(
                   textDirection: LanguageManager.getTextDirection(),
                   children: [
+                    Expanded(
+                      child: InkWell(
+                        onLongPress: () async {
+                          // if (Platform.isIOS) {
+                          // iOS
+                          var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.currentUser("name")}\nأريد...";
+                          var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
+                          var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                          whatsappUrl = Uri.encodeFull(whatsappUrl);
+                          whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
+
+
+
+                          //   var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.currentUser("name")}\nأريد...";
+                          //   var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                                  var txtControll = TextEditingController();
+                                Alert.show(
+                                    context,
+                                    Container(
+                                      padding: EdgeInsets.all(5),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.only(left: 10, right: 10),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(10),
+                                                color: Converter.hexToColor("#F2F2F2")),
+                                            child: TextField(
+                                              controller: txtControll,
+                                              onChanged:  (r) {r == "aaa"? r=whatsappUrl:whatsappUrl = r;},
+                                              textDirection: LanguageManager.getTextDirection(),
+                                              textAlign: LanguageManager.getDirection()
+                                                  ? TextAlign.right
+                                                  : TextAlign.left,
+                                              decoration: InputDecoration(
+                                                  border: InputBorder.none,
+                                                  hintText: LanguageManager.getText(33)),
+
+                                            ),
+                                          ),
+                                          Container(height: 15,),
+                                          InkWell(
+                                            onTap: () async{
+                                              if(txtControll.text.isEmpty)
+                                                txtControll.text= whatsappUrl;
+                                              else if(txtControll.text == "aaa")
+                                                txtControll.text = whatsappUrl2;
+                                              else {
+                                            Navigator.pop(context);
+                                            await canLaunch(whatsappUrl)
+                                                ? launch(whatsappUrl)
+                                                : await canLaunch(whatsappUrl2)
+                                                ? launch(whatsappUrl2)
+                                                : Alert.show(context,
+                                                "تعذر الوصول إلى تطبيق الواتس أب");
+                                          }
+                                        },
+                                            child: Container(
+                                              height: 45,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                LanguageManager.getText(34),
+                                                style: TextStyle(color: Colors.white),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                        color: Colors.black.withAlpha(15),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 2)
+                                                  ],
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: Converter.hexToColor("#344f64")),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    type: AlertType.WIDGET);
+
+
+                        },
+                        onTap: () async {
+                            // if (Platform.isIOS) {
+                              // iOS
+                                var url = 'http://maps.apple.com/';
+                                var mess  = "السلام عليكم ورحمة الله \n أنا ${UserManager.currentUser("name")}\nأريد...";
+                                var whatsappUrl2 ="https:wa.me/?phone=${item['phone']}&text=$mess";//$phone
+                                var whatsappUrl ="whatsapp://send?phone=${item['phone']}&text=$mess";//$phone
+                                whatsappUrl = Uri.encodeFull(whatsappUrl);
+                                whatsappUrl2 = Uri.encodeFull(whatsappUrl2);
+                                await canLaunch(whatsappUrl)
+                              ? launch(whatsappUrl)
+                              : await canLaunch(whatsappUrl2)
+                                  ? launch(whatsappUrl2)
+                                  : Alert.show(context,
+                                      "تعذر الوصول إلى تطبيق الواتس أب");
+                          
+
+                          },
+                        child: Container(
+                          height: 40,
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            textDirection: LanguageManager.getTextDirection(),
+                            children: [
+                              Icon(
+                                FlutterIcons.whatsapp_faw,
+                                color: Colors.white,
+                              ),
+                              Container(
+                                width: 5,
+                              ),
+                              Text(
+                                LanguageManager.getText(117),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black.withAlpha(15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2)
+                              ],
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.green),
+                        ),
+                      ),
+                    ),
                     // Expanded(
                     //   child: InkWell(
                     //     onTap: () {},
@@ -790,59 +736,59 @@ class _ServiceState extends State<Service> {
                     //             BoxShadow(
                     //                 color: Colors.black.withAlpha(15),
                     //                 spreadRadius: 2,
-                    //                 blurRadius: 2)],
+                    //                 blurRadius: 2)
+                    //           ],
                     //           borderRadius: BorderRadius.circular(12),
-                    //           color: Converter.hexToColor("#344f64")
-                    //       ),
+                    //           color: Converter.hexToColor("#344f64")),
                     //     ),
                     //   ),
                     // ),
                     // Container(
                     //   width: 10,
                     // ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          startNewConversation(item['provider_id']);
-                        },
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            textDirection: LanguageManager.getTextDirection(),
-                            children: [
-                              Icon(
-                                Icons.chat,
-                                color: Converter.hexToColor("#344f64"),
-                                size: 20,
-                              ),
-                              Container(
-                                width: 5,
-                              ),
-                              Text(
-                                LanguageManager.getText(117),
-                                style: TextStyle(
-                                    color: Converter.hexToColor("#344f64"),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withAlpha(15),
-                                    spreadRadius: 2,
-                                    blurRadius: 2)
-                              ],
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: Converter.hexToColor("#344f64"))),
-                        ),
-                      ),
-                    ),
+                    // Expanded(
+                    //   child: InkWell(
+                    //     onTap: () {
+                    //       startNewConversation(item['id']);
+                    //     },
+                    //     child: Container(
+                    //       height: 40,
+                    //       alignment: Alignment.center,
+                    //       child: Row(
+                    //         mainAxisAlignment: MainAxisAlignment.center,
+                    //         textDirection: LanguageManager.getTextDirection(),
+                    //         children: [
+                    //           Icon(
+                    //             Icons.chat,
+                    //             color: Converter.hexToColor("#344f64"),
+                    //             size: 20,
+                    //           ),
+                    //           Container(
+                    //             width: 5,
+                    //           ),
+                    //           Text(
+                    //             LanguageManager.getText(117),
+                    //             style: TextStyle(
+                    //                 color: Converter.hexToColor("#344f64"),
+                    //                 fontSize: 15,
+                    //                 fontWeight: FontWeight.w600),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       decoration: BoxDecoration(
+                    //           color: Colors.white,
+                    //           boxShadow: [
+                    //             BoxShadow(
+                    //                 color: Colors.black.withAlpha(15),
+                    //                 spreadRadius: 2,
+                    //                 blurRadius: 2)
+                    //           ],
+                    //           borderRadius: BorderRadius.circular(12),
+                    //           border: Border.all(
+                    //               color: Converter.hexToColor("#344f64"))),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
                 Container(
@@ -859,8 +805,7 @@ class _ServiceState extends State<Service> {
     );
   }
 
-  Widget getFilterOption(title, options, key, {message, String keyId}) {
-    print('op=: ${options.runtimeType}');
+  Widget getFilterOption(title, options, key, {message}) {
     return Container(
       margin: EdgeInsets.only(top: 20),
       padding: EdgeInsets.only(left: 15, right: 15),
@@ -881,54 +826,19 @@ class _ServiceState extends State<Service> {
             onTap: () {
               if (options.runtimeType == String) {
                 if (selectedFilters[options] != null &&
-                    selectedFilters[options]['street'] != null) {
+                    selectedFilters[options]['children'] != null) {
                   Alert.show(context, options, type: AlertType.SELECT);
                 } else {
                   Alert.show(context, message);
                 }
-              } else {
-                var tmpList = options as List;
-               // print('tmp: ${tmpList.isEmpty}, ${tmpList.first != {'name': 'الكل'}}, ${(tmpList.isEmpty || tmpList.first != {'name': 'الكل'})}, ${tmpList.first.runtimeType}, ${{'name': 'الكل'}.runtimeType}');
-                Map<String, dynamic> s= {'name': 'الكل'};
-                if(tmpList.isEmpty || (!mapEquals(tmpList.first, s)))
-                    tmpList.insert(0, {'name': 'الكل'});
-
-                Alert.show(context,tmpList,
-                    type: AlertType.SELECT, onSelected: (item) {
+              } else
+                Alert.show(context, options, type: AlertType.SELECT,
+                    onSelected: (item) {
                   setState(() {
-                    print('here_item: $key');
-                    switch (key) {
-                      case 'city':
-                        filters.remove('street_id');
-                        selectedFilters.remove('street');
-                        break;
-                      case 'Categories':
-                        selectOptions['subcategories'] = item['subcategories'];
-                        setNullSO(3);
-                        break;
-                      case 'subcategories':
-                        selectOptions['service_sub_2'] = item['service_sub_2'];
-                        setNullSO(2);
-                        break;
-                      case 'service_sub_2':
-                        selectOptions['service_sub_3'] = item['service_sub_3'];
-                        setNullSO(1);
-                        break;
-                      case 'service_sub_3':
-                        selectOptions['service_sub_4'] = item['service_sub_4'];
-                        setNullSO(0);
-                        break;
-                      default:
-                        print('------------->>>> $key');
-                    }
-
                     selectedFilters[key] = item;
-                    filters[keyId] = item['id'].toString();
-                    print('here_selectedFilters:* $selectedFilters');
-                    print('here_filters:* , $filters');
+                    filters[key] = item['id'];
                   });
                 });
-              }
             },
             child: Container(
                 padding: EdgeInsets.all(7),
@@ -943,7 +853,7 @@ class _ServiceState extends State<Service> {
                         child: Text(
                       selectedFilters[key] == null
                           ? LanguageManager.getText(112)
-                          : selectedFilters[key]["name"],
+                          : selectedFilters[key]["text"],
                       textDirection: LanguageManager.getTextDirection(),
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -960,58 +870,4 @@ class _ServiceState extends State<Service> {
       ),
     );
   }
-
-  void setNullSO(int i) {
-    // print('here_selectedFilters: $selectedFilters');
-    // print('here_filters: i: $i, $filters');
-    if(i != 0) {
-      i--;
-      selectOptions['service_sub_4'] = null;
-      selectedFilters.remove('service_sub_3');
-      filters.remove('sub3_id');
-    }
-    if(i != 0) {
-      i--;
-      selectOptions['service_sub_3'] = null;
-      selectedFilters.remove('service_sub_2');
-      filters.remove('sub2_id');
-    }
-    if(i != 0) {
-      i--;
-      selectOptions['service_sub_2'] = null;
-      selectedFilters.remove('subcategories');
-      filters.remove('service_subcategories_id');
-    }
-    if(i != 0) {
-      i--;
-      selectOptions['subcategories'] = null;
-    }
-    if(i == 0) {
-      selectedFilters.remove('service_sub_4');
-      filters.remove('sub4_id');
-    }
-
-    // print('here_selectedFilters: $selectedFilters');
-    // print('here_filters: i: $i, $filters');
-  }
-
-  getSelectedOptions(String s, {String keyId}) {
-    print('here_selectOptions_map : ${selectOptions[s]}');
-    var isNullOrEmptySO = selectOptions[s]!=null && (selectOptions[s] as List).isNotEmpty;
-    // if(isNullOrEmptySO){
-    //   selectOptions[s]
-    // }
-    return isNullOrEmptySO? getFilterOption(256, selectOptions[s], s, keyId: keyId): Container();
-  }
-
-  var timerLock = false;
-  void timerLoadLock() {
-    if(!timerLock)
-      Timer(Duration(seconds: 3), () {
-        timerLock = true;
-        applyFilter = true;
-        load();
-      });
-  }
-
 }

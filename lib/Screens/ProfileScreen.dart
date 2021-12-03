@@ -11,8 +11,8 @@ import 'package:dr_tech/Pages/ExtraPages/About.dart';
 import 'package:dr_tech/Pages/ExtraPages/RateApp.dart';
 import 'package:dr_tech/Pages/ExtraPages/Terms.dart';
 import 'package:dr_tech/Pages/FrequentlyAskedQuestions.dart';
-import 'package:dr_tech/Pages/JoinRequest.dart';
 import 'package:dr_tech/Pages/ProfileEdit.dart';
+import 'package:dr_tech/Pages/Transactions.dart';
 import 'package:dr_tech/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -30,18 +30,15 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+
     return ScrollConfiguration(
       behavior: CustomBehavior(),
       child: ListView(
-        padding: EdgeInsets.only(top: 25),
+        padding: EdgeInsets.symmetric(vertical: 30),
         children: [
-          UserManager.currentUser("id").isNotEmpty? getProfileHeader() : Container(),
+          getProfileHeader(),
+          Container(height: 10,),
           Container(
-            height: 10,
-          ),
-          UserManager.currentUser("type") != "ENGINEER"
-              ? Container()
-              : Container(
             margin: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 5),
             child: Row(
               textDirection: LanguageManager.getTextDirection(),
@@ -68,11 +65,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Colors.blue),
                     ),
                     Switch(
-                        value: UserManager.currentUser("status") == "1",
+                        value: UserManager.currentUser("active") == "1",
                         onChanged: (v) {
                           setState(() {
-                            DatabaseManager.save("status", v ? "1" : "0");
-                            UserManager.update("status", v ? "1" : "0", context ,(r) {
+                            DatabaseManager.save("active", v ? "1" : "0");
+                            UserManager.update("active", v ? "1" : "0",  context, (r) {
                                   setState(() {});
                                 });
                           });
@@ -135,49 +132,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          getProfileItem(FlutterIcons.attach_money_mdi, 301, () { // 185
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => Transactions()));
+          }),
           getProfileItem(FlutterIcons.list_fea, 59, () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => Terms()));
           }),
           getProfileItem(FlutterIcons.info_fea, 60, () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => About()));
           }),
-          getProfileItem(FlutterIcons.server_fea, 61, () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (_) => JoinRequest()));
-          }),
           getProfileItem(FlutterIcons.flag_fea, 62, () {
             Navigator.push(context,
                 MaterialPageRoute(builder: (_) => FrequentlyAskedQuestions()));
           }),
-          UserManager.currentUser("id").isNotEmpty?
-          getProfileItem(FlutterIcons.headphones_fea, 63, () { // الدعم والمسنادة
+          getProfileItem(FlutterIcons.headphones_fea, 63, () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => ContactUs()));
-          })
-          :Container(),
+          }),
           getProfileItem(FlutterIcons.share_fea, 64, () {
             Alert.show(context,
-                Container(
-                  child: Column(
+                Container(child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         LanguageManager.getText(64),
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
                       getShearinIcons(),
                     ])),
                 type: AlertType.WIDGET);
           }),
-          UserManager.currentUser("id").isNotEmpty?
           getProfileItem(FlutterIcons.star_fea, 65, () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => RateApp()));
-          })
-          :Container(),
-          UserManager.currentUser("id").isNotEmpty?
+          }),
+          // getProfileItem(FlutterIcons.account_off_mco, 278, () {
+          //   // Navigator.push(context, MaterialPageRoute(builder: (_) => RateApp()));
+          //   Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
+          // }, withArraw: false),
           getProfileItem(FlutterIcons.log_out_fea, 66, () {
             Alert.show(context, 319, onYes: (){
               print('here_logout confirm');
@@ -188,7 +181,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             }, secondaryText: 156, premieryText: 155);
           }, withArraw: false)
-          :Container(),
         ],
       ),
     );
@@ -289,7 +281,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fit: BoxFit.cover,
                     image: CachedNetworkImageProvider(Globals.correctLink(UserManager.currentUser("avatar")))),
               )),
-          Container(width: 20),
+          Container(
+            width: 20,
+          ),
           Expanded(
             child: Column(
               textDirection: LanguageManager.getTextDirection(),
@@ -307,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 5,
                 ),
                 InkWell(
-                  onTap: () { _navigateAndDisplaySelection(context); },
+                  onTap: () {_navigateAndDisplaySelection(context);},
                   child: Container(
                     alignment: !LanguageManager.getDirection()
                         ? Alignment.centerLeft
@@ -337,23 +331,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  getAlertDeleteAccount() {
+    return
+        Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            textDirection: LanguageManager.getTextDirection(),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(),
+                  InkWell(
+                    onTap: () {Navigator.pop(context);},
+                    child: Icon(FlutterIcons.x_fea, size: 24),
+                  )
+                ],
+              ),
+              Container(child: Icon(FlutterIcons.md_trash_ion, size: 50)),
+
+              Container(height: 5),
+
+              Text('   ' + LanguageManager.getText(280),
+                style: TextStyle(color: Converter.hexToColor("#707070"), fontWeight: FontWeight.bold)),
+
+              Container(height: 30),
+
+              Text(
+                LanguageManager.getText(279).replaceAll('\\n', '\n'),
+                style: TextStyle(
+                    color: Converter.hexToColor("#707070"),
+                    fontWeight: FontWeight.bold),
+              ),
+              Container(height: 30),
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  InkWell(
+                    onTap: () {Alert.publicClose();},
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(172),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), spreadRadius: 2, blurRadius: 2)],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#344f64")),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      // Navigator.pop(context);
+                      // cancelOrderConferm();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(169),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), spreadRadius: 2, blurRadius: 2)],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#FF0000")),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ));
+  }
 
   void _navigateAndDisplaySelection(BuildContext context) async {
-    // var oldImageUrl = UserManager.currentUser("image");
-    // Navigator.push returns a Future that completes after calling
-    // Navigator.pop on the Selection Screen.
-    final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileEdit()));
 
-    // var newImageUrl = UserManager.currentUser("image");
-    // if(oldImageUrl != newImageUrl){ // update image
-      setState(() {});
-    // }
+    // var oldImageUrl = UserManager.currentUser("avatar");
+    await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileEdit()));
+    setState(() {});
+    // var newImageUrl = UserManager.currentUser("avatar");
+    // if(oldImageUrl != newImageUrl){ setState(() {});} // update image
 
-    // After the Selection Screen returns a result, hide any previous snackbars
-    // and show the new result.
-    // ScaffoldMessenger.of(context)
-    //   ..removeCurrentSnackBar()
-    //   ..showSnackBar(SnackBar(content: Text('$result , old: $old, new: ${UserManager.currentUser("image")}')));
   }
 
 }

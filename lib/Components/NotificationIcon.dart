@@ -1,3 +1,4 @@
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Pages/Home.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +19,24 @@ class _NotificationIconState extends State<NotificationIcon> {
       : 0;
 
   @override
+  void initState() {
+    Globals.updateNotificationCount = ()
+    {
+      if(mounted)
+        setState(() {
+          countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
+        });
+    };
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
           setState(() {
             countNotSeen = 0;
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home(page: 2,)));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Home(page: 3,)));
           });
         },
         child: Stack(
@@ -36,14 +49,14 @@ class _NotificationIconState extends State<NotificationIcon> {
             ),
             countNotSeen > 0
                 ? Container(
-              alignment: Alignment.center,
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.red),
-              child: Text(
-                countNotSeen > 99 ? '99+' : countNotSeen.toString(),
-                style: TextStyle(fontSize: 6, color: Colors.white,fontWeight: FontWeight.w900 ),
-                textAlign: TextAlign.center,),
+                    alignment: Alignment.center,
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.red),
+                      child: Text(
+                        countNotSeen > 99 ? '99+' : countNotSeen.toString(),
+                        style: TextStyle(fontSize: 6, color: Colors.white,fontWeight: FontWeight.w900 ),
+                        textAlign: TextAlign.center),
             )
                 : Container()
           ],

@@ -1,7 +1,7 @@
 name: dr_tech
 description: A new Flutter project. 
 publish_to: 'none' 
-version: 1.0.3+3
+version: 1.0.4+4
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
@@ -9,34 +9,33 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_local_notifications: ^5.0.0
-  flutter_cupertino_localizations: ^1.0.1
-  shared_preferences: ^2.0.0
-  cached_network_image: ^3.0.0
+  flutter_local_notifications:
+  flutter_cupertino_localizations:
+  shared_preferences:
+  cached_network_image:
   http:
   intl:
   flutter_icons:
-  flutter_svg: ^0.19.2+1
-  flutter_sim_country_code: ^0.0.3
-  keyboard_visibility: ^0.5.6
-  vibration: ^1.7.3
-  webview_flutter: ^0.3.19+5
-  flutter_webview_plugin: ^0.3.10+1
-  url_launcher: ^6.0.0
+  flutter_svg:
+  flutter_sim_country_code:
+  keyboard_visibility:
+  vibration:
+  webview_flutter:
+  flutter_webview_plugin:
+  url_launcher:
   firebase_core:
-  firebase_messaging:
-  #firebase_analytics:
+  firebase_messaging: ^10.0.7
+  firebase_analytics:
   firebase_crashlytics:
-  assets_audio_player: ^3.0.3+6
-  share: ^2.0.4
+  assets_audio_player:
+  share:
   # Pickers
-  image_picker: ^0.7.0
-  file_picker: ^3.0.0
-  firebase_auth:
+  image_picker: ^0.8.4+2
+  file_picker:
+  firebase_auth: ^3.1.1
   package_info_plus: ^1.0.6
-#  geolocation: ^1.1.2
 
-  cupertino_icons: ^1.0.2
+  cupertino_icons:
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +62,3 @@ flutter:
         weight: 500
       - asset: assets/fonts/Cairo-Bold.ttf
         weight: 600
-
-module:
-  androidX: true # Add this line.
