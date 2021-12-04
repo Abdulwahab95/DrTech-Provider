@@ -83,12 +83,15 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void onReciveNotic(payloadTarget, paylaod) {
+    // Globals.printTel('here_timer: onReciveNotic');
     if (payloadTarget == null) return;
     switch (payloadTarget) {
       case "chat":
+        // Globals.printTel('here_timer: case chat');
         chatDataNotic(paylaod);
         break;
       case "info":
+        // Globals.printTel('here_timer: case infor');
         infoDataNotic(paylaod);
         break;
       default:
@@ -140,8 +143,10 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     }
   }
 
-  void chatDataNotic(paylaod) {
-    if (paylaod['text'] == 'USER_TYPING') {
+  void chatDataNotic(payload) {
+    // Globals.printTel('here_timer: chatDataNotic $payload');
+    if (payload['text'] == 'USER_TYPING') {
+      // Globals.printTel('here_timer: USER_TYPING');
       setState(() {
         isTyping = true;
       });
@@ -159,7 +164,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/received.mp3"));
     setState(() {
       isTyping = false;
-      data.values.last.add(paylaod);
+      data.values.last.add(payload);
       scrollDown();
       print('here_seen_1');
       sendSeenFlag();// sendSeenFlag(paylaod['id'].toString());

@@ -37,66 +37,66 @@ PODS:
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
-  - Firebase/Auth (8.9.0):
+  - Firebase/Auth (8.6.0):
     - Firebase/CoreOnly
-    - FirebaseAuth (~> 8.9.0)
-  - Firebase/CoreOnly (8.9.0):
-    - FirebaseCore (= 8.9.0)
-  - Firebase/Crashlytics (8.9.0):
+    - FirebaseAuth (~> 8.6.0)
+  - Firebase/CoreOnly (8.6.0):
+    - FirebaseCore (= 8.6.0)
+  - Firebase/Crashlytics (8.6.0):
     - Firebase/CoreOnly
-    - FirebaseCrashlytics (~> 8.9.0)
-  - Firebase/Messaging (8.9.0):
+    - FirebaseCrashlytics (~> 8.6.0)
+  - Firebase/Messaging (8.6.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 8.9.0)
-  - firebase_auth (3.0.2):
-    - Firebase/Auth (= 8.9.0)
+    - FirebaseMessaging (~> 8.6.0)
+  - firebase_auth (3.1.1):
+    - Firebase/Auth (= 8.6.0)
     - firebase_core
     - Flutter
-  - firebase_core (1.9.0):
-    - Firebase/CoreOnly (= 8.9.0)
+  - firebase_core (1.6.0):
+    - Firebase/CoreOnly (= 8.6.0)
     - Flutter
-  - firebase_crashlytics (2.2.0):
-    - Firebase/Crashlytics (= 8.9.0)
+  - firebase_crashlytics (2.2.1):
+    - Firebase/Crashlytics (= 8.6.0)
     - firebase_core
     - Flutter
-  - firebase_messaging (10.0.5):
-    - Firebase/Messaging (= 8.9.0)
+  - firebase_messaging (10.0.7):
+    - Firebase/Messaging (= 8.6.0)
     - firebase_core
     - Flutter
-  - FirebaseAuth (8.9.0):
+  - FirebaseAuth (8.6.0):
     - FirebaseCore (~> 8.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.6)
-    - GoogleUtilities/Environment (~> 7.6)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.4)
+    - GoogleUtilities/Environment (~> 7.4)
     - GTMSessionFetcher/Core (~> 1.5)
-  - FirebaseCore (8.9.0):
+  - FirebaseCore (8.6.0):
     - FirebaseCoreDiagnostics (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.6)
-    - GoogleUtilities/Logger (~> 7.6)
-  - FirebaseCoreDiagnostics (8.9.0):
+    - GoogleUtilities/Environment (~> 7.4)
+    - GoogleUtilities/Logger (~> 7.4)
+  - FirebaseCoreDiagnostics (8.10.0):
     - GoogleDataTransport (~> 9.1)
     - GoogleUtilities/Environment (~> 7.6)
     - GoogleUtilities/Logger (~> 7.6)
     - nanopb (~> 2.30908.0)
-  - FirebaseCrashlytics (8.9.0):
+  - FirebaseCrashlytics (8.6.0):
     - FirebaseCore (~> 8.0)
     - FirebaseInstallations (~> 8.0)
-    - GoogleDataTransport (~> 9.1)
-    - GoogleUtilities/Environment (~> 7.6)
+    - GoogleDataTransport (~> 9.0)
+    - GoogleUtilities/Environment (~> 7.4)
     - nanopb (~> 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - FirebaseInstallations (8.9.0):
+  - FirebaseInstallations (8.10.0):
     - FirebaseCore (~> 8.0)
     - GoogleUtilities/Environment (~> 7.6)
     - GoogleUtilities/UserDefaults (~> 7.6)
     - PromisesObjC (< 3.0, >= 1.2)
-  - FirebaseMessaging (8.9.0):
+  - FirebaseMessaging (8.6.0):
     - FirebaseCore (~> 8.0)
     - FirebaseInstallations (~> 8.0)
-    - GoogleDataTransport (~> 9.1)
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.6)
-    - GoogleUtilities/Environment (~> 7.6)
-    - GoogleUtilities/Reachability (~> 7.6)
-    - GoogleUtilities/UserDefaults (~> 7.6)
+    - GoogleDataTransport (~> 9.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.4)
+    - GoogleUtilities/Environment (~> 7.4)
+    - GoogleUtilities/Reachability (~> 7.4)
+    - GoogleUtilities/UserDefaults (~> 7.4)
     - nanopb (~> 2.30908.0)
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
@@ -156,7 +156,7 @@ PODS:
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
-  - SwiftyGif (5.4.0)
+  - SwiftyGif (5.4.1)
   - url_launcher (0.0.1):
     - Flutter
   - vibration (1.7.3):
@@ -258,17 +258,17 @@ SPEC CHECKSUMS:
   DKImagePickerController: b5eb7f7a388e4643264105d648d01f727110fc3d
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
-  Firebase: 13d8d96499e2635428d5bf0ec675df21f95d9a95
-  firebase_auth: b2c795e825dcfcc85acae4dbe2cabb36bbbda6da
-  firebase_core: 3aa324017663581c1d250b66518b86298fda337c
-  firebase_crashlytics: 05f5660e71073bd730cd0b1761f2791a2c52f9c1
-  firebase_messaging: 089f98d797e1c1c522be8f02b5919cf1b509dfb6
-  FirebaseAuth: 2b78b2a32c07b3ecfa4970bdf1d3632b8304099b
-  FirebaseCore: 599ee609343eaf4941bd188f85e3aa077ffe325b
-  FirebaseCoreDiagnostics: 5daa63f1c1409d981a2d5007daa100b36eac6a34
-  FirebaseCrashlytics: 40efbd81157dae307ec95612fa1328347284d2c2
-  FirebaseInstallations: caa7c8e0d3e2345b8829d2fa9ca1b4dfbf2fcc85
-  FirebaseMessaging: 82c4a48638f53f7b184f3cc9f6cd2cbe533ab316
+  Firebase: 21ac9f28b09a8bdfc005f34c984fca84e7e8786d
+  firebase_auth: a5da789c2876fda3ad7407bd2828e502dfeebc42
+  firebase_core: c21ac09a8d23afd3594b56ed786bad12e5266bba
+  firebase_crashlytics: b0581024be6112af8821de61e5a37fdb292373f0
+  firebase_messaging: 0fddeca6fcfee0bed23c66210391d782af8f8d0e
+  FirebaseAuth: 223adeeb2262b417532e89bf06a960e3a0a1e9e4
+  FirebaseCore: 620b677f70f5470a8e59cb77f3ddc666f6f09785
+  FirebaseCoreDiagnostics: 56fb7216d87e0e6ec2feddefa9d8a392fe8b2c18
+  FirebaseCrashlytics: 58f8ecea7c799c61c50e8111d2e438424a8a1d2e
+  FirebaseInstallations: 830327b45345ffc859eaa9c17bcd5ae893fd5425
+  FirebaseMessaging: ce0a5ee974f7bfe83b6cc5acce88c2d969e37c41
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_sim_country_code: 364e91e71f067cdec1dd1228eb4d1f13ab1a54e5
@@ -288,7 +288,7 @@ SPEC CHECKSUMS:
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
-  SwiftyGif: 5d4af95df24caf1c570dbbcb32a3b8a0763bc6d7
+  SwiftyGif: 6895c887f5551618a3c5dd3ecb512419105bacca
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   vibration: b5a33e764c3f609a975b9dca73dce20fdde627dc
   webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96

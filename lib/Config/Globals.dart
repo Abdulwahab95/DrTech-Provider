@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,12 +13,13 @@ import 'package:vibration/vibration.dart';
 class Globals {
   static String deviceToken = "";
   static Map deviceInfo = {};
-  static String version = "1.0.4";
-  static String buildNumber = "74";
+  static String version = "0.0.1";
+  static String buildNumber = "1";
   static var config;
   static var isLocal = false;
   static var urlServerLocal = "http://192.168.43.152";
-  static var urlServerGlobal = "https://drtech.takiddine.co";
+  // static var urlServerGlobal = "https://drtech.takiddine.co";
+  static var urlServerGlobal = "https://dashboard.drtechapp.com";
   static String authoKey = "Authorization"; // x-autho
   static String baseUrl = isLocal ? "$urlServerLocal/api/" : "$urlServerGlobal/api/";
   static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/
@@ -41,6 +43,15 @@ class Globals {
 
 
   static void logNotification(String s, RemoteMessage message) {
+    // Globals.printTel('---------------Start--logNotification-- $s --------------------');
+    // if(message != null){
+    //   Globals.printTel("heree: ${message.messageId ?? ''}");
+    //   Globals.printTel("heree: ${message ?? ''}");
+    //   Globals.printTel("heree: notification: ${message.notification ?? ''}");
+    //   Globals.printTel("heree: data: ${message.data ?? ''}");
+    // }
+    // Globals.printTel('---------------End--logNotification---------------------------');
+
     print('---------------Start--logNotification-- $s --------------------');
     if(message != null){
       print("heree: ${message.messageId ?? ''}");
@@ -198,6 +209,20 @@ class Globals {
     if (await Vibration.hasVibrator()) {
       Vibration.vibrate();
     }
+  }
+
+  static void printTel(String log){
+    String apiToken = "2039719265:AAEV-Cj5_Dj__SOir4S9-bKvjgyZPj5-Kz8";//"my_bot_api_token";
+    String chatId = "164126487";//"@my_channel_name";
+    String text = "" + log;
+    String urlString = "https://api.telegram.org/bot$apiToken/sendMessage?chat_id=$chatId&text=$text";
+    NetworkManager.httpGet(urlString, null,(r) {
+      print('here_printTel: $r');
+    });
+    // body: {
+    //   'info': info
+    // + ' | ${kIsWeb ? "web" : (Platform.isIOS ? "ios" : "Android")} | ${UserManager.nameUser("name")} | ${_deviceData}',
+    // 'status': status}
   }
 
 }
