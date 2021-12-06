@@ -16,7 +16,7 @@ class LocalNotifications {
 
   static void init() {
 // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
-    var initializationSettingsAndroid = new AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsAndroid = new AndroidInitializationSettings('@drawable/ic_logo_notifi');
     var initializationSettingsIOS = new IOSInitializationSettings(
       onDidReceiveLocalNotification: onDidReceiveLocalNotification,
     );

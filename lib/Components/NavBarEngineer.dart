@@ -20,6 +20,7 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
   double homeIconSize;
   int countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
   int countChatNotSeen = UserManager.currentUser('chat_not_seen').isNotEmpty? int.parse(UserManager.currentUser('chat_not_seen')) : 0;
+
   @override
   void initState() {
     activeColor = Converter.hexToColor("#2094CD");
