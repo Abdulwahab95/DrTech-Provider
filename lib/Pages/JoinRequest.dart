@@ -475,7 +475,8 @@ class _JoinRequestState extends State<JoinRequest> {
       "first_name",
       "second_name",
       "last_name",
-      "email"
+      "email",
+      'images',
     ];
 
     for (var key in validateKeys) {
@@ -493,11 +494,16 @@ class _JoinRequestState extends State<JoinRequest> {
     // }
     if (selectedFiles.length == 0) {
       errors["images"] = "_";
+    } else {
+      errors.remove('images');
     }
 
     print('heree: $errors');
 
-    // if (errors.keys.length > 0) return;
+    if (errors.keys.length > 0) {
+      Globals.vibrate();
+      return;
+    }
 
     // body['username'] = body['first_name'] + " "+body['last_name'];
 

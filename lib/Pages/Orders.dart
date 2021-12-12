@@ -425,9 +425,11 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
 
                         Container(height: 10),
 
-                        customButton(96, () {// Call Action
-                          launch('tel:${item['number_phone']}');
-                        }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco),
+                        item["status"] == 'PENDING' || item["status"] == 'WAITING'
+                        ? customButton(96, () {// Call Action
+                              launch('tel:${item['number_phone']}');
+                            }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco)
+                        : Container(),
 
                         customButton(117, () {// Chat Action
                           Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item['user_id'].toString())));

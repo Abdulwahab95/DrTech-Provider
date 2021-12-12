@@ -1782,25 +1782,29 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void send() {
-    typingNotifyer = false;
-    if (body.keys.length == 0) return;
-    AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
-    body['type'] = "TEXT".toLowerCase();
-    body['user_id'] = widget.id.toString();
-    body['provider_id'] = UserManager.currentUser("id").toString();
-    body['send_by'] = UserManager.currentUser("id").toString();
+    if(body['text'].toString().replaceAll(new RegExp(r'[^0-9]'),'').length<7) {
+      typingNotifyer = false;
+      if (body.keys.length == 0) return;
+      AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
+      body['type'] = "TEXT".toLowerCase();
+      body['user_id'] = widget.id.toString();
+      body['provider_id'] = UserManager.currentUser("id").toString();
+      body['send_by'] = UserManager.currentUser("id").toString();
 
-    NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) { // chat/send
-      if (r['state'] == true) {
-        setState(() {
-          data.values.last.add(r['data'][0]); // r['message']
-        });
-      }
-    }, body: body);
-    setState(() {
-      controller.text = "";
-    });
-    body = {};
+      NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) { // chat/send
+        if (r['state'] == true) {
+          setState(() {
+            data.values.last.add(r['data'][0]); // r['message']
+          });
+        }
+      }, body: body);
+      setState(() {
+        controller.text = "";
+      });
+      body = {};
+    } else{
+      Alert.show(context, 320);
+    }
   }
 
   void cancelOffer(messageId, id, page, index) {

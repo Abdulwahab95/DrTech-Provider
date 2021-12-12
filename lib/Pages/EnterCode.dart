@@ -30,6 +30,7 @@ class EnterCode extends StatefulWidget {
 class _EnterCodeState extends State<EnterCode> {
   var visibleKeyboard = false;
   Map<int, String> code = {};
+  String codeStr = '';
   int selectedIndex = 0;
   List<Map> fileds = [];
   String countDownTimer = "00:00";
@@ -48,7 +49,7 @@ class _EnterCodeState extends State<EnterCode> {
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
-          visibleKeyboard = visible;
+          // visibleKeyboard = visible;
         });
       },
     );
@@ -123,19 +124,43 @@ class _EnterCodeState extends State<EnterCode> {
                       padding: EdgeInsets.only(
                           left: MediaQuery.of(context).size.width * 0.07,
                           right: MediaQuery.of(context).size.width * 0.07,
-                          top: 20,
+                          top: 5,
                           bottom: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          getCodeField(0),
-                          getCodeField(1),
-                          getCodeField(2),
-                          getCodeField(3),
-                          getCodeField(4),
-                          getCodeField(5),
-                        ],
-                      ),
+                      // child: Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      //   children: [
+                      //     getCodeField(0),
+                      //     getCodeField(1),
+                      //     getCodeField(2),
+                      //     getCodeField(3),
+                      //     getCodeField(4),
+                      //     getCodeField(5),
+                      //   ],
+                      // ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  width: 2,
+                                  color: Colors.transparent),
+                              color: errorInputOtp
+                                  ? Converter.hexToColor( "#ffb6b6")
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(5)),
+                          child: TextFormField(keyboardType: TextInputType.number,
+                              autofocus: true,
+                              textAlign: TextAlign.center,
+                              maxLength: 6,
+                              decoration: InputDecoration(
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                              ),
+                              cursorColor: Colors.blue,
+                              onChanged: (value) {codeStr = value;}),
+                        )
                     ),
                     Container(
                       padding: EdgeInsets.only(left: 20, right: 20),
@@ -274,7 +299,7 @@ class _EnterCodeState extends State<EnterCode> {
   Future<void> conferm() async {
     setState(() {errorInputOtp = false;});
 
-    if (code.keys.length < 6) {
+    if (codeStr.length < 6) {
       errorInputOtp = true;
       vibrate();
       return;
@@ -299,7 +324,7 @@ class _EnterCodeState extends State<EnterCode> {
         }
       }, body: widget.body);
     } else
-      signIn(code.values.join(), context);
+      await signIn(codeStr, context);
   }
 
   Future<void> signIn(String otp, BuildContext contextPage) async {
@@ -368,11 +393,12 @@ class _EnterCodeState extends State<EnterCode> {
       phoneNumber: widget.selectedCountrieCode + widget.body['number_phone'],// "+249965095703",
       forceResendingToken: _forceCodeResent,
       timeout: const Duration(seconds: duration),
-      verificationCompleted: (PhoneAuthCredential  authCredential) {
+      verificationCompleted: (PhoneAuthCredential authCredential) async{
         print('heree: verificationCompleted');
         Alert.endLoading();
         // setState(() {authStatus = "Your account is successfully verified";});
         // loginApi();
+        await conferm();
       },
       verificationFailed: (FirebaseAuthException  authException) {
         print('heree: verificationFailed: ${authException.code}, ${authException.message}');
