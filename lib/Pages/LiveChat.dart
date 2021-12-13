@@ -955,7 +955,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                               width: 5,
                                             ),
                                             Text(
-                                                item["message"]['unit'].toString(),
+                                              Converter.getRealText(UserManager.currentUser("unit")),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
