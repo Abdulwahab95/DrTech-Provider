@@ -1759,7 +1759,25 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
   }
 
+  Map errors = {};
   void sendOffer() {
+    errors = {};
+    List validateKeys = ["provider_service_id", "description", "price"];
+
+    for (var key in validateKeys) {
+      print('here_setAll: key-: $key, value: ${body[key]}');
+      if (offer[key] == null || offer[key].isEmpty) {
+        errors[key] = "_";
+        Alert.staticContent = getOfferWidget();
+        Alert.setStateCall = () {};
+        Alert.callSetState();
+      }
+    }
+    if (errors.keys.length > 0) {
+      Globals.vibrate();
+      return;
+    }
+
     Alert.publicClose();
     if (offer.isEmpty || offer["price"] == null) return;
     // offer['id'] = widget.id;
@@ -1888,18 +1906,22 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                   Container(
                     child: InkWell(
                         onTap: () {
-                          if (Alert.publicClose != null)
-                            Alert.publicClose();
-                          else
-                            Navigator.pop(context);
-                        },
+                          if (Alert.publicClose != null) {
+                            print('here_error: 4');
+                        Alert.publicClose();
+                      } else {
+                            print('here_error: 5');
+                        Navigator.pop(context);
+                      }
+                    },
                         child: Icon(FlutterIcons.close_ant)),
                   ),
                 ],
               ),
             ),
 
-            config != null ?createSelectInput("service", 283, config, onSelected: (v) { // config['service']
+            config != null ?
+            createSelectInput("service", 283, config, onSelected: (v) { // config['service']
               print('here_service: $v');
 
               setState(() {
@@ -1910,10 +1932,13 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
               });
 
               Timer(Duration(milliseconds: 250), () {
+                print('here_error: 1 ${Alert.publicClose() != null}');
                 Alert.publicClose();
 
                 Timer(Duration(milliseconds: 250), () {
+                  print('here_error: 2 ${Alert.publicClose() != null}');
                   Alert.publicClose();
+                  print('here_error: 3 ${Alert.publicClose() != null}');
                   addOffer();
                 });
               });
@@ -1924,7 +1949,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
               padding: EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: Converter.hexToColor("#F2F2F2"),
+                color: Converter.hexToColor(errors['description'] != null ? "#E9B3B3" : "#F2F2F2"),
               ),
               child: TextField(
                 onChanged: (v) {
@@ -1946,7 +1971,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
               padding: EdgeInsets.symmetric(horizontal: 5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: Converter.hexToColor("#F2F2F2"),
+                color: Converter.hexToColor(errors['price'] != null ? "#E9B3B3" : "#F2F2F2"),
               ),
               child: Row(
                 textDirection: LanguageManager.getTextDirection(),
@@ -2142,6 +2167,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
           Alert.show(context, onEmptyMessage);
           return;
         }
+        print('here_error: 6 ');
         Alert.publicClose();
         var con = context;
         Timer(Duration(milliseconds: 500), () {
@@ -2153,7 +2179,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
         padding: EdgeInsets.only(left: 7, right: 7),
         decoration: BoxDecoration(
-            color: Converter.hexToColor("#F2F2F2"),// errors[key] != null ? "#E9B3B3" : "#F2F2F2"
+            color: Converter.hexToColor(errors['provider_service_id'] != null ? "#E9B3B3" : "#F2F2F2"),
             borderRadius: BorderRadius.circular(12)),
         child: Row(
           textDirection: LanguageManager.getTextDirection(),
@@ -2203,15 +2229,22 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   String getDisCount() {
     // print('here_getDefaultCommission: ${Globals.getDefaultCommission()}');
     try {
-      double d = double.parse(offer["price"]);
-      // if(d <= 80 )
-      //   d *= 0.8;
-      // else
+      double d = double.parse(reblaceArabicNumber(offer["price"]));
         d -= Globals.getDefaultCommission() ;
       return d.toString().substring(0, d.toString().indexOf('.') + 2 );
     } catch(e){
       return '0';
     }
+  }
+
+  String reblaceArabicNumber(String offerNum) {
+    const en = ['0','1','2','3','4','5','6','7','8','9'];
+    const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    for (int i = 0; i< en.length; i++){
+      offerNum = offerNum.replaceAll(ar[i], en[i]);
+    }
+    offer["price"] =  offerNum;
+    return    offerNum;
   }
 
 }

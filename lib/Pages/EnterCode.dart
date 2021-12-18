@@ -327,7 +327,17 @@ class _EnterCodeState extends State<EnterCode> {
         }
       }, body: widget.body);
     } else
-      await signIn(codeStr, context);
+      await signIn(reblaceArabicNumber(codeStr), context);
+  }
+
+  String reblaceArabicNumber(String codeNum) {
+    const en = ['0','1','2','3','4','5','6','7','8','9'];
+    const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    for (int i = 0; i< en.length; i++){
+      codeNum = codeNum.replaceAll(ar[i], en[i]);
+    }
+    codeStr =  codeNum;
+    return    codeNum;
   }
 
   Future<void> signIn(String otp, BuildContext contextPage) async {

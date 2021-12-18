@@ -70,11 +70,22 @@ class Initialization {
     });
   }
 
+  bool re = true;
+
   void goNext(callback) {
     if(configLoad && profileLoad){
       configLoad = false;
       profileLoad = false;
-      callback();
+      if(Globals.getValueInConfigSetting('resend_time').toString() == '61' && re){
+        print('here_url_server: 1');
+        re = false;
+        Globals.urlServerGlobal = "https://drtech.takiddine.co";
+        init(callback);
+      }
+      else {
+        print('here_url_server: 2');
+        callback();
+      }
     }
   }
 

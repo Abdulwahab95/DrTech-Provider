@@ -977,7 +977,7 @@ class _AddServicesState extends State<AddServices>
     print('here_body: $body');
 
     body.removeWhere((key, value) {
-      return value == null ? true :  false;
+      return (value == null || (value != null && value == 'null'))? true : false;
     });
 
     Alert.startLoading(context);
