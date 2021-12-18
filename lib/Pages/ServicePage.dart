@@ -618,7 +618,7 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
         Container(
           padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 0),
           child: Text(
-            LanguageManager.getText(214) + ':\n\"${data['name']}\"',
+            LanguageManager.getText(data['in_update'] == 1 ? 322 : 214) + ':\n\"${data['name']}\"',
             textDirection: LanguageManager.getTextDirection(),
             textAlign: TextAlign.center,
             style: TextStyle(

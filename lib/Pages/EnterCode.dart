@@ -159,7 +159,10 @@ class _EnterCodeState extends State<EnterCode> {
                                 ),
                               ),
                               cursorColor: Colors.blue,
-                              onChanged: (value) {codeStr = value;}),
+                              onChanged: (value) {
+                                  codeStr = value;
+                                  if (value.length == 6) hideKeyBoard();
+                          }),
                         )
                     ),
                     Container(

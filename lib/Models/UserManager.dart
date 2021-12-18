@@ -43,15 +43,15 @@ class UserManager {
   }
 
   static void refrashUserInfo({callBack}) {
-    if (!UserManager.checkLogin()) return;
+    if (!UserManager.checkLogin()) {if (callBack != null) callBack(); return;}
     NetworkManager.httpGet(Globals.baseUrl + "users/profile", null, (userInfo) { // user/info
       try {
         if (userInfo['state'] == true) {
           UserManager.proccess(userInfo['data']);
-          if (callBack != null) callBack();
           Globals.updateNotificationCount();
+          if (callBack != null) callBack();
         } else
-          UserManager.logout((){});
+          UserManager.logout((){if (callBack != null) callBack();});
       } catch (e) {
         // error loading info log the user out ..
       }

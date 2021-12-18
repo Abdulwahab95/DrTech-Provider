@@ -198,95 +198,97 @@ class _AlertState extends State<Alert> {
     }
     if (widget.type == AlertType.WIDGET) return Alert.staticContent != null? Alert.staticContent: widget.content;
     return Container(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: close,
-                child: Icon(
-                  FlutterIcons.close_ant,
-                  size: 24,
-                ),
-              )
-            ],
-          ),
-          Container(
-            height: 10,
-          ),
-          Text(
-            Converter.getRealText(widget.content),
-            textDirection: LanguageManager.getTextDirection(),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-            textAlign: TextAlign.center,
-          ),
-          Container(
-            height: 15,
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 10, bottom: 15),
-            child: Row(
-              textDirection: LanguageManager.getTextDirection(),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: widget.onYes != null ? widget.onYes : close,
-                    child: Container(
-                      width: 90,
-                      height: 45,
-                      alignment: Alignment.center,
-                      child: Text(
-                        widget.premieryText != null
-                            ? Converter.getRealText(widget.premieryText)
-                            : Converter.getRealText(22),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withAlpha(15),
-                                spreadRadius: 2,
-                                blurRadius: 2)
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                          color: Converter.hexToColor("#344f64")),
-                    ),
+                InkWell(
+                  onTap: close,
+                  child: Icon(
+                    FlutterIcons.close_ant,
+                    size: 24,
                   ),
-                ),
-                Container(
-                  width: 10,
-                ),
-                Expanded(
-                    child: widget.onYes != null && widget.onYesShowSecondBtn
-                        ? InkWell(
-                            onTap: widget.onClickSecond != null? widget.onClickSecond : close,
-                            child: Container(
-                              width: 90,
-                              height: 45,
-                              alignment: Alignment.center,
-                              child: Text(
-                                widget.secondaryText != null
-                                    ? Converter.getRealText(widget.secondaryText)
-                                    : Converter.getRealText(21),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              decoration: BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black.withAlpha(15),
-                                        spreadRadius: 2,
-                                        blurRadius: 2)
-                                  ],
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Converter.hexToColor("#344f64")),
-                            ),
-                          )
-                        : Container())
+                )
               ],
             ),
-          )
-        ],
+            Container(
+              height: 10,
+            ),
+            Text(
+              Converter.getRealText(widget.content),
+              textDirection: LanguageManager.getTextDirection(),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
+            ),
+            Container(
+              height: 15,
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 10, bottom: 15),
+              child: Row(
+                textDirection: LanguageManager.getTextDirection(),
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: widget.onYes != null ? widget.onYes : close,
+                      child: Container(
+                        width: 90,
+                        height: 45,
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.premieryText != null
+                              ? Converter.getRealText(widget.premieryText)
+                              : Converter.getRealText(22),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withAlpha(15),
+                                  spreadRadius: 2,
+                                  blurRadius: 2)
+                            ],
+                            borderRadius: BorderRadius.circular(8),
+                            color: Converter.hexToColor("#344f64")),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: widget.onYes != null && widget.onYesShowSecondBtn
+                          ? InkWell(
+                              onTap: widget.onClickSecond != null? widget.onClickSecond : close,
+                              child: Container(
+                                width: 90,
+                                height: 45,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  widget.secondaryText != null
+                                      ? Converter.getRealText(widget.secondaryText)
+                                      : Converter.getRealText(21),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black.withAlpha(15),
+                                          spreadRadius: 2,
+                                          blurRadius: 2)
+                                    ],
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Converter.hexToColor("#344f64")),
+                              ),
+                            )
+                          : Container())
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -294,6 +296,7 @@ class _AlertState extends State<Alert> {
   List<Widget> getListOptions() {
     List<Widget> contents = [];
     for (var item in widget.content) {
+      print('here_Alert_getListOptions: $item');
       contents.add(InkWell(
         onTap: () {
           if (widget.onSelected != null) widget.onSelected(item);
@@ -329,6 +332,7 @@ class _AlertState extends State<Alert> {
                     item['name'] != null ? item['name']
                         : item['title'] != null ? item['title']
                         : item['text']),
+                textAlign: TextAlign.right,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               )
             ],

@@ -56,7 +56,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   Initialization(() {
-    UserManager.refrashUserInfo();
+    // UserManager.refrashUserInfo();
     runApp(App());
   });
 

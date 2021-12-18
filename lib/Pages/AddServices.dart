@@ -26,8 +26,7 @@ class AddServices extends StatefulWidget {
 class _AddServicesState extends State<AddServices>
     with TickerProviderStateMixin {
   Map<String, String> body = {}, selectedTexts = {}, errors = {};
-  Map selectOptions = {}, selectSubcategoriesOptions = {}, selectSub2Options = {},
-      selectSub3Options = {},selectSub4Options = {}, config, data;
+  Map selectOptions = {}, config, data;
   List images = [], removedImagesUpdate = [], removedOffers = [];
   Map<String, TextEditingController> controllers = {};
   Map<String, TabController> tabControllers = {};
@@ -42,147 +41,60 @@ class _AddServicesState extends State<AddServices>
   }
 
   void loadConfig() {
-        // setState(() {
-
-          // config = {
-          //   "service": [
-          //     {
-          //       "id": "1",
-          //       "service_id": "1",
-          //       "name": "اصلاح الجولات",
-          //       "name_en": "",
-          //       "icon": "0",
-          //       "children": [
-          //         {
-          //           "id": "2",
-          //           "service_id": "0",
-          //           "name": "تغير الشاشة",
-          //           "name_en": "",
-          //           "icon": "0",
-          //         }
-          //       ]
-          //     }
-          //   ],
-          //   "unit": "ريال"
-          // };
-
-
-          // config = {
-          //   "service": [
-          //     {
-          //       "id": 2,
-          //       "name": "صيانة الكمبيوترات",
-          //       "status": 1,
-          //       "categories": []
-          //     },
-          //     {
-          //       "id": 3,
-          //       "name": "صيانة الماك",
-          //       "status": 1,
-          //       "categories": []
-          //     },
-          //     {
-          //       "id": 4,
-          //       "name": "الانظمة و التقنية",
-          //       "status": 1,
-          //       "categories": []
-          //     },
-          //     {
-          //       "id": 5,
-          //       "name": "المتجر",
-          //       "status": 1,
-          //       "categories": []
-          //     },
-          //     {
-          //       "id": 6,
-          //       "name": "خدمات الاعمال",
-          //       "status": 1,
-          //       "categories": []
-          //     },
-          //     {
-          //       "id": 7,
-          //       "name": "خدمات الصيانة",
-          //       "status": 1,
-          //       "categories": [
-          //         {
-          //           "id": 1,
-          //           "name": "صيانة الهواتف",
-          //           "status": 1,
-          //           "subcategories": [
-          //             {
-          //               "id": 1,
-          //               "name": "هواتف هواوي",
-          //               "status": 1
-          //             }
-          //           ]
-          //         },
-          //         {
-          //           "id": 2,
-          //           "name": "صيانة السيارات",
-          //           "status": 1,
-          //           "subcategories": []
-          //         }
-          //       ]
-          //     }
-          //   ],
-          //   "unit": "ريال"
-          // };
-
-        //   if (widget.id != null) {
-        //     load();
-        //   } else {
-        //     isLoading = false;
-        //   }
-        // });
     setState(() { isLoading = true; });
-
     NetworkManager.httpGet(Globals.baseUrl + "services",  context, (r) { // services/configuration
       if (r['state'] == true) {
         setState(() {
           config = r['data'];
-          if (widget.data != null) {
-            load();
-          } else {
-            isLoading = false;
-          }
+          if (widget.data != null)    load();   else    isLoading = false;
         });
       }
     }, cashable: true);
-
   }
 
   void load() {
-    setState(() {isLoading = true;});
-    // NetworkManager.httpGet(Globals.baseUrl + "user/service?id=${widget.id}",  context, (r) {
-    //   if (r['state'] == true) {
-        setState(() {
-          data = widget.data;
-          initBodyData();
-          isLoading = false;
-        });
-    //   } else if (r['message'] != null) {
-    //     Alert.show(context, Converter.getRealText(r['message']));
-    //   }
-    // }, cashable: true);
+      setState(() {
+        data = widget.data;
+        initBodyData();
+        isLoading = false;
+      });
   }
 
+  void initDataItem(String bodyName, String configName, {String configNameNext = '', int index = -1}) {
+    List list = configName == 'service'
+        ? config[configName]
+        : selectOptions[configName]; // for first item
 
+    if (data[bodyName] != null) {
+      body[bodyName] = data[bodyName].toString();
+      selectedTexts[bodyName] = getNameFromId(list, data[bodyName].toString());
+
+      if (configNameNext.isNotEmpty)
+        selectOptions[configNameNext] =
+            list[getIndexFromId(list, data[bodyName].toString())][configNameNext];  // for last item
+
+    } else if (index != -1 && cssss[index] == 1) { // without first item // الكل
+      selectedTexts[bodyName] = getNameFromId(list, 'null');
+    }
+  }
 
   void initBodyData() {
-    print('here_data: $data');
     offers = [];
     selectedFiles = [];
 
     if(data['service_id'] != null) {
-      body["service_id"] = data['service_id'].toString();
-      selectedTexts["service_id"] = getNameFromId(config['service'], data['service_id'].toString());
-      selectOptions["categories"] = config['service'][getIndexFromId(config['service'],data['service_id'].toString())]['categories'];
+
+      cct   = data['country_city_street']           .split('-').map(int.parse).toList();
+      cssss = data['cat_subcat_sub1_sub2_sub3_sub4'].split('-').map(int.parse).toList();
+
       List CCS= (config['service'][getIndexFromId(config['service'],data['service_id'].toString())]['is_country_city_street'] as String).split('-').toList();
+
       if(CCS[0] == '1') {
         showSelectCountry = true;
         selectedTexts["country_id"] =  getNameFromId(config['countries'], data['country_id'].toString());
         body["country_id"] = data['country_id'].toString();
-        selectOptions["cities"] = config['countries'][getIndexFromId(config['countries'],data['country_id'].toString())]['cities'];
+        if(cct[0] == 0)
+          selectOptions["cities"] = config['countries'][getIndexFromId(config['countries'],data['country_id'].toString())]['cities'];
       } else {
         (config['countries'] as List<dynamic>).forEach((element) {
           if((element as Map)['id'].toString() == UserManager.currentUser('country_id')) {
@@ -194,7 +106,8 @@ class _AddServicesState extends State<AddServices>
         showSelectCity = true;
         selectedTexts["city_id"] = getNameFromId(selectOptions["cities"], data['city_id'].toString());
         body["city_id"] = data['city_id'].toString();
-        selectOptions["street"] = selectOptions["cities"][getIndexFromId(selectOptions["cities"],data['city_id'].toString())]['street'];
+        if(cct[1] == 0)
+          selectOptions["street"] = selectOptions["cities"][getIndexFromId(selectOptions["cities"],data['city_id'].toString())]['street'];
       }
       if(CCS[2] == '1') {
         showSelectStreet = true;
@@ -204,52 +117,28 @@ class _AddServicesState extends State<AddServices>
 
     }
 
-    if(data['service_categories_id'] != null) {
-      body["service_categories_id"] = data['service_categories_id'].toString();
-      selectedTexts["service_categories_id"] = getNameFromId(selectOptions["categories"], data['service_categories_id'].toString());
-      selectSubcategoriesOptions["subcategories"] = selectOptions["categories"][getIndexFromId(selectOptions["categories"],data['service_categories_id'].toString())]['subcategories'];
-    }
-
-    if(data['service_subcategories_id'] != null) {
-      body["service_subcategories_id"] = data['service_subcategories_id'].toString();
-      selectedTexts['service_subcategories_id'] = getNameFromId(selectSubcategoriesOptions["subcategories"], data['service_subcategories_id'].toString());
-      selectSub2Options["service_sub_2"] = selectSubcategoriesOptions["subcategories"][getIndexFromId(selectSubcategoriesOptions["subcategories"],data['service_subcategories_id'].toString())]['service_sub_2'];
-    }
-
-    if(data['sub2_id'] != null) {
-      body["sub2_id"] = data['sub2_id'].toString();
-      selectedTexts['sub2_id'] = getNameFromId(selectSub2Options["service_sub_2"], data['sub2_id'].toString());
-      selectSub3Options["service_sub_3"] = selectSub2Options["service_sub_2"][getIndexFromId(selectSub2Options["service_sub_2"],data['sub2_id'].toString())]['service_sub_3'];
-    }
-
-    if(data['sub3_id'] != null) {
-      body["sub3_id"] = data['sub3_id'].toString();
-      selectedTexts['sub3_id'] = getNameFromId(selectSub3Options["service_sub_3"], data['sub3_id'].toString());
-      selectSub4Options["service_sub_4"] = selectSub3Options["service_sub_3"][getIndexFromId(selectSub3Options["service_sub_3"],data['sub3_id'].toString())]['service_sub_4'];
-    }
-
-    if(data['sub4_id'] != null) {
-      body["sub4_id"] = data['sub4_id'].toString();
-      selectedTexts['sub4_id'] = getNameFromId(selectSub4Options["service_sub_4"], data['sub4_id'].toString());
-    }
-
-    print('here_body: $body');
+    initDataItem('service_id'              , 'service'      , configNameNext: 'categories'    );
+    initDataItem('service_categories_id'   , 'categories'   , configNameNext: 'subcategories', index : 0);
+    initDataItem('service_subcategories_id', 'subcategories', configNameNext: 'service_sub_2', index : 1);
+    initDataItem('sub2_id'                 , 'service_sub_2', configNameNext: 'service_sub_3', index : 2);
+    initDataItem('sub3_id'                 , 'service_sub_3', configNameNext: 'service_sub_4', index : 3);
+    initDataItem('sub4_id'                 , 'service_sub_4', index : 4);
 
     body['title'] = data["name"];
+
     body['description'] = data["about"];
+
     for (var item in data['offers']) {
       offers.add({"details": item['description'], "price": item['price']});
     }
 
     for (var item in (data['images'] as String).split('||').toList() ) {
-      print('here_item: $item');
       selectedFiles.add({"id": '1', "name": Globals.correctLink(item)});
     }
 
     controllers['title'] = TextEditingController(text: body['title'] ?? "");
     controllers['description'] = TextEditingController(text: body['description'] ?? "");
   }
-
 
 
   @override
@@ -273,12 +162,11 @@ class _AddServicesState extends State<AddServices>
 
   List<Widget> getFormInputs() {
     List<Widget> items = [];
-    // items.add(createInput("title", 255, maxInput: 60, maxLines: 2));
 
     if (widget.data == null || body['service_id'] != null)
       items.add(createSelectInput("service_id", 283, config['service'], onSelected: (v) {
       setState(() {
-        selectOptions["categories"] = v['categories'];
+        selectOptions["categories"] = v['categories']  ?? [];
 
         selectedTexts["service_id"] = v['name'];
         body["service_id"] = v['id'].toString();
@@ -286,7 +174,7 @@ class _AddServicesState extends State<AddServices>
         selectedTexts['service_categories_id'] = null;
         body["service_categories_id"] = null;
 
-        List CCS= (v['is_country_city_street'] as String).split('-').toList();
+        List CCS = (v['is_country_city_street'] as String).split('-').toList();
         if(CCS[0] == '1') showSelectCountry = true; else {selectedTexts["country_id"] = null; body["country_id"] = null; showSelectCountry = false;}
         if(CCS[1] == '1') showSelectCity    = true; else {selectedTexts["city_id"]    = null; body["city_id"]    = null; showSelectCity    = false;}
         if(CCS[2] == '1') showSelectStreet  = true; else {selectedTexts["street_id"]  = null; body["street_id"]  = null; showSelectStreet  = false;}
@@ -300,18 +188,20 @@ class _AddServicesState extends State<AddServices>
         selectOptions["cities"]     = null;
         selectOptions["street"]     = null;
 
-        if(selectSubcategoriesOptions.containsKey('subcategories')) selectSubcategoriesOptions.remove('subcategories');
-        if(selectSub2Options.containsKey('service_sub_2')) selectSub2Options.remove('service_sub_2');
-        if(selectSub3Options.containsKey('service_sub_3')) selectSub3Options.remove('service_sub_3');
-        if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
+        if(selectOptions.containsKey('subcategories')) selectOptions.remove('subcategories');
+        if(selectOptions.containsKey('service_sub_2')) selectOptions.remove('service_sub_2');
+        if(selectOptions.containsKey('service_sub_3')) selectOptions.remove('service_sub_3');
+        if(selectOptions.containsKey('service_sub_4')) selectOptions.remove('service_sub_4');
+
+        for(int i = 0; i< cssss.length;i++){cssss[i] = 0; }
 
       });
     }));
 
-    if (widget.data == null || data['service_categories_id'] != null)
+    if (isArrayNotEmpty('categories'))
     items.add(createSelectInput("service_categories_id", 256, selectOptions["categories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
       setState(() {
-        selectSubcategoriesOptions["subcategories"] = v['subcategories'];
+        selectOptions["subcategories"] = v['subcategories']  ?? [];
 
         selectedTexts['service_categories_id'] = v['name'];
         body["service_categories_id"] = v['id'].toString();
@@ -324,24 +214,24 @@ class _AddServicesState extends State<AddServices>
         body["sub3_id"] = null;
         body["sub4_id"] = null;
 
-        if(selectSub2Options.containsKey('service_sub_2')) selectSub2Options.remove('service_sub_2');
-        if(selectSub3Options.containsKey('service_sub_3')) selectSub3Options.remove('service_sub_3');
-        if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
-        //
-        // items.removeWhere((element) {
-        //   return (!(items.indexOf(element) == 0 || items.indexOf(element) == 1)) ? true :  false;
-        // });
+        if(selectOptions.containsKey('service_sub_2')) selectOptions.remove('service_sub_2');
+        if(selectOptions.containsKey('service_sub_3')) selectOptions.remove('service_sub_3');
+        if(selectOptions.containsKey('service_sub_4')) selectOptions.remove('service_sub_4');
+
+        for(int i = 0; i< cssss.length;i++){ cssss[i] = 0; }
+
       });
     }));
 
-   // if (widget.data == null || data['service_subcategories_id'] != null)
-    items.add(selectSubcategoriesOptions.containsKey("subcategories") && selectSubcategoriesOptions["subcategories"].length > 0 ?
-        createSelectInput("service_subcategories_id", 256, selectSubcategoriesOptions["subcategories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+
+    items.add(
+        isArrayNotEmpty('subcategories')
+          ? createSelectInput("service_subcategories_id", 256, selectOptions["subcategories"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
             setState(() {
               selectedTexts["service_subcategories_id"] = v['name'];
               body["service_subcategories_id"] = v['id'].toString();
 
-              selectSub2Options["service_sub_2"] = v['service_sub_2'];
+              selectOptions["service_sub_2"] = v['service_sub_2'] ?? [];
 
               selectedTexts["sub2_id"] = null;
               body["sub2_id"] = null;
@@ -349,53 +239,62 @@ class _AddServicesState extends State<AddServices>
               body["sub4_id"] = null;
 
 
-              if(selectSub3Options.containsKey('service_sub_3')) selectSub3Options.remove('service_sub_3');
-              if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
+              if(selectOptions.containsKey('service_sub_3')) selectOptions.remove('service_sub_3');
+              if(selectOptions.containsKey('service_sub_4')) selectOptions.remove('service_sub_4');
+
+              for(int i = 0; i< cssss.length;i++){ cssss[i] = 0; }
+
             });
           })
         : Container());
 
-    //if (widget.data == null || data['sub2_id'] != null)
-      items.add(selectSub2Options.containsKey("service_sub_2") && selectSub2Options["service_sub_2"].length > 0 ?
-      createSelectInput("sub2_id", 256, selectSub2Options["service_sub_2"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
-        setState(() {
-          selectedTexts["sub2_id"] = v['name'];
-          body["sub2_id"] = v['id'].toString();
 
-          selectSub3Options["service_sub_3"] = v['service_sub_3'];
 
-          selectedTexts["sub3_id"] = null;
-          body["sub3_id"] = null;
-          body["sub4_id"] = null;
+    items.add(
+        isArrayNotEmpty('service_sub_2')
+            ? createSelectInput("sub2_id", 256, selectOptions["service_sub_2"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+                  setState(() {
+                    selectedTexts["sub2_id"] = v['name'];
+                    body["sub2_id"] = v['id'].toString();
 
-          if(selectSub4Options.containsKey('service_sub_4')) selectSub4Options.remove('service_sub_4');
-        });
-      })
+                    selectOptions["service_sub_3"] = v['service_sub_3']  ?? [];
+
+                    selectedTexts["sub3_id"] = null;
+                    body["sub3_id"] = null;
+                    body["sub4_id"] = null;
+
+                    if(selectOptions.containsKey('service_sub_4')) selectOptions.remove('service_sub_4');
+
+                    for(int i = 0; i< cssss.length;i++){ cssss[i] = 0; }
+                  });
+                })
           : Container());
 
-    //if (widget.data == null || data['sub3_id'] != null)
-      items.add(selectSub3Options.containsKey("service_sub_3") && selectSub3Options["service_sub_3"].length > 0 ?
-      createSelectInput("sub3_id", 256, selectSub3Options["service_sub_3"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
-        setState(() {
-          selectedTexts["sub3_id"] = v['name'];
-          body["sub3_id"] = v['id'].toString();
+    items.add(
+        isArrayNotEmpty('service_sub_3')
+            ? createSelectInput("sub3_id", 256, selectOptions["service_sub_3"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+                  setState(() {
+                    selectedTexts["sub3_id"] = v['name'];
+                    body["sub3_id"] = v['id'].toString();
 
-          selectSub4Options["service_sub_4"] = v['service_sub_4'];
+                    selectOptions["service_sub_4"] = v['service_sub_4']  ?? [];
 
-          selectedTexts["sub4_id"] = null;
-          body["sub4_id"] = null;
-        });
-      })
+                    selectedTexts["sub4_id"] = null;
+                    body["sub4_id"] = null;
+
+                    for(int i = 0; i< cssss.length;i++){ cssss[i] = 0; }
+                  });
+                })
           : Container());
 
-    //if (widget.data == null || data['sub4_id'] != null)
-      items.add(selectSub4Options.containsKey("service_sub_4") && selectSub4Options["service_sub_4"].length > 0 ?
-      createSelectInput("sub4_id", 256, selectSub4Options["service_sub_4"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
-        setState(() {
-          selectedTexts["sub4_id"] = v['name'];
-          body["sub4_id"] = v['id'].toString();
-        });
-      })
+      items.add(
+          isArrayNotEmpty('service_sub_4')
+          ? createSelectInput("sub4_id", 256, selectOptions["service_sub_4"], onEmptyMessage: LanguageManager.getText(257), onSelected: (v) {
+              setState(() {
+                selectedTexts["sub4_id"] = v['name'];
+                body["sub4_id"] = v['id'].toString();
+              });
+            })
           : Container());
 
     items.add(createInput("description", 258, maxInput: 500, maxLines: 4));
@@ -525,7 +424,7 @@ class _AddServicesState extends State<AddServices>
     if (showSelectCountry) {
       items.add(createSelectInput("country_id", 312, config['countries'], onSelected: (v) {
         setState(() {
-          selectOptions["cities"] = v['cities'];
+          selectOptions["cities"] = v['cities']  ?? [];
 
           selectedTexts["country_id"] = v['name'];
           body["country_id"] = v['id'].toString();
@@ -533,41 +432,81 @@ class _AddServicesState extends State<AddServices>
           selectedTexts['city_id'] = null;
           body["city_id"] = null;
           body["street_id"] = null;
+
+          for(int i = 0; i< cct.length;i++){ cct[i] = 0; }
+          if(body["country_id"].toLowerCase() == 'null') cct[0] = 1;
+          // print('body["country_id"] = ${body["country_id"]}');
+          // if(body["country_id"].toLowerCase() == 'null') {
+          //   print('here_f_orEach: 7');
+          //   // cct.forEach((element) {cct[element] = 1;});
+          // //   print('yes');
+          // //   cct[0] = 1;
+          // } else {
+          //   print('here_f_orEach: 8');
+          //   // cct.forEach((element) {cct[element] = 0;});
+          // }
+
         });
       }));
     } else if(showSelectCity){
+      cct[0] = 0;
+      print('here_f_orEach: 9');
       (config['countries'] as List<dynamic>).forEach((element) {
         if((element as Map)['id'].toString() == UserManager.currentUser('country_id')) {
           print('here_element: $element');
-          selectOptions["cities"] = element['cities'];
+          selectOptions["cities"] = element['cities']  ?? [];
         }
       });
 
     }
 
-    if ((widget.data == null  || data['city_id'] != null) && showSelectCity)
+
+    if (showSelectCity && isArrayNotEmpty('cities'))
+
       items.add(Row(
         textDirection: LanguageManager.getTextDirection(),
         children: [
           Expanded(
             child: createSelectInput("city_id", 107, selectOptions["cities"], onEmptyMessage: LanguageManager.getText(311), onSelected: (v) {
               setState(() {
-                selectOptions["street"] = v['street'];
+                selectOptions["street"] = v['street']  ?? [];
 
                 selectedTexts["city_id"] = v['name'];
                 body["city_id"] = v['id'].toString();
 
                 selectedTexts['street_id'] = null;
                 body["street_id"] = null;
+
+                for(int i = 0; i< cct.length;i++){ cct[i] = 0; }
+                if(body["city_id"].toLowerCase() == 'null') cct[1] = 1;
+
+                // if(body["city_id"].toLowerCase() == 'null') {
+                //   print('here_f_orEach: 10 ${selectOptions["street"]}');
+                //   cct.forEach((element) {if(element > 0) cct[element] = 1;});
+                // } else {
+                //   print('here_f_orEach: 11 ${selectOptions["street"]}');
+                //   cct.forEach((element) {if(element > 0) cct[element] = 0;});
+                // }
               });
             }),
           ),
-          showSelectStreet?
+          showSelectStreet  &&  isArrayNotEmpty('street')?
           Expanded(
             child: createSelectInput("street_id", 108, selectOptions["street"], onEmptyMessage: LanguageManager.getText(113),onSelected: (v) {
               setState(() {
                 selectedTexts["street_id"] = v['name'];
                 body["street_id"] = v['id'].toString();
+
+                for(int i = 0; i< cct.length;i++){ cct[i] = 0; }
+                if(body["street_id"].toLowerCase() == 'null') cct[2] = 1;
+
+                // if(body["city_id"].toLowerCase() == 'null') {
+                //   print('here_f_orEach: 12');
+                //   cct.forEach((element) {if(element > 1) cct[element] = 1;});
+                // } else {
+                //   print('here_f_orEach: 13');
+                //   cct.forEach((element) {if(element > 1) cct[element] = 0;});
+                // }
               });
             }),
           ):Container()
@@ -576,7 +515,7 @@ class _AddServicesState extends State<AddServices>
 
     items.add(Container(height: 10,));
     items.add(InkWell(
-      onTap: widget.data == null ? send : update,
+      onTap: widget.data == null ? send : confirmUpdate , //update
       child: Container(
         margin: EdgeInsets.all(10),
         height: 45,
@@ -932,46 +871,80 @@ class _AddServicesState extends State<AddServices>
     }
   }
 
-  void send() {
+  List cct   = [0,0,0]; // country_city_street
+  List cssss = [0,0,0,0,0]; // cat_subcat_sub1_sub2_sub3_sub4
 
+  void setAll(String key, {bool isUpdateDoNotRemove = false, bool notAll = false}){
+    print('here_setAll: key: $key, cssss: $cssss, cct: $cct');
+    switch(key){
+      case 'service_categories_id'    :  cssss[0] = (notAll ? 0 : 1); break;
+      case 'service_subcategories_id' :  cssss[1] = (notAll ? 0 : 1); break;
+      case 'sub2_id' :  cssss[2] = (notAll ? 0 : 1); break;
+      case 'sub3_id' :  cssss[3] = (notAll ? 0 : 1); break;
+      case 'sub4_id' :  cssss[4] = (notAll ? 0 : 1); break;
+
+      case 'country_id' :  cct[0] = (notAll ? 0 : 1); break;
+      case 'city_id'    :  cct[1] = (notAll ? 0 : 1); break;
+      case 'street_id'  :  cct[2] = (notAll ? 0 : 1); break;
+    }
+    if(! isUpdateDoNotRemove && body[key].toLowerCase() == "null") {
+      print('here_setAll: remove key: $key');
+      body.remove(key);
+    } else {
+      print('here_setAll: remove not key: $key');
+    }
+    body['cat_subcat_sub1_sub2_sub3_sub4'] = '${cssss[0]}-${cssss[1]}-${cssss[2]}-${cssss[3]}-${cssss[4]}';
+    body['country_city_street'] = '${cct[0]}-${cct[1]}-${cct[2]}';
+
+    print('here_setAll: body: $body');
+  }
+
+  void validate({bool isUpdateDoNotRemove = false}){
     setState(() { errors = {}; });
-    print('here_body: selectSubcategoriesOptions: ${selectSubcategoriesOptions.isNotEmpty}, $body');
-    List validateKeys = ["service_id","service_categories_id", "description"]; // ,"service"
 
-    if(showSelectCountry == true)
-      validateKeys.add('country_id');
+    List validateKeys = ["service_id", "description"]; // ,"service"
 
-    if(showSelectCity == true)
-      validateKeys.add('city_id');
+    if(cct[0] == 0 && showSelectCountry == true)          validateKeys.add('country_id');
 
-    if(showSelectStreet == true)
-      validateKeys.add('street_id');
+    if(cct[0] == 0 && cct[1] == 0 && showSelectCity == true)             validateKeys.add('city_id');
 
-    if(selectSubcategoriesOptions.isNotEmpty && selectSubcategoriesOptions["subcategories"].length > 0)
-      validateKeys.add('service_subcategories_id');
+    if(cct[0] == 0 && cct[1] == 0 && cct[2] == 0 && showSelectStreet == true)           validateKeys.add('street_id');
 
-    if(selectSub2Options.isNotEmpty && selectSub2Options["service_sub_2"].length > 0)
-      validateKeys.add('sub2_id');
+    if(cssss[0] == 0 && isArrayNotEmpty("categories"))    validateKeys.add('service_categories_id');
 
-    if(selectSub3Options.isNotEmpty && selectSub3Options["service_sub_3"].length > 0)
-      validateKeys.add('sub3_id');
+    if(cssss[1] == 0 && isArrayNotEmpty("subcategories")) validateKeys.add('service_subcategories_id');
 
-    if(selectSub4Options.isNotEmpty && selectSub4Options["service_sub_4"].length > 0)
-      validateKeys.add('sub4_id');
+    if(cssss[2] == 0 && isArrayNotEmpty("service_sub_2")) validateKeys.add('sub2_id');
+
+    if(cssss[3] == 0 && isArrayNotEmpty("service_sub_3")) validateKeys.add('sub3_id');
+
+    if(cssss[4] == 0 && isArrayNotEmpty("service_sub_4")) validateKeys.add('sub4_id');
 
 
     for (var key in validateKeys) {
+      print('here_setAll: key-: $key, value: ${body[key]}');
       if (body[key] == null || body[key].isEmpty)
         setState(() {
           errors[key] = "_";
         });
+      else if(body[key].toString().toLowerCase() == "null") {
+        setAll(key.toString(), isUpdateDoNotRemove: isUpdateDoNotRemove);
+      } else
+        setAll(key.toString(), isUpdateDoNotRemove: isUpdateDoNotRemove, notAll: true);
     }
-	
+
     if (selectedFiles.length == 0 && images.length == 0) {
       errors["images"] = "_";
     }
 
     print('here_errors: $errors');
+
+  }
+
+  void send() {
+
+    validate();
+
     if (errors.keys.length > 0) return;
 
     var isCountryCityStreet = config['service'][getIndexFromId(config['service'],body['service_id'].toString())]['is_country_city_street'];
@@ -1019,45 +992,116 @@ class _AddServicesState extends State<AddServices>
 
   }
 
+  void confirmUpdate() {
+    if( data['status'].toString().toUpperCase() != 'ACCEPTED') {update(); return;}
+    Alert.show(
+        context,
+        Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            textDirection: LanguageManager.getTextDirection(),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      FlutterIcons.x_fea,
+                      size: 24,
+                    ),
+                  )
+                ],
+              ),
+              Container(
+                child: Icon(
+                  FlutterIcons.info_fea,
+                  size: 60,
+                  color: Converter.hexToColor("#2094CD"),
+                ),
+              ),
+              Container(
+                height: 30,
+              ),
+              Text(
+                LanguageManager.getText(323), // "سيتم تحويل الخدمة إلى المراجعة من قبل الإدارة هل أنت متأكد من إرسال طلب التعديل؟
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Converter.hexToColor("#707070"),
+                    fontWeight: FontWeight.bold),
+              ),
+              Container(
+                height: 30,
+              ),
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Alert.publicClose();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(172),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#344f64")),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      update();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(170),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#2094CD")),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+        type: AlertType.WIDGET);
+  }
   void update() {
 
-    setState(() { errors = {}; });
+    validate(isUpdateDoNotRemove: true);
 
-    List validateKeys = ["service_id","service_categories_id", "description"]; // ,"service"
-
-    if(showSelectCountry == true)
-      validateKeys.add('country_id');
-
-    if(showSelectCity == true)
-      validateKeys.add('city_id');
-
-    if(showSelectStreet == true)
-      validateKeys.add('street_id');
-
-    if(selectSubcategoriesOptions.isNotEmpty && selectSubcategoriesOptions["subcategories"].length > 0)
-      validateKeys.add('service_subcategories_id');
-
-    if(selectSub2Options.isNotEmpty && selectSub2Options["service_sub_2"].length > 0)
-      validateKeys.add('sub2_id');
-
-    if(selectSub3Options.isNotEmpty && selectSub3Options["service_sub_3"].length > 0)
-      validateKeys.add('sub3_id');
-
-    if(selectSub4Options.isNotEmpty && selectSub4Options["service_sub_4"].length > 0)
-      validateKeys.add('sub4_id');
-
-    for (var key in validateKeys) {
-      if (body[key] == null || body[key].isEmpty)
-        setState(() {
-          errors[key] = "_";
-        });
-    }
-
-    if (selectedFiles.length == 0 && images.length == 0) {
-      errors["images"] = "_";
-    }
-
-    print('here_errors: $errors');
     if (errors.keys.length > 0) return;
 
     var isCountryCityStreet = config['service'][getIndexFromId(config['service'],body['service_id'].toString())]['is_country_city_street'];
@@ -1085,6 +1129,7 @@ class _AddServicesState extends State<AddServices>
     body['offers'] = jsonEncode(offers);
     body['removed_images'] = jsonEncode(removedImagesUpdate);
 
+    print('here_f_orEach: 14');
     body.forEach((key, value) {
       if(value == null)
         body[key] = value.toString().toUpperCase();
@@ -1107,6 +1152,14 @@ class _AddServicesState extends State<AddServices>
 
   getNameFromId(List config, String id) {
     var name = '';
+    if(id.toLowerCase() == 'null') {
+      print('here_f_orEach: 15 config: $config, id: $id ${id.toLowerCase() == 'null'}');
+      return LanguageManager.getText(112);
+    } else if (config == null){
+      print('here_f_orEach: 15 config: $config, id: $id');
+      return LanguageManager.getText(112);
+    }
+
     config.forEach((element) {
       if((element as Map)['id'].toString() == id){
         name =  (element as Map)['name'];
@@ -1118,6 +1171,13 @@ class _AddServicesState extends State<AddServices>
 
   getIndexFromId(List config, String id) {
     var index = 0, i = 0;
+    if(id.toLowerCase() == 'null') {
+      print('here_f_orEach: 16 config: $config, id: $id ${id.toLowerCase() == 'null'}');
+      return 1;
+    } else if (config == null){
+      print('here_f_orEach: 16 config: $config, id: $id');
+      return 1;
+    }
     config.forEach((element) {
       if((element as Map)['id'].toString() == id){
         index =  i;
@@ -1126,6 +1186,15 @@ class _AddServicesState extends State<AddServices>
       i++;
     });
     return index;
+  }
+
+  bool isArrayNotEmpty(String s) {
+
+    return selectOptions.containsKey(s)
+        && selectOptions[s] != null
+        && selectOptions[s].length > 0
+    ;
+    
   }
 
 }

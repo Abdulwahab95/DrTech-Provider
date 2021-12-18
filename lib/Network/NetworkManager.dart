@@ -42,9 +42,17 @@ class NetworkManager {
         else
           log('onError: $e');
 
-        if(context != null) {
+        if (context != null) {
           Alert.endLoading();
-          Alert.show(context, responseBody);
+          if (json.decode(responseBody)['state'] != null && json.decode(responseBody)['state'] == false) {
+            if (json.decode(responseBody)['message_code'] != null && json.decode(responseBody)['message_code'] != -1)
+              Alert.show(context, LanguageManager.getText(int.parse(json.decode(responseBody)['message_code'].toString())));
+            else
+              Alert.show(context, Converter.getRealText(json.decode(responseBody)['message']));
+          } else if(json.decode(responseBody)['state'] != null && json.decode(responseBody)['state'] == true){
+            Alert.show(context, 'onError: $e');
+          }else
+            Alert.show(context, responseBody);
         }
       }
     };
