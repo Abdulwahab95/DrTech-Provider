@@ -179,8 +179,11 @@ class Globals {
   static String correctLink(data) {
 
 
+    print('here2: $imageUrl');
+    print('here2: $data');
+
     if(!isLocal){
-      if (!data.toString().contains('http') ) {
+      if (data != null && !data.toString().contains('http') ) {
         return imageUrl + data;
       } else
         return data;

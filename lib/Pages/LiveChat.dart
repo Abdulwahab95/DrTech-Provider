@@ -2217,7 +2217,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void loadConfig() {
-    NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // services/configuration
+    NetworkManager.httpGet(Globals.baseUrl + "provider/services/list/${UserManager.currentUser('id')}",  context, (r) { // services/configuration
       if (r['state'] == true) {
         setState(() {
           config = r['data'];
