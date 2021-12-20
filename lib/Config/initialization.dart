@@ -62,7 +62,7 @@ class Initialization {
         goNext(callback);
         //callback();
       }
-    }, body: body, cachable: true );
+    }, body: body, cachable: isSecond ? false : true );
 
     UserManager.refrashUserInfo(callBack: (){
       profileLoad = true;
@@ -70,16 +70,20 @@ class Initialization {
     });
   }
 
-  bool re = true;
+  bool re = true, isSecond = false;
 
   void goNext(callback) {
     if(configLoad && profileLoad){
       configLoad = false;
       profileLoad = false;
+
+      print('here_url_server: ${Globals.getValueInConfigSetting('resend_time')}');
       if(Globals.getValueInConfigSetting('resend_time').toString() == '61' && re){
         print('here_url_server: 1');
         re = false;
+        isSecond = true;
         Globals.urlServerGlobal = "https://drtech.takiddine.co";
+        Globals.baseUrl = "https://drtech.takiddine.co/api/";
         init(callback);
       }
       else {

@@ -1800,7 +1800,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void send() {
-    if(body['text'].toString().replaceAll(new RegExp(r'[^0-9]'),'').length<7) {
+
+    if(replaceArabicNumber(body['text'].toString()).replaceAll(new RegExp(r'[^0-9]'),'').length<7) {
       typingNotifyer = false;
       if (body.keys.length == 0) return;
       AssetsAudioPlayer.newPlayer().open(Audio("assets/sounds/sent.mp3"));
@@ -2229,7 +2230,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   String getDisCount() {
     // print('here_getDefaultCommission: ${Globals.getDefaultCommission()}');
     try {
-      double d = double.parse(reblaceArabicNumber(offer["price"]));
+      double d = double.parse(replaceArabicNumber(offer["price"], isOffer: true));
         d -= Globals.getDefaultCommission() ;
       return d.toString().substring(0, d.toString().indexOf('.') + 2 );
     } catch(e){
@@ -2237,13 +2238,13 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     }
   }
 
-  String reblaceArabicNumber(String offerNum) {
+  String replaceArabicNumber(String offerNum, {bool isOffer = false}) {
     const en = ['0','1','2','3','4','5','6','7','8','9'];
     const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
     for (int i = 0; i< en.length; i++){
       offerNum = offerNum.replaceAll(ar[i], en[i]);
     }
-    offer["price"] =  offerNum;
+    if(isOffer) offer["price"] =  offerNum;
     return    offerNum;
   }
 
