@@ -137,7 +137,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                   width: 5,
                                 ),
                                 Text(
-                                  widget.data["unit"].toString(),
+                                  Globals.getUnit(),
                                   textDirection:
                                       LanguageManager.getTextDirection(),
                                   style: TextStyle(
@@ -327,19 +327,21 @@ class _OrderDetailsState extends State<OrderDetails> {
     cancel["canceled_by"] = UserManager.currentUser("id");
     NetworkManager.httpPost(Globals.baseUrl + "orders/status/${widget.data['id']}", context ,(r) { // orders/cancel
       Alert.endLoading();
+      print('here_response: ${r['state'] == true}, r $r');
       if (r['state'] == true) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context, rootNavigator: true)..pop(true)..pop(true);
       }
     }, body: cancel);
 
   }
 
-  void completedOrderConferm() {
+  void completedOrderConfirm() {
     Alert.startLoading(context);
     NetworkManager.httpPost(Globals.baseUrl + "orders/status/${widget.data['id']}",  context, (r) { // orders/completed
       Alert.endLoading();
+      print('here_response: ${r['state'] == true}, r $r');
       if (r['state'] == true) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context, rootNavigator: true)..pop(true)..pop(true);
       }
     }, body: {"status":"WAITING"});
   }
@@ -552,7 +554,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                   InkWell(
                     onTap: () {
                       Navigator.pop(context);
-                      completedOrderConferm();
+                      completedOrderConfirm();
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.45,

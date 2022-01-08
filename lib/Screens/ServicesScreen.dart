@@ -47,11 +47,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
     var servicesApi = Globals.getConfig("services");
     if (servicesApi == "") return Container();
     List<Widget> lastInsert = [];
-    // var numItemAdd = 0;
-    // var numItemInactive = 0;
+
+
     for (var item in servicesApi) {
       print('here_row_item: ${item['name']}');
-      // if (item["status"] != "inactive"){
         if (lastInsert.length < 3) {
           print('here_row < 3: ${item['name']}, lastInsert: ${lastInsert.length}');
           lastInsert.add(createService(item["icon"], Globals.isRtl()? item["name"]: item["name_en"], () {
@@ -75,7 +74,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
         print('here_row_length: ${rows.length}, lastInsert: ${lastInsert.length}');
       }
       if (lastInsert.length == 3) {
-        // numItemAdd += 2;
         print('here_row == 3: ${item['name']}');
         rows.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -86,13 +84,9 @@ class _ServicesScreenState extends State<ServicesScreen> {
         print('here_row_length: ${rows.length}, lastInsert: ${lastInsert.length}');
         lastInsert = [];
       }
-
-    // } else numItemInactive++;
-    //
     }
     print('here_length: rows: ${rows.length}, items: ${(servicesApi as List).length}');
 
-    // if ((servicesApi.length - numItemInactive) % 2 != 0 && servicesApi.length - numItemInactive - 1 == numItemAdd ){
     if(rows.length < (servicesApi as List).length){
       rows.add(Row(
         mainAxisAlignment: MainAxisAlignment.end,

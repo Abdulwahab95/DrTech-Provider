@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
+import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -176,21 +177,20 @@ class Globals {
     return LanguageManager.getTextDirection() == TextDirection.rtl;
   }
 
+  static String getUnit(){
+    if(isRtl())
+      return UserManager.currentUser('unit_ar');
+    else
+      return UserManager.currentUser('unit_en');
+  }
+
   static String correctLink(data) {
-
-
-    print('here2: $imageUrl');
-    print('here2: $data');
-
     if(!isLocal){
       if (data != null && !data.toString().contains('http') ) {
         return imageUrl + data;
       } else
         return data;
-    }
-
-
-    else  {
+    } else  {
         String url = data.toString();
         if(!url.contains('http')) {
           url = imageUrl + data;
@@ -205,7 +205,6 @@ class Globals {
       }
         return url;
     }
-
   }
 
   static void vibrate() async {

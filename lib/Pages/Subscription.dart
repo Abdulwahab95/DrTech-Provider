@@ -95,7 +95,7 @@ class _SubscriptionState extends State<Subscription> {
         if (r['valid'] == true) {
           String cutValue = r["code"]["amount"].toString();
           cutValue +=
-              r["code"]["type"] == "PERCENTAGE" ? "%" : " " + r["code"]["unit"];
+              r["code"]["type"] == "PERCENTAGE" ? "%" : " " + Globals.getUnit();
           Alert.show(context, LanguageManager.getText(227) + "\n" + cutValue);
           setState(() {
             coupon = r["code"];
@@ -488,7 +488,7 @@ class _SubscriptionState extends State<Subscription> {
                       Text(
                         getRealPrice(selectedPlan["price"]).toString() +
                             " " +
-                            config["unit"].toString() +
+                            Globals.getUnit() +
                             " / " +
                             selectedPlan["name"],
                         textDirection: LanguageManager.getTextDirection(),
@@ -581,7 +581,7 @@ class _SubscriptionState extends State<Subscription> {
                     Text(
                       getRealPrice(selectedPlan["price"]).toString() +
                           " " +
-                          config["unit"].toString() +
+                          Globals.getUnit() +
                           " / " +
                           selectedPlan["name"],
                       textDirection: LanguageManager.getTextDirection(),
@@ -677,7 +677,7 @@ class _SubscriptionState extends State<Subscription> {
                     Text(
                       getRealPrice(selectedPlan["price"]).toString() +
                           " " +
-                          config["unit"].toString() +
+                          Globals.getUnit() +
                           " / " +
                           selectedPlan["name"],
                       textDirection: LanguageManager.getTextDirection(),

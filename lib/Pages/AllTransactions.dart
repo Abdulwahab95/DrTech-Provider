@@ -41,7 +41,7 @@ class _AllTransactionsState extends State<AllTransactions> {
           if (r['state'] == true) {
             setState(() {
               data[page] = r['data'];
-              unit = UserManager.currentUser('unit');
+              unit = Globals.getUnit();
             });
           }
         }, cashable: false);

@@ -112,7 +112,7 @@ class MessageHandlerState extends State<MessageHandler> {
     Map payload = data['payload'].runtimeType == String? json.decode(data['payload']) : data['payload'];
     if (data["conversation_id"] != null) {
       print('here_timer: if 1');
-      if (LiveChat.currentConversationId == data["conversation_id"].toString()) {
+      if (LiveChat.currentConversationId == data["conversation_id"].toString() ||  UserManager.currentUser('id')== data["conversation_id"].toString()) {
         print('here_timer: if 2');
         if (LiveChat.callback != null) {
           print('here_timer: if 3');
@@ -126,18 +126,21 @@ class MessageHandlerState extends State<MessageHandler> {
       } else if (data != null && payload != null && payload['type'] != null && payload['type'] == 'seen'){ // seen
         // seen and user not on screen liveChat => don't show notification
       } else if (data != null) {
-        if (UserManager.currentUser("chat_not_seen").isNotEmpty && data['screen'] == 'LiveChat') {
-          print('here_timer: chat if');
-          UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) + 1));
-        } else if (UserManager.currentUser("not_seen").isNotEmpty && data['screen'] == 'Notifications') {
-          print('here_timer: not_seen');
-          UserManager.updateSp("not_seen", (int.parse(UserManager.currentUser("not_seen")) + 1));
-        }
-        Globals.updateConversationCount();
-        Globals.updateNotificationCount();
 
-        print('here_timer: else 2');
-        LocalNotifications.send(data['title'],data['message_txt'], payload);
+        if (UserManager.currentUser("chat_not_seen").isNotEmpty && data['screen'] == 'LiveChat'
+              && payload['provider_id'] != payload['send_by']) {
+
+                print('here_timer: chat if');
+                UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) + 1));
+                Globals.updateConversationCount();
+                LocalNotifications.send(data['title'],data['message_txt'], payload);
+
+        } else if (UserManager.currentUser("not_seen").isNotEmpty && data['screen'] == 'Notifications') {
+                print('here_timer: not_seen');
+                UserManager.updateSp("not_seen", (int.parse(UserManager.currentUser("not_seen")) + 1));
+                Globals.updateNotificationCount();
+                LocalNotifications.send(data['title'],data['message_txt'], payload);
+        }
       }
     }else {
       print('here_timer: else 1');

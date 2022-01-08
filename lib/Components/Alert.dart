@@ -44,10 +44,17 @@ class Alert extends StatefulWidget {
       type = AlertType.TEXT,
       isDismissible: true,
       onYesShowSecondBtn : true}) {
-    showDialog(
+      showDialog(
         context: context,
         builder: (c) => Alert(content, onSelected, onYes, premieryText,onClickSecond,
-            secondaryText, type, isDismissible, onYesShowSecondBtn));
+                              secondaryText, type, isDismissible, onYesShowSecondBtn))
+        .then((value) {
+              currentLoader = false ;
+              publicClose   = null  ;
+              setStateCall  = null  ;
+              callSetState  = null  ;
+              staticContent = null  ;
+    });
   }
 
   static void startLoading(context) {

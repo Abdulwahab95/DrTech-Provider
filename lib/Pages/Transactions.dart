@@ -49,7 +49,7 @@ class _TransactionsState extends State<Transactions> {
               data[page] = r['data'];
               balance = r['data']['revenue'];
               commission = r['data']['commission'];
-              unit = UserManager.currentUser('unit');
+              unit = Globals.getUnit();
               // page++;
             });
           }

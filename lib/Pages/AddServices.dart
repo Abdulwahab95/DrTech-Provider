@@ -1143,7 +1143,7 @@ class _AddServicesState extends State<AddServices>
     NetworkManager().fileUpload(Globals.baseUrl + "provider/service/update/${widget.data['id']}", files, (p) {},   (r) { // services/add
       Alert.endLoading();
       if (r['state'] == true) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context, rootNavigator: true)..pop(true)..pop(true);
       } else if (r["message"] != null) {
         Alert.show(context, Converter.getRealText(r["message"]));
       }

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
 import 'package:dr_tech/Components/RateStars.dart';
 import 'package:dr_tech/Config/Converter.dart';
@@ -28,19 +29,20 @@ class _EngineerServicesState extends State<EngineerServices> {
     super.initState();
   }
 
+  var isFirstLoad = true;
   void load() {
     if(isLoading) return;
     setState(() {
       isLoading = true;
     });
+
     NetworkManager.httpGet(Globals.baseUrl + "provider/services/${UserManager.currentUser('id')}",  context, (r) { // user/services
       setState(() {
         isLoading = false;
       });
       if (r['state'] == true) {
-        setState(() {
-          data = r['data'];
-        });
+        data = r['data'];
+        setState(() {});
       }
     }, cashable: true);
   }
@@ -147,7 +149,7 @@ class _EngineerServicesState extends State<EngineerServices> {
                   RateStars(15, stars: item['stars']?? 5,), // rate
                   Container(width: 10),
                   Text(
-                    item['stars'].toString()?? '5',//rate
+                    Converter.format(item['stars']) ?? '5',//rate
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   )
                 ],

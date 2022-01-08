@@ -39,22 +39,24 @@ class LiveChat extends StatefulWidget{
 }
 
 class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
-  Map user = {}, data = {}, body = {}, offer = {};
+  Map user = {}, data = {}, body = {}, offer = {}, providerInfo = {};
   Map<int, Uint8List> images = {};
   Map<int, bool> files = {};
   String promoCode = "";
-  bool isLoading = false,
-      visibleoptions = false,
-      isOpenPicks = false,
-      isTyping = false,
-      typingNotifyer = false,
-      allowEmptyOffer = true;
-  Timer timer;
+
+  bool isLoading      = false   ,   visibleOptions  = false,
+      isOpenPicks     = false   ,   isTyping        = false,
+      typingNotifyer  = false   ,   allowEmptyOffer = false,
+      visibleServices = false;
+
+  Timer  timer;
   Widget ui;
-  int page = 0;
+  int    page = 0;
+
   TextEditingController controller = TextEditingController();
   ScrollController scroller = ScrollController();
   final ImagePicker _picker = ImagePicker();
+
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -177,17 +179,25 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
           duration: Duration(milliseconds: 300), curve: Curves.ease);
   }
 
+  bool isNotShowed = true;
+
   void load() {
+    if(isLoading) return;
     setState(() {
       isLoading = true;
     });
     NetworkManager.httpPost(Globals.baseUrl + "convertation",  context, (r) { // "chat/load?conversation_id=" + widget.id.toString() + "&page=" + page.toString()
       try {
         if (r['state'] == true) {
+          if(providerInfo['message'] != null && isNotShowed) {
+            isNotShowed = false;
+            Alert.show(context, providerInfo['message']);
+          }
           setState(() {
             isLoading = false;
             data['0'] = r['data']['convertation']; // r['page']
             user = r['data']['with'];
+            providerInfo = r['data']['provider_info'];
           });
           print('here_seen_2');
           sendSeenFlag();
@@ -205,7 +215,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
           ui = BrokenPage(load);
         });
       }
-    }, cachable: true, body: {"user_id":widget.id.toString() ,"provider_id": UserManager.currentUser('id')});
+    }, cachable: false, body: {"user_id":widget.id.toString() ,"provider_id": UserManager.currentUser('id')});
   }
 
   int i=0;
@@ -299,6 +309,9 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                             ),
                           ],
                         ))),
+                isLoading
+                    ? LinearProgressIndicator()
+                    : Container(),
                 Expanded(
                     child: ScrollConfiguration(
                         behavior: CustomBehavior(),
@@ -309,7 +322,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                         ))),
                 getChatInput()
               ]),
-              visibleoptions
+              visibleOptions
                   ? InkWell(
                       onTap: showOptions,
                       highlightColor: Colors.transparent,
@@ -498,7 +511,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                           ),
                         ),
                         InkWell(
-                                onTap: (){print('here_on_tap:'); allowEmptyOffer = true; addOffer();},
+                                onTap: (){print('here_on_tap:'); allowEmptyOffer = false; addOffer();},
                                 child: Container(
                                   child: Column(
                                     children: [
@@ -955,7 +968,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                               width: 5,
                                             ),
                                             Text(
-                                              Converter.getRealText(UserManager.currentUser("unit")),
+                                              Converter.getRealText(Globals.getUnit()),
                                               textDirection: LanguageManager
                                                   .getTextDirection(),
                                               style: TextStyle(
@@ -1540,8 +1553,16 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
 
   void showOptions() {
     setState(() {
-      visibleoptions = !visibleoptions;
+      visibleOptions = !visibleOptions;
     });
+  }
+
+  void showServices() {
+    visibleServices = !visibleServices;
+    Alert.staticContent = getOfferWidget();
+    Alert.setStateCall = () {};
+    Alert.callSetState();
+    setState((){});
   }
 
   void phoneCall() {
@@ -1669,17 +1690,17 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         ],
         (p) {}, (r) {
             if (r["state"] == true) {
-        setState(() {
-          data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
-          int tempId = id; // int tempId = int.parse(r["temp_id"]);
-          files[tempId] = null;
-
-        });
-      } else {
-        setState(() {
-          data[page][index]["error"] = true;
-        });
-      }
+              data.values.last.add(r['data'][0]);
+              setState(() {
+                //data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
+                int tempId = id; // int tempId = int.parse(r["temp_id"]);
+                files[tempId] = null;
+              });
+            } else {
+              setState(() {
+                data[page][index]["error"] = true;
+              });
+            }
     }, body: {
       "id": widget.id,
       "index": index.toString(),
@@ -1723,8 +1744,9 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       setState(() {});
     }, (r) {
       if (r['state'] == true) {
+        data.values.last.add(r['data'][0]);
         setState(() {
-          data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
+         // data[page][index] = r['data'][0]; // data[r["page"]][int.parse(r["index"])] = r["message"];
           int tempId = id; //int tempId = int.parse(r["temp_id"]);
           images[tempId] = null;
         });
@@ -1790,6 +1812,9 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
 
     NetworkManager.httpPost(Globals.baseUrl + "convertation/create",  context, (r) {// chat/offer
       if (r['state'] == true) {
+        allowEmptyOffer = true;
+        offer = {};
+        selectedTexts = {};
         setState(() {
           data.values.last.add(r['data'][0]);
         });
@@ -1874,184 +1899,308 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void addOffer() {
+      if(providerInfo['not_allow_send_offer'] != null && providerInfo['not_allow_send_offer']) {
+        Alert.show(context, 329);
+        return;
+      }
+
+
     if(allowEmptyOffer) {
       selectedTexts["service"] = null;
       offer = {};
+      errors = {};
     }
     setState(() {
       isOpenPicks = false;
     });
     Alert.staticContent = getOfferWidget();
-    Alert.show(context, Alert.staticContent, type: AlertType.WIDGET);
+    Alert.show(context, Alert.staticContent, type: AlertType.WIDGET, isDismissible: false);
   }
 
+  FocusNode _focus = new FocusNode();
+
   getOfferWidget () {
-    return Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: EdgeInsets.only(bottom: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                textDirection: LanguageManager.getTextDirection(),
-                children: [
-                  Container(),
-                  Text(
-                    LanguageManager.getText(128),
-                    style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                    child: InkWell(
-                        onTap: () {
-                          if (Alert.publicClose != null) {
-                            print('here_error: 4');
-                        Alert.publicClose();
-                      } else {
-                            print('here_error: 5');
-                        Navigator.pop(context);
-                      }
-                    },
-                        child: Icon(FlutterIcons.close_ant)),
-                  ),
-                ],
+    TextEditingController _controllerDescription = new TextEditingController();
+    TextEditingController _controllerPrice       = new TextEditingController();
+
+
+
+    if(offer.isNotEmpty && offer.containsKey('description') && offer["description"].toString().isNotEmpty) {
+      _controllerDescription.text = offer["description"];
+      _controllerDescription.selection = TextSelection.fromPosition(TextPosition(offset: _controllerDescription.text.length));
+    }
+
+    if(offer.isNotEmpty && offer.containsKey('price') && offer["price"].toString().isNotEmpty) {
+      _controllerPrice.text = offer["price"];
+      _controllerPrice.selection = TextSelection.fromPosition(TextPosition(offset: _controllerPrice.text.length));
+    }
+    if(_focus.hasFocus)
+      _controllerPrice.selection = TextSelection.fromPosition(TextPosition(offset: _controllerPrice.text.length));
+
+    return Stack(
+      children: [
+        Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [
+                    Container(),
+                    Text(
+                      LanguageManager.getText(128),
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Container(
+                      child: InkWell(
+                          onTap: () {
+                            if (Alert.publicClose != null) {
+                              print('here_error: 4');
+                              Alert.publicClose();
+                            } else {
+                                  print('here_error: 5');
+                              Navigator.pop(context);
+                            }
+                      },
+                          child: Icon(FlutterIcons.close_ant)),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            config != null ?
-            createSelectInput("service", 283, config, onSelected: (v) { // config['service']
-              print('here_service: $v');
-
-              setState(() {
-                allowEmptyOffer = false;
-                // Alert.alertSetState();
-                selectedTexts["service"] = v['title'];
-                offer['provider_service_id'] = v['id'].toString();
-              });
-
-              Timer(Duration(milliseconds: 250), () {
-                print('here_error: 1 ${Alert.publicClose() != null}');
-                Alert.publicClose();
-
-                Timer(Duration(milliseconds: 250), () {
-                  print('here_error: 2 ${Alert.publicClose() != null}');
-                  Alert.publicClose();
-                  print('here_error: 3 ${Alert.publicClose() != null}');
-                  addOffer();
-                });
-              });
-
-            }): Container(),
-            Container(
-              margin: EdgeInsets.only(left: 20, right: 20, top: 7, bottom: 7),
-              padding: EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: Converter.hexToColor(errors['description'] != null ? "#E9B3B3" : "#F2F2F2"),
+              config != null
+                  ? createSelectInput("service", 283, config)
+                  : Container(),
+              Container(
+                margin: EdgeInsets.only(left: 20, right: 20, top: 7, bottom: 7),
+                padding: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: Converter.hexToColor(errors['description'] != null ? "#E9B3B3" : "#F2F2F2"),
+                ),
+                child: TextField(
+                  controller: _controllerDescription,
+                  onChanged: (v) {
+                    offer["description"] = v;
+                    if(errors['description'] != null) {
+                      errors.remove('description');
+                      Alert.staticContent = getOfferWidget();
+                      Alert.setStateCall = () {};
+                      Alert.callSetState();
+                    }
+                  },
+                  textDirection: LanguageManager.getTextDirection(),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 0),
+                      border: InputBorder.none,
+                      hintTextDirection: LanguageManager.getTextDirection(),
+                      hintText: LanguageManager.getText(129)),
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
-              child: TextField(
-                onChanged: (v) {
-                  offer["description"] = v;
-                },
-                textDirection: LanguageManager.getTextDirection(),
-                keyboardType: TextInputType.multiline,
-                maxLines: 3,
-                decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 0),
-                    border: InputBorder.none,
-                    hintTextDirection: LanguageManager.getTextDirection(),
-                    hintText: LanguageManager.getText(129)),
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-              padding: EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: Converter.hexToColor(errors['price'] != null ? "#E9B3B3" : "#F2F2F2"),
-              ),
-              child: Row(
-                textDirection: LanguageManager.getTextDirection(),
-                children: [
-                  Expanded(
-                    child: TextField(
-                      onChanged: (v) {
+              Container(
+                margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: Converter.hexToColor(errors['price'] != null ? "#E9B3B3" : "#F2F2F2"),
+                ),
+                child: Row(
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controllerPrice,
+                        focusNode: _focus,
+                        onChanged: (v) {
                           offer["price"] = v;
+                          if(errors['price'] != null) {
+                            errors.remove('price');
+                          }
                           Alert.staticContent = getOfferWidget();
                           Alert.setStateCall = () {};
                           Alert.callSetState();
-                      },
+                          // _controllerPrice.clear();
+                          // _focus.requestFocus();
+
+                          // _controllerPrice.foc
+                        },
+                        textDirection: LanguageManager.getTextDirection(),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0),
+                            border: InputBorder.none,
+                            hintTextDirection: LanguageManager.getTextDirection(),
+                            hintText: LanguageManager.getText(130)),
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Text(
+                      Converter.getRealText(Globals.getUnit()) ,
+                      style: TextStyle(fontSize: 15),
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+                child: Row(
+                  textDirection: LanguageManager.getTextDirection(),
+                  children: [ // #translae
+                    Text( // صافي المبيع  // بعد خصم
+                      LanguageManager.getText(306) + ' ' + getDisCount() + ' ' + Converter.getRealText(Globals.getUnit()) + ' ' + LanguageManager.getText(307) + ' ',
+                      style: TextStyle(fontSize: 13),
                       textDirection: LanguageManager.getTextDirection(),
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 0),
-                          border: InputBorder.none,
-                          hintTextDirection: LanguageManager.getTextDirection(),
-                          hintText: LanguageManager.getText(130)),
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(// عمولة دكتورتك.
+                      ' ' + LanguageManager.getText(308),
+                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                      textDirection: LanguageManager.getTextDirection(),
+                    ),
+                  ],
+                ),
+              ),
+              Container(height: 10),
+              InkWell(
+                onTap: sendOffer,
+                child: Container(
+                  margin: EdgeInsets.only(left: 20, right: 20),
+                  height: 45,
+                  alignment: Alignment.center,
+                  child: Text(
+                    LanguageManager.getText(70),
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                   ),
-                  Text(
-                    Converter.getRealText(UserManager.currentUser("unit")) ,
-                    style: TextStyle(fontSize: 15),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-              child: Row(
-                textDirection: LanguageManager.getTextDirection(),
-                children: [ // #translae
-                  Text( // صافي المبيع  // بعد خصم
-                    LanguageManager.getText(306) + ' ' + getDisCount() + ' ' + Converter.getRealText(UserManager.currentUser("unit")) + ' ' + LanguageManager.getText(307) + ' ',
-                    style: TextStyle(fontSize: 13),
-                    textDirection: LanguageManager.getTextDirection(),
-                  ),
-                  Text(// عمولة دكتورتك.
-                    ' ' + LanguageManager.getText(308),
-                    style: TextStyle(fontSize: 12, color: Colors.blue),
-                    textDirection: LanguageManager.getTextDirection(),
-                  ),
-                ],
-              ),
-            ),
-            Container(height: 10),
-            InkWell(
-              onTap: sendOffer,
-              child: Container(
-                margin: EdgeInsets.only(left: 20, right: 20),
-                height: 45,
-                alignment: Alignment.center,
-                child: Text(
-                  LanguageManager.getText(70),
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
+                  decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withAlpha(15),
+                            spreadRadius: 2,
+                            blurRadius: 2)
+                      ],
+                      borderRadius: BorderRadius.circular(8),
+                      color: Converter.hexToColor("#344f64")),
                 ),
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withAlpha(15),
-                          spreadRadius: 2,
-                          blurRadius: 2)
-                    ],
-                    borderRadius: BorderRadius.circular(8),
-                    color: Converter.hexToColor("#344f64")),
               ),
-            ),
-            Container(
-              height: 10,
-            ),
-          ],
-        ));
+              Container(
+                height: 10,
+              ),
+            ],
+          ),
+        ),
+        visibleServices
+            ? InkWell(
+                onTap: showServices,
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                child: Container(
+                    // padding: EdgeInsets.only(
+                    //     top: MediaQuery.of(context).padding.top + 30),
+                    // alignment: !LanguageManager.getDirection()
+                    //     ? Alignment.topRight
+                    //     : Alignment.topLeft,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(20),
+                                spreadRadius: 5,
+                                blurRadius: 5)
+                          ],
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(5)),
+                      margin: EdgeInsets.symmetric(vertical: 80, horizontal: 20),
+                      padding: EdgeInsets.all(10),
+                      child: ScrollConfiguration(
+                        behavior: CustomBehavior(),
+                        child: Container(
+                          height: config.length > 3 ? 175 : null,
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: getListOptions(),
+                          ),
+                        ),
+                      ),
+                    )
+                ),
+        )
+            : Container(height: 1)
+      ],
+    );
   }
 
+  List<Widget> getListOptions() {
+    List<Widget> contents = [];
+    for (var item in config) {
+      print('here_Alert_getListOptions: $item');
+      contents.add(InkWell(
+        onTap: () {
+          if(errors['provider_service_id'] != null)
+             errors.remove('provider_service_id');
+          print('here_Alert_selected_text: ${item['title']}');
+          allowEmptyOffer = false;
+          selectedTexts["service"] = item['title'];
+          offer['provider_service_id'] = item['id'].toString();
+          Alert.setStateCall();
+          showServices();
+        },
+        child: Container(
+          height: 40,
+          padding: EdgeInsets.all(5),
+          margin: EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Colors.black.withAlpha(5),
+          ),
+          child: Row(
+            textDirection: LanguageManager.getTextDirection(),
+            children: [
+              item['icon'] != null
+                  ? Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        fit: BoxFit.contain,
+                        image: CachedNetworkImageProvider(Globals.correctLink(item['icon'])))),
+              )
+                  : Container(),
+              Container(
+                color: Colors.transparent,
+                width: 15,
+              ),
+              Flexible(
+                child: Text(
+                  Converter.getRealText(
+                      item['name'] != null ? item['name']
+                          : item['title'] != null ? item['title']
+                          : item['text']),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                ),
+              )
+            ],
+          ),
+        ),
+      ));
+    }
+
+    return contents;
+  }
+  
   void addPromoCode() {
     setState(() {
       isOpenPicks = false;
@@ -2164,16 +2313,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     print('here_selectedTexts: ${selectedTexts[key]}');
     return GestureDetector(
       onTap: () {
-        if (options == null) {
-          Alert.show(context, onEmptyMessage);
-          return;
-        }
-        print('here_error: 6 ');
-        Alert.publicClose();
-        var con = context;
-        Timer(Duration(milliseconds: 500), () {
-          Alert.show(con, options, type: AlertType.SELECT, onSelected: onSelected);
-        });
+        showServices();
       },
       child: Container(
         height: 50,
@@ -2231,9 +2371,11 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     // print('here_getDefaultCommission: ${Globals.getDefaultCommission()}');
     try {
       double d = double.parse(replaceArabicNumber(offer["price"], isOffer: true));
-        d -= Globals.getDefaultCommission() ;
+      d -= double.parse(providerInfo['commission'].toString()) ;
+
       return d.toString().substring(0, d.toString().indexOf('.') + 2 );
     } catch(e){
+      print('here_error_getDisCount: $e ');
       return '0';
     }
   }

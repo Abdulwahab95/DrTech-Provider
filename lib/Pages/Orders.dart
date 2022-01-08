@@ -233,7 +233,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     return InkWell(
       onTap: () async {
         var results = await Navigator.push(context, MaterialPageRoute(builder: (_) => OrderDetails(item)));
-
+        print('here_setState_results: $results');
         if (results == true) {
           setState(() {
             print('here_setState: from here 1');
@@ -377,7 +377,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                               width: 5,
                             ),
                             Text(
-                              item["unit"].toString(),
+                              Globals.getUnit(),
                               textDirection: LanguageManager.getTextDirection(),
                               style: TextStyle(
                                   fontSize: 14,

@@ -31,6 +31,7 @@ class _EnterCodeState extends State<EnterCode> {
   var visibleKeyboard = false;
   Map<int, String> code = {};
   String codeStr = '';
+  TextEditingController controlSms = TextEditingController();
   int selectedIndex = 0;
   List<Map> fileds = [];
   String countDownTimer = "00:00";
@@ -147,6 +148,7 @@ class _EnterCodeState extends State<EnterCode> {
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(5)),
                           child: TextFormField(keyboardType: TextInputType.number,
+                              controller: controlSms,
                               autofocus: true,
                               textAlign: TextAlign.center,
                               maxLength: 6,
@@ -408,6 +410,10 @@ class _EnterCodeState extends State<EnterCode> {
       timeout: const Duration(seconds: duration),
       verificationCompleted: (PhoneAuthCredential authCredential) async{
         print('heree: verificationCompleted');
+        if(authCredential != null && authCredential.smsCode != null && authCredential.smsCode.isNotEmpty) {
+          codeStr = authCredential.smsCode;
+          controlSms.text = codeStr;
+        }
         Alert.endLoading();
         // setState(() {authStatus = "Your account is successfully verified";});
         // loginApi();
