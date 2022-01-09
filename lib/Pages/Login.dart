@@ -8,6 +8,7 @@ import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Pages/EnterCode.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -279,8 +280,73 @@ class _LoginState extends State<Login> {
     }
 
     body["role"] = 'provider';
+    reblaceArabicNumber(body["number_phone"]);
 
-    Navigator.push(context, MaterialPageRoute(builder: (_) => EnterCode(reblaceArabicNumber(body["number_phone"]), selectedCountrieCode["phone_code"] )));
+    fullNum = selectedCountrieCode["phone_code"] + body["number_phone"];
+
+    sendSms();
+
+
+  }
+
+  String fullNum = '';
+  static const int duration = 60;
+  int  _forceCodeResent = 0;
+
+  Future<void> sendSms() async {
+    print('heree: sendSms $fullNum');
+
+    Alert.startLoading(context);
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: fullNum,// "+249965095703",
+      forceResendingToken: _forceCodeResent,
+      timeout: const Duration(seconds: duration),
+
+      verificationCompleted: (PhoneAuthCredential authCredential) async { // Your account is successfully verified
+        EnterCode.callVerificationCompleted(authCredential);
+      },
+
+      verificationFailed: (FirebaseAuthException  authException) { // Authentication failed
+        EnterCode.callVerificationFailed = (){
+          print('heree: verificationFailed: ${authException.code}, ${authException.message}');
+          Alert.endLoading();
+          if(authException.code.contains('invalid-phone-number'))
+            Alert.show(context, 332);
+          else if(authException.code.contains('too-many-requests'))
+            Alert.show(context, 333);
+          else
+            Alert.show(context, authException.message);
+        };
+        EnterCode.callVerificationFailed();
+      },
+
+      codeSent: (String verId, [int forceCodeResent]) { // OTP has been successfully send
+        Alert.endLoading();
+        print('heree: codeSent');
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => EnterCode(
+                        reblaceArabicNumber(body["number_phone"]),
+                        selectedCountrieCode["phone_code"], () {
+                      sendSms();
+                    })));
+        _forceCodeResent = forceCodeResent;
+
+        Timer(Duration(seconds: 1), () {
+          EnterCode.callCodeSent(verId, forceCodeResent);
+        });
+      },
+
+      codeAutoRetrievalTimeout: (String verId) {
+        print('heree: codeAutoRetrievalTimeout');
+        EnterCode.callCodeAutoRetrievalTimeout(verId);
+        // setState(() {authStatus = "TIMEOUT";});
+      },
+
+    );
 
   }
 

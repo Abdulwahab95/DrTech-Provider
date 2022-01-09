@@ -19,12 +19,20 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:vibration/vibration.dart';
 
 class EnterCode extends StatefulWidget {
-  Map body;
-  String selectedCountrieCode;
-  EnterCode(this.body, this.selectedCountrieCode);
+
+  final Map body;
+  final String selectedCountryCode;
+  final Function sendSms;
+
+  EnterCode(this.body, this.selectedCountryCode, this.sendSms);
 
   @override
   _EnterCodeState createState() => _EnterCodeState();
+
+  static Function callVerificationCompleted = (PhoneAuthCredential authCredential){};
+  static Function callVerificationFailed = (){};
+  static Function callCodeSent = (){};
+  static Function callCodeAutoRetrievalTimeout = (){};
 }
 
 class _EnterCodeState extends State<EnterCode> {
@@ -33,19 +41,18 @@ class _EnterCodeState extends State<EnterCode> {
   String codeStr = '';
   TextEditingController controlSms = TextEditingController();
   int selectedIndex = 0;
-  List<Map> fileds = [];
+  List<Map> fields = [];
   String countDownTimer = "00:00";
   int resendTime = 0;
   bool errorInputOtp = false;
 
   String phoneNumber, verificationId, otp;
-  static const int duration = 60;
-  int  _forceCodeResent = 0;
+
 
   @override
   void initState() {
     for (var i = 0; i < 6; i++)
-      fileds.add({"Node": FocusNode(), "Controller": TextEditingController()});
+      fields.add({"Node": FocusNode(), "Controller": TextEditingController()});
 
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
@@ -63,9 +70,8 @@ class _EnterCodeState extends State<EnterCode> {
     countDownTimer = getTimeFromInt(resendTime);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      fileds[0]["Node"].requestFocus();
+      fields[0]["Node"].requestFocus();
     });
-
 
     super.initState();
 
@@ -74,8 +80,31 @@ class _EnterCodeState extends State<EnterCode> {
       if(Globals.isLocal){
         Alert.endLoading();
         tick();
-      } else
-        sendSms();
+      } else {
+        // sendSms();
+        EnterCode.callVerificationCompleted = (PhoneAuthCredential authCredential) async {
+          print('heree: verificationCompleted');
+          if(authCredential != null && authCredential.smsCode != null && authCredential.smsCode.isNotEmpty) {
+            codeStr = authCredential.smsCode;
+            controlSms.text = codeStr;
+          }
+          Alert.endLoading();
+          await conferm();
+        };
+
+        EnterCode.callCodeAutoRetrievalTimeout = (String verId){
+          verificationId = verId;
+        };
+
+        EnterCode.callCodeSent = (String verId, [int forceCodeResent]){
+          verificationId = verId;
+          resendTime = Globals.getConfig("resend_time") != ""
+              ? Parser(context).getRealValue(Globals.getConfig("resend_time"))
+              : 60;
+          tick();
+        };
+
+      }
     });
   }
 
@@ -242,21 +271,21 @@ class _EnterCodeState extends State<EnterCode> {
           setState(() {
             errorInputOtp = false;
             hideKeyBoard();
-            fileds[index]["Node"].requestFocus();
-            fileds[index]["Controller"].text = "";
+            fields[index]["Node"].requestFocus();
+            fields[index]["Controller"].text = "";
             selectedIndex = index;
           });
         },
         textAlignVertical: TextAlignVertical.center,
-        controller: fileds[index]["Controller"],
-        focusNode: fileds[index]["Node"],
+        controller: fields[index]["Controller"],
+        focusNode: fields[index]["Node"],
         onChanged: (v) {
           setState(() {
             errorInputOtp = false;
             code[index] = v;
             if (index < 5) {
-              fileds[index + 1]["Node"].requestFocus();
-              fileds[index + 1]["Controller"].text = "";
+              fields[index + 1]["Node"].requestFocus();
+              fields[index + 1]["Controller"].text = "";
             } else {
               hideKeyBoard();
             }
@@ -298,7 +327,7 @@ class _EnterCodeState extends State<EnterCode> {
       Alert.endLoading();
       tick();
     } else
-        sendSms();
+        widget.sendSms();
   }
 
   Future<void> conferm() async {
@@ -359,6 +388,7 @@ class _EnterCodeState extends State<EnterCode> {
           } else if(value.runtimeType == UserCredential){
 
             print('heree: ${value.user.uid}');
+
             Alert.startLoading(context);
             NetworkManager.httpPost(Globals.baseUrl + "users/login",  context, (r) { // user/login
               Alert.endLoading();
@@ -366,7 +396,6 @@ class _EnterCodeState extends State<EnterCode> {
                 DatabaseManager.liveDatabase[Globals.authoKey] = r['data']['token'];
                 DatabaseManager.save(Globals.authoKey, r['data']['token']);
                 UserManager.proccess(r['data']['user']);
-
                 if (UserManager.currentUser('is_blocked') == '1') {
                   Alert.endLoading();
                   Alert.show(context, 313, onYes: () {
@@ -380,8 +409,6 @@ class _EnterCodeState extends State<EnterCode> {
 
               }
             }, body: widget.body);
-
-
           }
     });
   }
@@ -399,58 +426,7 @@ class _EnterCodeState extends State<EnterCode> {
     }
   }
 
-  Future<void> sendSms() async {
-    print('heree: sendSms ${widget.selectedCountrieCode + widget.body['number_phone']}');
 
-    Alert.startLoading(context);
-
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: widget.selectedCountrieCode + widget.body['number_phone'],// "+249965095703",
-      forceResendingToken: _forceCodeResent,
-      timeout: const Duration(seconds: duration),
-      verificationCompleted: (PhoneAuthCredential authCredential) async{
-        print('heree: verificationCompleted');
-        if(authCredential != null && authCredential.smsCode != null && authCredential.smsCode.isNotEmpty) {
-          codeStr = authCredential.smsCode;
-          controlSms.text = codeStr;
-        }
-        Alert.endLoading();
-        // setState(() {authStatus = "Your account is successfully verified";});
-        // loginApi();
-        await conferm();
-      },
-      verificationFailed: (FirebaseAuthException  authException) {
-        print('heree: verificationFailed: ${authException.code}, ${authException.message}');
-        Alert.endLoading();
-        // Alert.show(context, Converter.getRealText(r['message']));
-        Alert.show(context, authException.message);
-        // setState(() {authStatus = "Authentication failed";});
-      },
-      codeSent: (String verId, [int forceCodeResent]) {
-        Alert.endLoading();
-        print('heree: codeSent');
-        verificationId = verId;
-        // setState(() {authStatus = "OTP has been successfully send";});
-        _forceCodeResent = forceCodeResent;
-
-        resendTime = Globals.getConfig("resend_time") != ""
-            ? Parser(context).getRealValue(Globals.getConfig("resend_time"))
-            : 60;
-
-
-        tick();
-        // Navigator.push(context, MaterialPageRoute(builder: (_) => EnterCode(verId)))
-        //     .then((value) {print('heree: back_here $value');});
-      },
-      codeAutoRetrievalTimeout: (String verId) {
-        print('heree: codeAutoRetrievalTimeout');
-        verificationId = verId;
-        // setState(() {authStatus = "TIMEOUT";});
-      },
-    );
-
-
-  }
 }
 
 enum CodeSendType { PHONE, EMAIL }
