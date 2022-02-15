@@ -24,6 +24,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'Home.dart';
+import 'OpenImage.dart';
 
 class LiveChat extends StatefulWidget{
   final String id;
@@ -472,6 +473,45 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                       textDirection: LanguageManager.getTextDirection(),
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
+                        InkWell(
+                          onTap: () {
+                            print('here_pickImage: camera');
+                            pickImage(ImageSource.camera);
+                          },
+                          child: Container(
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  padding: EdgeInsets.all(3),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
+                                      color: Converter.hexToColor("#344F64"),
+                                      borderRadius: BorderRadius.circular(40)),
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: Converter.hexToColor("#344F64"),
+                                    ),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(40),
+                                        color: Colors.white),
+                                  ),
+                                ),
+                                Text(
+                                  LanguageManager.getText(335),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
                         // pick image
                         InkWell(
                           onTap: () {
@@ -1370,74 +1410,77 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         children: [
           Expanded(
             child: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: direction,
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
-                                ? user["avatar"]
-                                : UserManager.currentUser("avatar")))),
-                        borderRadius: BorderRadius.circular(50),
-                        color: Converter.hexToColor("#F2F2F2")),
-                  ),
-                  Container(
-                    width: 4,
-                  ),
-                  Expanded(
-                    child: Column(
-                      textDirection: direction,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          alignment: direction == TextDirection.rtl
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(minWidth: 40),
-                            child: Container(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: CachedNetworkImage(
-                                    imageUrl: item['message'].toString()),
+              child: InkWell(
+                onTap : (){ Navigator.push(context, MaterialPageRoute(builder: (_) => OpenImage(url: item['message'].toString(),)));},
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  textDirection: direction,
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: CachedNetworkImageProvider(Globals.correctLink(isFromSender
+                                  ? user["avatar"]
+                                  : UserManager.currentUser("avatar")))),
+                          borderRadius: BorderRadius.circular(50),
+                          color: Converter.hexToColor("#F2F2F2")),
+                    ),
+                    Container(
+                      width: 4,
+                    ),
+                    Expanded(
+                      child: Column(
+                        textDirection: direction,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            alignment: direction == TextDirection.rtl
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minWidth: 40),
+                              child: Container(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: CachedNetworkImage(
+                                      imageUrl: item['message'].toString()),
+                                ),
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: isFromSender
+                                        ? Converter.hexToColor("#F2F2F2")
+                                        : Converter.hexToColor("#03a9f4")),
                               ),
-                              padding: EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: isFromSender
-                                      ? Converter.hexToColor("#F2F2F2")
-                                      : Converter.hexToColor("#03a9f4")),
                             ),
                           ),
-                        ),
-                        Row(
-                          textDirection: direction,
-                          children: [
-                            !isFromSender
-                                ? SvgPicture.asset(
-                                    "assets/icons/double_check.svg",
-                                    color: item["seen"] == 1
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                  )
-                                : Container(),
-                            Container(
-                              width: 5,
-                            ),
-                            Text(Converter.getRealTime(item['created_at'],
-                                timeOnly: true,
-                                noDelay: true,
-                                formatterPattron: "HH:mm"))
-                          ],
-                        )
-                      ],
+                          Row(
+                            textDirection: direction,
+                            children: [
+                              !isFromSender
+                                  ? SvgPicture.asset(
+                                      "assets/icons/double_check.svg",
+                                      color: item["seen"] == 1
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                    )
+                                  : Container(),
+                              Container(
+                                width: 5,
+                              ),
+                              Text(Converter.getRealTime(item['created_at'],
+                                  timeOnly: true,
+                                  noDelay: true,
+                                  formatterPattron: "HH:mm"))
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             flex: 3,
@@ -1889,11 +1932,13 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   void pickImage(ImageSource source) async {
+    print('here_pickImage: pickImage');
     try {
       final pickedFile = await _picker.getImage(source: source);
       if (pickedFile == null) return;
       sendImage(pickedFile);
     } catch (e) {
+      print('here_pickImage: pickImage $e');
       // error
     }
   }
@@ -2105,11 +2150,6 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                 highlightColor: Colors.transparent,
                 splashColor: Colors.transparent,
                 child: Container(
-                    // padding: EdgeInsets.only(
-                    //     top: MediaQuery.of(context).padding.top + 30),
-                    // alignment: !LanguageManager.getDirection()
-                    //     ? Alignment.topRight
-                    //     : Alignment.topLeft,
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -2368,12 +2408,15 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   }
 
   String getDisCount() {
-    // print('here_getDefaultCommission: ${Globals.getDefaultCommission()}');
     try {
       double d = double.parse(replaceArabicNumber(offer["price"], isOffer: true));
-      d -= double.parse(providerInfo['commission'].toString()) ;
+      if(providerInfo['percentage'].toString() == 'true') {
+        var commission = d * double.parse(providerInfo['commission'].toString()) / 100;
+        d -= commission;
+      } else
+        d -= double.parse(providerInfo['commission'].toString()) ;
 
-      return d.toString().substring(0, d.toString().indexOf('.') + 2 );
+      return Converter.format(d, numAfterComma: 3);
     } catch(e){
       print('here_error_getDisCount: $e ');
       return '0';

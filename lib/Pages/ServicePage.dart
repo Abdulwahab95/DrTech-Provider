@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/svg.dart';
 
+import 'AddRemoveOffers.dart';
+
 class ServicePage extends StatefulWidget {
   final id;
   ServicePage(this.id);
@@ -36,52 +38,6 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
   }
 
   void load() {
-    // setState(() {isLoading = false;});
-    // setState(() {
-    //   data = {
-    //     "id": "8",
-    //     "user_id": "1",
-    //     "about": "تغير شاشة هواوي",
-    //     "images": [
-    //       {
-    //         "id": "38",
-    //         "name": "https://server.drtechapp.com/storage/images/6158a8856a70d.jpg",
-    //       }
-    //     ],
-    //     "name": "تغير الشاشة",
-    //     "rate": 4,
-    //     "unit": "ريال",
-    //     "offers": [
-    //       {
-    //         "price": "99.00",
-    //         "description": "تغير شاشة هواوي بعرض مغري",
-    //       },
-    //       {
-    //         "price": "9.00",
-    //         "description": "شاحن سريع جدا",
-    //       }
-    //     ],
-    //     "ratings": [
-    //       {
-    //         "name": "هاني القحطاني",
-    //         "image": "https://server.drtechapp.com/storage/images/614c4f3a7f274.jpg",
-    //         "created_at": "2021-07-27 09:56:28",
-    //         "comment": "ممتاز جدا",
-    //         "stars": "5"
-    //       },
-    //       {
-    //         "name": "Abood",
-    //         "image": "https://server.drtechapp.com/storage/images/612929053654d.jpg",
-    //         "created_at": "2021-08-27 22:26:30",
-    //         "comment": "خدمة سيئة",
-    //         "stars": "1"
-    //       }
-    //     ]
-    //   };
-    //
-    //   controller = new TabController(length: data['images'].length, vsync: this);
-    // });
-    //--------------------------------------------------------------------------
     setState(() {
       isLoading = true;
     });
@@ -181,9 +137,9 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                                     color: Converter.hexToColor("#727272")),
                               ),
                             ),
-                            Container(
-                              height: 25,
-                            ),
+                            // Container(
+                            //   height: 25,
+                            // ),
                             // Row(
                             //   textDirection: LanguageManager.getTextDirection(),
                             //   children: [
@@ -277,38 +233,26 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                             //                     CrossAxisAlignment.start,
                             //                 children: [
                             //                   Row(
-                            //                     textDirection: LanguageManager
-                            //                         .getTextDirection(),
-                            //                     mainAxisAlignment:
-                            //                         MainAxisAlignment
-                            //                             .spaceBetween,
+                            //                     textDirection: LanguageManager.getTextDirection(),
+                            //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             //                     children: [
                             //                       Text(
-                            //                         e["price"].toString() +
-                            //                             " " +
-                            //                             data["unit"].toString(),
-                            //                         textDirection: LanguageManager
-                            //                             .getTextDirection(),
+                            //                         e["price"].toString() + " " + Globals.getUnit(),
+                            //                         textDirection: LanguageManager.getTextDirection(),
                             //                         style: TextStyle(
-                            //                             color:
-                            //                                 Converter.hexToColor(
-                            //                                     "#2094CD"),
+                            //                             color: Converter.hexToColor("#2094CD"),
                             //                             fontSize: 16,
-                            //                             fontWeight:
-                            //                                 FontWeight.bold),
+                            //                             fontWeight: FontWeight.bold),
                             //                       )
                             //                     ],
                             //                   ),
                             //                   Text(
                             //                     e["description"].toString(),
-                            //                     textDirection: LanguageManager
-                            //                         .getTextDirection(),
+                            //                     textDirection: LanguageManager.getTextDirection(),
                             //                     style: TextStyle(
-                            //                         color: Converter.hexToColor(
-                            //                             "#727272"),
+                            //                         color: Converter.hexToColor("#727272"),
                             //                         fontSize: 16,
-                            //                         fontWeight:
-                            //                             FontWeight.normal),
+                            //                         fontWeight: FontWeight.normal),
                             //                   ),
                             //                 ],
                             //               ),
@@ -316,9 +260,9 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                             //           }).toList(),
                             //         ),
                             //       ),
-                            // Container(
-                            //   height: 10,
-                            // ),
+                            Container(
+                              height: 10,
+                            ),
                             Container(
                                 height: 1,
                                 margin: EdgeInsets.only(top: 2, bottom: 2),
@@ -365,7 +309,45 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                       )
                     :getFormContent()
             ),
-             InkWell(
+            isLoading
+            ? Container()
+            : Row(
+              textDirection: LanguageManager.getTextDirection(),
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      returnResult = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => AddRemoveOffers(data: data)));
+                      if (returnResult == true) {
+                        load();
+                      }
+                    },
+                    child: Container(
+                      margin: EdgeInsets.all(10),
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(141),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#344f64")),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: InkWell(
                     onTap: () async {
                       returnResult = await Navigator.push(
                           context,
@@ -393,7 +375,10 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                           borderRadius: BorderRadius.circular(8),
                           color: Converter.hexToColor("#344f64")),
                     ),
-                  )
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),

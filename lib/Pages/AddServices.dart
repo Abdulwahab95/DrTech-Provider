@@ -385,7 +385,7 @@ class _AddServicesState extends State<AddServices>
     //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     //                     children: [
     //                       Text(
-    //                         e["price"].toString() + " " + UserManager.currentUser("unit"),
+    //                         e["price"].toString() + " " + Globals.getUnit(),
     //                         textDirection: LanguageManager.getTextDirection(),
     //                         style: TextStyle(
     //                             color: Converter.hexToColor("#2094CD"),
@@ -435,17 +435,6 @@ class _AddServicesState extends State<AddServices>
 
           for(int i = 0; i< cct.length;i++){ cct[i] = 0; }
           if(body["country_id"].toLowerCase() == 'null') cct[0] = 1;
-          // print('body["country_id"] = ${body["country_id"]}');
-          // if(body["country_id"].toLowerCase() == 'null') {
-          //   print('here_f_orEach: 7');
-          //   // cct.forEach((element) {cct[element] = 1;});
-          // //   print('yes');
-          // //   cct[0] = 1;
-          // } else {
-          //   print('here_f_orEach: 8');
-          //   // cct.forEach((element) {cct[element] = 0;});
-          // }
-
         });
       }));
     } else if(showSelectCity){
@@ -479,14 +468,6 @@ class _AddServicesState extends State<AddServices>
 
                 for(int i = 0; i< cct.length;i++){ cct[i] = 0; }
                 if(body["city_id"].toLowerCase() == 'null') cct[1] = 1;
-
-                // if(body["city_id"].toLowerCase() == 'null') {
-                //   print('here_f_orEach: 10 ${selectOptions["street"]}');
-                //   cct.forEach((element) {if(element > 0) cct[element] = 1;});
-                // } else {
-                //   print('here_f_orEach: 11 ${selectOptions["street"]}');
-                //   cct.forEach((element) {if(element > 0) cct[element] = 0;});
-                // }
               });
             }),
           ),
@@ -500,13 +481,6 @@ class _AddServicesState extends State<AddServices>
                 for(int i = 0; i< cct.length;i++){ cct[i] = 0; }
                 if(body["street_id"].toLowerCase() == 'null') cct[2] = 1;
 
-                // if(body["city_id"].toLowerCase() == 'null') {
-                //   print('here_f_orEach: 12');
-                //   cct.forEach((element) {if(element > 1) cct[element] = 1;});
-                // } else {
-                //   print('here_f_orEach: 13');
-                //   cct.forEach((element) {if(element > 1) cct[element] = 0;});
-                // }
               });
             }),
           ):Container()
@@ -968,14 +942,9 @@ class _AddServicesState extends State<AddServices>
       }
     }
     body["images_length"] = files.length.toString();
-
     body['offers'] = jsonEncode(offers);
-
-    // body.containsValue(null);
     body['service_subcategories_id'] == null? body.remove('service_subcategories_id') : null;
-
     print('here_body: $body');
-
     body.removeWhere((key, value) {
       return (value == null || (value != null && value == 'null'))? true : false;
     });
@@ -1125,19 +1094,12 @@ class _AddServicesState extends State<AddServices>
       }
     }
     body["images_length"] = files.length.toString();
-
     body['offers'] = jsonEncode(offers);
     body['removed_images'] = jsonEncode(removedImagesUpdate);
-
-    print('here_f_orEach: 14');
     body.forEach((key, value) {
       if(value == null)
         body[key] = value.toString().toUpperCase();
     });
-
-    // body.removeWhere((key, value) {
-    //   return value == null ? true :  false;
-    // });
 
     Alert.startLoading(context);
     NetworkManager().fileUpload(Globals.baseUrl + "provider/service/update/${widget.data['id']}", files, (p) {},   (r) { // services/add
@@ -1189,12 +1151,9 @@ class _AddServicesState extends State<AddServices>
   }
 
   bool isArrayNotEmpty(String s) {
-
     return selectOptions.containsKey(s)
         && selectOptions[s] != null
-        && selectOptions[s].length > 0
-    ;
-    
+        && selectOptions[s].length > 0;
   }
 
 }

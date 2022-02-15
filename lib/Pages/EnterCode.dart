@@ -16,7 +16,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:vibration/vibration.dart';
+
+import 'DrTechCode.dart';
 
 class EnterCode extends StatefulWidget {
 
@@ -36,7 +37,7 @@ class EnterCode extends StatefulWidget {
 }
 
 class _EnterCodeState extends State<EnterCode> {
-  var visibleKeyboard = false;
+  var visibleKeyboard = false, visibleGetPanelCode = false;
   Map<int, String> code = {};
   String codeStr = '';
   TextEditingController controlSms = TextEditingController();
@@ -51,6 +52,9 @@ class _EnterCodeState extends State<EnterCode> {
 
   @override
   void initState() {
+    Timer(Duration(seconds: 3), () {
+      visibleGetPanelCode = true;
+    });
     for (var i = 0; i < 6; i++)
       fields.add({"Node": FocusNode(), "Controller": TextEditingController()});
 
@@ -132,13 +136,10 @@ class _EnterCodeState extends State<EnterCode> {
           children: [
             TitleBar((){Navigator.pop(context);}, 16, without: true),
             Container(
-                height: MediaQuery.of(context).size.height * 0.45,
                 child: Column(
                   children: [
                     Container(
                       padding: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.width * 0.25,
-                          right: MediaQuery.of(context).size.width * 0.25,
                           top: MediaQuery.of(context).size.width * 0.15,
                           bottom: 25),
                       child: Text(
@@ -192,7 +193,7 @@ class _EnterCodeState extends State<EnterCode> {
                               cursorColor: Colors.blue,
                               onChanged: (value) {
                                   codeStr = value;
-                                  if (value.length == 6) hideKeyBoard();
+                                  if (value.length == 6) Globals.hideKeyBoard(context);
                           }),
                         )
                     ),
@@ -223,24 +224,60 @@ class _EnterCodeState extends State<EnterCode> {
             visibleKeyboard
                 ? Container()
                 : Expanded(
-                    child: Container(
-                    alignment: Alignment.bottomCenter,
-                    child: InkWell(
-                      onTap: conferm,
+                child: Column(
+                  children: [
+                    visibleGetPanelCode ?
+                    Container(
+                        margin: EdgeInsets.symmetric(vertical: 15),
+                        height: 1,
+                        width: double.infinity,
+                        color: Colors.grey.shade300
+                    ) : Container(),
+                    visibleGetPanelCode ?
+                    Text(
+                        LanguageManager.getText(342),//هل تواجه مشكلة في الحصول على الكود؟
+                        style: TextStyle(color: Converter.hexToColor("#40746e"))) : Container(),
+                    visibleGetPanelCode ?
+                    InkWell(
+                      onTap : (){ Navigator.push(context, MaterialPageRoute(builder: (_) => DrTechCode(body: widget.body,)));},
                       child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Converter.hexToColor("#344f64")),
-                        height: 50,
-                        width: 300,
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 10),
                         child: Text(
-                          LanguageManager.getText(21),// تأكيد
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                            LanguageManager.getText(74),//هل تواجه مشكلة في الحصول على الكود؟ تواصل معنا
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Converter.hexToColor("#40749e"), fontWeight: FontWeight.bold,)),
+                      ),
+                    ) : Container(),
+                    visibleGetPanelCode ?
+                    Container(
+                        height: 1,
+                        width: double.infinity,
+                        color: Colors.grey.shade300
+                    ) : Container(),
+                    Container(height: 10,),
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        child: InkWell(
+                          onTap: conferm,
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Converter.hexToColor("#344f64")),
+                            height: 50,
+                            width: 300,
+                            child: Text(
+                              LanguageManager.getText(21),// تأكيد
+                              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  )),
+                  ],
+                )),
             Container(
               height: 20,
             )
@@ -270,7 +307,7 @@ class _EnterCodeState extends State<EnterCode> {
         onTap: () {
           setState(() {
             errorInputOtp = false;
-            hideKeyBoard();
+            Globals.hideKeyBoard(context);
             fields[index]["Node"].requestFocus();
             fields[index]["Controller"].text = "";
             selectedIndex = index;
@@ -287,7 +324,7 @@ class _EnterCodeState extends State<EnterCode> {
               fields[index + 1]["Node"].requestFocus();
               fields[index + 1]["Controller"].text = "";
             } else {
-              hideKeyBoard();
+              Globals.hideKeyBoard(context);
             }
             selectedIndex = index + 1;
           });
@@ -335,7 +372,7 @@ class _EnterCodeState extends State<EnterCode> {
 
     if (codeStr.length < 6) {
       errorInputOtp = true;
-      vibrate();
+      Globals.vibrate();
       return;
     }
 
@@ -412,20 +449,6 @@ class _EnterCodeState extends State<EnterCode> {
           }
     });
   }
-
-  void hideKeyBoard() {
-    FocusScopeNode currentFocus = FocusScope.of(context);
-    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
-      currentFocus.focusedChild.unfocus();
-    }
-  }
-
-  void vibrate() async {
-    if (await Vibration.hasVibrator()) {
-      Vibration.vibrate();
-    }
-  }
-
 
 }
 

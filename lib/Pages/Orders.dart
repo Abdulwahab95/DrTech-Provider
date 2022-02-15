@@ -282,21 +282,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                     textDirection: LanguageManager.getTextDirection(),
                     children: [
                       Expanded(
-                        child: item["service_name"].toString().length < 25 &&
-                            item["service_name"].toString().length > 18
-                            ? FittedBox(
-                          fit: BoxFit.contain,
-                          child: Text(
-                            item["service_name"].toString(),
-                            textDirection:
-                            LanguageManager.getTextDirection(),
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Converter.hexToColor("#2094CD")),
-                          ),
-                        )
-                            : Text(
+                        child: Text(
                           item["service_name"].toString(),
                           textDirection:
                           LanguageManager.getTextDirection(),

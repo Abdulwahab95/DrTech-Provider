@@ -50,7 +50,7 @@ class Alert extends StatefulWidget {
                               secondaryText, type, isDismissible, onYesShowSecondBtn))
         .then((value) {
               currentLoader = false ;
-              publicClose   = null  ;
+             // publicClose   = null  ;
               setStateCall  = null  ;
               callSetState  = null  ;
               staticContent = null  ;
@@ -88,13 +88,7 @@ class Alert extends StatefulWidget {
                   ),
                 ),
               ));
-        }).then((value) {
-      currentLoader = false;
-      publicClose = null;
-      setStateCall = null;
-      callSetState = null;
-      staticContent = null;
-    });
+        });
   }
 
   static void endLoading() {

@@ -53,7 +53,7 @@ class _WelcomeState extends State<Welcome> {
   void screenTimer() {
     Timer(Duration(seconds: 2), () {
       setState(() {
-        DatabaseManager.load("welcome") != true ?isInLogoScreen = false : close();
+         DatabaseManager.load("welcome") != true ?isInLogoScreen = false : close();
       });
     });
   }

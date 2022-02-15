@@ -143,9 +143,9 @@ class Converter {
         : item.toString() ?? "";
   }
 
-  static String format(d){
-    if(d.toString().contains('.') && d.toString().length >d.toString().indexOf('.') + 2)
-      return d.toString().substring(0, d.toString().indexOf('.') + 2 );
+  static String format(d, {numAfterComma = 2}){
+    if(d.toString().contains('.') && d.toString().length > (d.toString().indexOf('.') + numAfterComma))
+      return d.toString().substring(0, d.toString().indexOf('.') + numAfterComma );
     else if(!d.toString().contains('.'))
       return d.toString() + '.0';
     else

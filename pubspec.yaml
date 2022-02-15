@@ -1,7 +1,7 @@
 name: dr_tech
 description: A new Flutter project. 
 publish_to: 'none' 
-version: 0.0.8+8
+version: 0.0.13+9
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
@@ -34,8 +34,8 @@ dependencies:
   file_picker:
   firebase_auth: ^3.0.2
   package_info_plus: ^1.0.6
-
   cupertino_icons:
+  number_to_word_arabic: ^0.0.8
 
 dev_dependencies:
   flutter_test:

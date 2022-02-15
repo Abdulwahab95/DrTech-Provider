@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
   Map selectedCountrieCode = {}, body = {}, errors = {};
   double logoSize = 0.3;
   List countries = [];
-  bool accepted = true;
+  bool accepted = true, foundCountryCurrentUser = false;
 
   @override
   void initState() {
@@ -41,9 +41,9 @@ class _LoginState extends State<Login> {
     var countries = Globals.getConfig("countries");
     if (countries != "") {
       for (var item in countries) {
-        if (item["code"].toString().toLowerCase() ==
-            selectedCountrieCode["code"].toString().toLowerCase()) {
+        if (item["code"].toString().toLowerCase() == selectedCountrieCode["code"].toString().toLowerCase()) {
           selectedCountrieCode["phone_code"] = item["country_code"];
+          foundCountryCurrentUser = true;
         }
         this.countries.add({
           "code": item["code"],
@@ -55,7 +55,12 @@ class _LoginState extends State<Login> {
       }
     }
     body["country"] = selectedCountrieCode["code"];
+    if(!foundCountryCurrentUser) {
+      body["country"] = 'SA';
+      selectedCountrieCode["code"] = 'SA';
+    }
     body["number_phone"] = '';
+    print('here_login: $body');
     super.initState();
   }
 
@@ -311,7 +316,9 @@ class _LoginState extends State<Login> {
         EnterCode.callVerificationFailed = (){
           print('heree: verificationFailed: ${authException.code}, ${authException.message}');
           Alert.endLoading();
-          if(authException.code.contains('invalid-phone-number'))
+          if(authException.code == null)
+            Alert.show(context, authException.message);
+          else if(authException.code.contains('invalid-phone-number'))
             Alert.show(context, 332);
           else if(authException.code.contains('too-many-requests'))
             Alert.show(context, 333);

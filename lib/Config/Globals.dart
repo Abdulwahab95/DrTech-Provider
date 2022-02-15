@@ -19,8 +19,9 @@ class Globals {
   static var config;
   static var isLocal = false;
   static var urlServerLocal = "http://192.168.43.152";
+  static var urlServerGlobal = "https://www.drtech-api.com";
   // static var urlServerGlobal = "https://drtech.takiddine.co";
-  static var urlServerGlobal = "https://dashboard.drtechapp.com";
+  // static var urlServerGlobal = "https://dashboard.drtechapp.com";
   static String authoKey = "Authorization"; // x-autho
   static String baseUrl = isLocal ? "$urlServerLocal/api/" : "$urlServerGlobal/api/";
   static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/
@@ -118,14 +119,14 @@ class Globals {
     Map<String, String> header = {
       authoKey: ["Bearer " , DatabaseManager.load(authoKey) ?? ""].join(),
       "x-os": kIsWeb ? "web" : (Platform.isIOS ? "ios" : "Android"),
-      "x-app-version": version,
-      "x-build-number": buildNumber,
+      "x-app-version"     : version,
+      "x-build-number"    : buildNumber,
       "x-token": (isLocal && deviceToken.isEmpty)
           ?'pGWIGoTDRlunHuhL-UTBRb:APA91bGoDrjEsT8uLq8AqGfCNWfpy2SBsFaiWjKwZrcanQVZWwiNVSPKVfySvsAH10wIBPpO7dFK1sPma9w71Lzbb3MLC8Sm-gyCII4pZjlNitGwoSnU5HRZwb1iasQ0VrFuCFm-xrJm':
       deviceToken,
-      "X-Requested-With": "XMLHttpRequest",
-      // "Content-type": "application/json",
-      "Accept": "application/json"
+      "x-app-type"        : "PROVIDER_APP",
+      "X-Requested-With"  : "XMLHttpRequest",
+      "Accept"            : "application/json"
     };
     if (DatabaseManager.liveDatabase[Globals.authoKey] != null) {
       header[Globals.authoKey] = "Bearer " + DatabaseManager.liveDatabase[Globals.authoKey];
@@ -210,6 +211,13 @@ class Globals {
   static void vibrate() async {
     if (await Vibration.hasVibrator()) {
       Vibration.vibrate();
+    }
+  }
+
+  static void hideKeyBoard(BuildContext context) {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+      currentFocus.focusedChild.unfocus();
     }
   }
 

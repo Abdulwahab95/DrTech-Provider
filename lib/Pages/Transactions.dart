@@ -369,10 +369,7 @@ class _TransactionsState extends State<Transactions> {
   Widget createTransactionItem(item) {
     Color color = item['type'] == "WITHDRAWAL" ? Colors.blue : Colors.green;
     return Container(
-        decoration: BoxDecoration(
-            border: Border(
-                bottom:
-                    BorderSide(color: Colors.grey.withAlpha(30), width: 1))),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.withAlpha(30), width: 1))),
         padding: EdgeInsets.all(10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -393,36 +390,58 @@ class _TransactionsState extends State<Transactions> {
                 textDirection: LanguageManager.getTextDirection(),
                 children: [
                   Text(
-                    item['type'] == "WITHDRAWAL"
-                        ? LanguageManager.getText(302) + " #" + item['order_id'].toString() // تسديد عمولة الطلب رقم
-                        : LanguageManager.getText(303) + " #" + item['order_id'].toString() + " " + item['title'], // تنفيذ طلب
+                    item['order_id'].toString() == '0'
+                        ? LanguageManager.getText( item['type'] == "WITHDRAWAL" ? 302 : 334)
+                        : item['type'] == "WITHDRAWAL"
+                            ? LanguageManager.getText(302) + " #" + item['order_id'].toString() // تسديد عمولة الطلب رقم
+                            : LanguageManager.getText(303) + " #" + item['order_id'].toString() + " " + item['title'], // تنفيذ طلب
                     textDirection: LanguageManager.getTextDirection(),
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.normal),
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
                   ),
                   Text(
                     Converter.getRealText(item['created_at']),
                     // textDirection: LanguageManager.getTextDirection(),
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.normal),
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
                   ),
                 ],
               ),
             ),
-            Text(
-              item['amount'].toString(),
-              textDirection: LanguageManager.getTextDirection(),
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.bold, fontSize: 18),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['amount'].toString(),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      color: color, fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  item['commission'].toString(),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      color: Converter.hexToColor("#344F64"), fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ],
             ),
             Container(
               width: 10,
             ),
-            Text(
-              unit.toString(),
-              textDirection: LanguageManager.getTextDirection(),
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.normal, fontSize: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  unit.toString(),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      color: color, fontWeight: FontWeight.normal, fontSize: 16),
+                ),
+                Text(
+                  unit.toString(),
+                  textDirection: LanguageManager.getTextDirection(),
+                  style: TextStyle(
+                      color: Converter.hexToColor("#344F64"), fontWeight: FontWeight.normal, fontSize: 12),
+                ),
+              ],
             ),
           ],
         ));
