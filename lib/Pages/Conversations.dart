@@ -38,7 +38,8 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(_onLayoutDone);
     WidgetsBinding.instance.addObserver(this);
-    Globals.updateConversationCount = (){if(mounted)load();};
+    print('here_not_seen: initState Conversations');
+    Globals.updateConversationCount = (){print('here_not_seen: Conversations $mounted');if(mounted)load();};
     load();
     super.initState();
   }
@@ -115,7 +116,7 @@ class _ConversationsState extends State<Conversations>   with WidgetsBindingObse
       onTap: () async {
         if (UserManager.currentUser("chat_not_seen").isNotEmpty && item['count_not_seen'] != null )
             UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) - item['count_not_seen']));
-        Globals.updateNotificationCount();
+        Globals.updateBottomBarNotificationCount();
         item['count_not_seen'] = 0;
         setState(() {});
         responseBody['data'][length] = item;

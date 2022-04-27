@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
-import 'package:dr_tech/Components/RateStars.dart';
+import 'package:dr_tech/Components/RateStarsStateless.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
@@ -25,6 +24,10 @@ class _EngineerServicesState extends State<EngineerServices> {
 
   @override
   void initState() {
+    print('here_infoBody $data');
+    Globals.reloadPageEngineerServices = () {
+      if (mounted) load();
+    };
     load();
     super.initState();
   }
@@ -91,8 +94,11 @@ class _EngineerServicesState extends State<EngineerServices> {
       alignment: Alignment.topCenter,
       children: [
         SingleChildScrollView(
-          child: Wrap(
-            children: data.map((e) => getServiceItem(e)).toList(),
+          child: Container(
+            padding: EdgeInsets.only(bottom: 50),
+            child: Wrap(
+              children: data.map((e) => getServiceItem(e)).toList(),
+            ),
           ),
         ),
         Container(
@@ -146,7 +152,7 @@ class _EngineerServicesState extends State<EngineerServices> {
                 children: [
                   item['status']!=null?getStatusService(item):Container(),
                   Container(width: 10),
-                  RateStars(15, stars: item['stars']?? 5,), // rate
+                  RateStarsStateless(15, stars: item['stars']?? 5,), // rate
                   Container(width: 10),
                   Text(
                     Converter.format(item['stars']) ?? '5',//rate

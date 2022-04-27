@@ -2,7 +2,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
-import 'package:dr_tech/Components/RateStars.dart';
+import 'package:dr_tech/Components/RateStarsStateless.dart';
 import 'package:dr_tech/Components/Recycler.dart';
 import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
@@ -503,7 +503,7 @@ class _ServiceState extends State<Service> {
                 Container(
                   height: 5,
                 ),
-                RateStars(
+                RateStarsStateless(
                   13,
                   stars: item['rating'].toInt(),
                 ),

@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
-import 'package:dr_tech/Components/RateStars.dart';
+import 'package:dr_tech/Components/RateStarsStateless.dart';
 import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
@@ -45,8 +45,6 @@ class _EngineerPageState extends State<EngineerPage> {
         setState(() {
           user = r['user'];
         });
-      } else {
-        Navigator.pop(context);
       }
     });
   }
@@ -417,7 +415,7 @@ class _EngineerPageState extends State<EngineerPage> {
                 Container(
                   height: 5,
                 ),
-                RateStars(
+                RateStarsStateless(
                   13,
                   stars: user['rating'],
                 ),

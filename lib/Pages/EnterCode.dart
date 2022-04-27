@@ -16,8 +16,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-
 import 'DrTechCode.dart';
+
 
 class EnterCode extends StatefulWidget {
 
@@ -451,5 +451,3 @@ class _EnterCodeState extends State<EnterCode> {
   }
 
 }
-
-enum CodeSendType { PHONE, EMAIL }

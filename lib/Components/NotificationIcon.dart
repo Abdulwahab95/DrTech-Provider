@@ -20,11 +20,16 @@ class _NotificationIconState extends State<NotificationIcon> {
 
   @override
   void initState() {
-    Globals.updateNotificationCount = ()
+    print('here_not_seen: initState NotificationIcon');
+    Globals.updateTitleBarNotificationCount = ()
     {
+      print('here_not_seen..');
+      print('here_not_seen: $mounted');
       if(mounted)
         setState(() {
+          print('here_not_seen: $countNotSeen, ${UserManager.currentUser('not_seen')}');
           countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
+          print('here_not_seen: $countNotSeen, ${UserManager.currentUser('not_seen')}');
         });
     };
     super.initState();

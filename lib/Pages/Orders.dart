@@ -23,7 +23,7 @@ class Orders extends StatefulWidget {
   _OrdersState createState() => _OrdersState();
 }
 
-class _OrdersState extends State<Orders> with TickerProviderStateMixin {
+class _OrdersState extends State<Orders> with TickerProviderStateMixin, WidgetsBindingObserver {
   TabController tabController;
   // Map<String, Map<int, List>> data = {};
   // Map<String, int> pages = {};
@@ -32,6 +32,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     tabController = TabController(length: 3, vsync: this);
     tabController.addListener((){
       print('here_listener_index: ${tabController.index}');
@@ -48,14 +49,26 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
      }
     });
     print('here_initState_index: ${tabController.index}');
+    Globals.reloadPageOrder = () {
+      if (mounted) load();
+    };
     load();
     super.initState();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print('here_resumed_from: Orders');
+      load();
+    }
   }
 
   void load({index}) {
@@ -84,10 +97,8 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
         print('here_setState: from here 3');
         isLoading = false;
       });
-
-    };
-    NetworkManager.httpGet(
-        Globals.baseUrl + "orders/?status=$status", context, callback,// orders/load?page=$page&status=$status
+    } ;
+    NetworkManager.httpGet(Globals.baseUrl + "orders/?status=$status", context, callback,// orders/load?page=$page&status=$status
         cashable: false);
   }
 
@@ -232,7 +243,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
     double size = 90;
     return InkWell(
       onTap: () async {
-        var results = await Navigator.push(context, MaterialPageRoute(builder: (_) => OrderDetails(item)));
+        var results = await Navigator.push(context, MaterialPageRoute(settings: RouteSettings(name: 'OrderDetails'), builder: (_) => OrderDetails(item)));
         print('here_setState_results: $results');
         if (results == true) {
           setState(() {
@@ -313,7 +324,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                             ),
                             decoration: BoxDecoration(
                                 color: Converter.hexToColor(
-                                    item["status"] == 'CANCELED'
+                                    item["status"] == 'CANCELED' || item["status"] == 'ONE_SIDED_CANCELED'
                                         ? "#f00000"
                                         : item["status"] == 'WAITING'
                                         ? "#0ec300"
@@ -348,7 +359,16 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                         width: 10,
                       ),
                       Container(
-                        child: Row(
+                        child: item['price'] == 0
+                            ? Text(
+                          LanguageManager.getText(405),
+                          textDirection: LanguageManager.getTextDirection(),
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Converter.hexToColor("#2094CD")),
+                        )
+                      : Row(
                           textDirection: LanguageManager.getTextDirection(),
                           children: [
                             Text(
@@ -363,7 +383,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
                               width: 5,
                             ),
                             Text(
-                              Globals.getUnit(),
+                              Globals.getUnit(isUsd: item["service_target"]),
                               textDirection: LanguageManager.getTextDirection(),
                               style: TextStyle(
                                   fontSize: 14,
@@ -411,7 +431,7 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
 
                         Container(height: 10),
 
-                        item["status"] == 'PENDING' || item["status"] == 'WAITING'
+                        item["status"] == 'PENDING' || item["status"] == 'WAITING' || item["status"] == 'ONE_SIDED_CANCELED'
                         ? customButton(96, () {// Call Action
                               launch('tel:${item['number_phone']}');
                             }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco)
@@ -477,7 +497,8 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin {
           'PENDING': 93,
           'WAITING': 92,
           'COMPLETED': 94,
-          'CANCELED': 184
+          'CANCELED': 184,
+          'ONE_SIDED_CANCELED': 389,
         }[status.toString().toUpperCase()] ??
         92);
   }

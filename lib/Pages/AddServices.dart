@@ -206,7 +206,7 @@ class _AddServicesState extends State<AddServices>
         selectedTexts['service_categories_id'] = v['name'];
         body["service_categories_id"] = v['id'].toString();
 
-        body['title'] = v['name'];
+       // body['title'] = v['name'];
 
         selectedTexts["service_subcategories_id"] = null;
         body["service_subcategories_id"] = null;

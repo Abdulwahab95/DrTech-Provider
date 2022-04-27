@@ -80,21 +80,20 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      //do your stuff
       load();
     }
   }
 
   void onReciveNotic(payloadTarget, paylaod) {
-    // Globals.printTel('here_timer: onReciveNotic');
+     print('here_timer: onReciveNotic: payloadTarget: $payloadTarget, paylaod: $paylaod');
     if (payloadTarget == null) return;
     switch (payloadTarget) {
       case "chat":
-        // Globals.printTel('here_timer: case chat');
+        print('here_timer: case chat');
         chatDataNotic(paylaod);
         break;
       case "info":
-        // Globals.printTel('here_timer: case infor');
+        print('here_timer: case infor');
         infoDataNotic(paylaod);
         break;
       default:
@@ -108,7 +107,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         print('here_timer: case offer');
         for (var page in data.keys) {
           for (var i = 0; i < data[page].length; i++) {
-            if (data[page][i]["id"].toString() == payload["message_id"]) {
+            if (data[page][i]["id"].toString() == payload["message_id"].toString()) {
               print('here_timer: if 1');
               if (data[page][i]["message"].runtimeType != String)
                 print('here_timer: if 2');
@@ -202,9 +201,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
           });
           print('here_seen_2');
           sendSeenFlag();
-        } else if (r['message'] != null) {
-          Navigator.pop(context);
-        } else {
+        }else {
           setState(() {
             print('here_seen_4');
             ui = BrokenPage(load);
@@ -949,7 +946,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                     width: 4,
                   ),
                   Expanded(
-                    child: Column(
+                    child: preventContain(item["review"], // Offer
+                    Column(
                       textDirection: direction,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1008,20 +1006,15 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                                               width: 5,
                                             ),
                                             Text(
-                                              Converter.getRealText(Globals.getUnit()),
-                                              textDirection: LanguageManager
-                                                  .getTextDirection(),
+                                              Globals.getUnit(isUsd: item["message"]["target"]),
+                                              textDirection: LanguageManager.getTextDirection(),
                                               style: TextStyle(
-                                                  decoration: item["message"]
-                                                              ["status"] ==
-                                                          "REJECTED"
-                                                      ? TextDecoration
-                                                          .lineThrough
+                                                  decoration: item["message"]["status"] == "REJECTED"
+                                                      ? TextDecoration.lineThrough
                                                       : TextDecoration.none,
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                  color: Converter.hexToColor(
-                                                      "#344F64")),
+                                                  fontSize: item["message"]["target"] == "online_services" ? 17 : 14,
+                                                  color: Converter.hexToColor("#344F64")),
                                             )
                                           ],
                                         ),
@@ -1070,7 +1063,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                           ],
                         )
                       ],
-                    ),
+                    )),
                   ),
                 ],
               ),
@@ -1211,7 +1204,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                     width: 4,
                   ),
                   Expanded(
-                    child: Column(
+                    child: preventContain(item["review"], // File
+                    Column(
                       textDirection: direction,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1292,7 +1286,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                           ],
                         )
                       ],
-                    ),
+                    )),
                   ),
                 ],
               ),
@@ -1431,7 +1425,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                       width: 4,
                     ),
                     Expanded(
-                      child: Column(
+                      child: preventContain(item["review"], // Image
+                      Column(
                         textDirection: direction,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1477,7 +1472,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                             ],
                           )
                         ],
-                      ),
+                      )),
                     ),
                   ],
                 ),
@@ -1525,7 +1520,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                     width: 4,
                   ),
                   Expanded(
-                    child: Column(
+                    child: preventContain(item["review"], // Text
+                      Column(
                       textDirection: direction,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1578,7 +1574,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                           ],
                         )
                       ],
-                    ),
+                    )),
                   ),
                 ],
               ),
@@ -1949,9 +1945,15 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
         return;
       }
 
+      if(config.isEmpty) {
+        Alert.show(context, 419);
+        return;
+      }
+
 
     if(allowEmptyOffer) {
       selectedTexts["service"] = null;
+      selectedTexts["service_target"] = null;
       offer = {};
       errors = {};
     }
@@ -2073,10 +2075,6 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                           Alert.staticContent = getOfferWidget();
                           Alert.setStateCall = () {};
                           Alert.callSetState();
-                          // _controllerPrice.clear();
-                          // _focus.requestFocus();
-
-                          // _controllerPrice.foc
                         },
                         textDirection: LanguageManager.getTextDirection(),
                         keyboardType: TextInputType.number,
@@ -2089,7 +2087,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                       ),
                     ),
                     Text(
-                      Converter.getRealText(Globals.getUnit()) ,
+                      Converter.getRealText(Globals.getUnit(isUsd: selectedTexts["service_target"])) ,
                       style: TextStyle(fontSize: 15),
                     )
                   ],
@@ -2102,7 +2100,9 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
                   textDirection: LanguageManager.getTextDirection(),
                   children: [ // #translae
                     Text( // صافي المبيع  // بعد خصم
-                      LanguageManager.getText(306) + ' ' + getDisCount() + ' ' + Converter.getRealText(Globals.getUnit()) + ' ' + LanguageManager.getText(307) + ' ',
+                      LanguageManager.getText(306) + ' ' + getDisCount()
+                          + ' ' + Globals.getUnit(isUsd: selectedTexts["service_target"])
+                          + ' ' + LanguageManager.getText(307) + ' ',
                       style: TextStyle(fontSize: 13),
                       textDirection: LanguageManager.getTextDirection(),
                     ),
@@ -2191,7 +2191,8 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
              errors.remove('provider_service_id');
           print('here_Alert_selected_text: ${item['title']}');
           allowEmptyOffer = false;
-          selectedTexts["service"] = item['title'];
+          selectedTexts["service"]        = item['title'];
+          selectedTexts["service_target"] = item['service_target'];
           offer['provider_service_id'] = item['id'].toString();
           Alert.setStateCall();
           showServices();
@@ -2401,7 +2402,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
       if (r['state'] == true) {
         setState(() {
           config = r['data'];
-          print('here_config: $config');
+          //print('here_config: $config');
         });
       }
     }, cashable: true);
@@ -2432,5 +2433,60 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
     if(isOffer) offer["price"] =  offerNum;
     return    offerNum;
   }
+
+  preventContain(Map review, Widget widget) {
+    var isPrevent = review == null;
+    if(isPrevent) return widget;
+    return InkWell(
+      onTap: (){},
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.red.withAlpha(10),
+        ),
+        child: Column(children: [
+          Stack(
+            children: [
+              widget,
+              Positioned.fill(
+                child: Container(
+                  padding: EdgeInsets.only(bottom: 25),
+                  child: SvgPicture.asset(
+                    "assets/icons/prevent.svg",
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                  child: Center(
+                      child: Container(
+                          color: Colors.black.withAlpha(190),
+                          margin: EdgeInsets.only(bottom: 25),
+                          width: double.infinity,
+                          child: Text(
+                            LanguageManager.getText(375), // هذا المحتوى مخالف
+                            style: TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
+                          )))),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.only(right: 5, left: 5, bottom: 10),
+            alignment: Alignment.center,
+            child: Center(
+              child: Text(
+                review['review'],
+                textAlign: TextAlign.center,
+                textDirection: LanguageManager.getTextDirection(),
+                textWidthBasis: TextWidthBasis.longestLine,
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
 
 }

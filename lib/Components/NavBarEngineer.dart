@@ -23,9 +23,10 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
 
   @override
   void initState() {
+    print('here_not_seen: initState NavBarEngineer');
     activeColor = Converter.hexToColor("#2094CD");
     if(widget.page != null) iSelectedIndex = widget.page;
-    Globals.updateNotificationCount = ()
+    Globals.updateBottomBarNotificationCount = ()
     {
       print('here_not_seen: $mounted');
 

@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dr_tech/Components/Alert.dart';
 import 'package:dr_tech/Components/CustomLoading.dart';
-import 'package:dr_tech/Components/RateStars.dart';
+import 'package:dr_tech/Components/RateStarsStateless.dart';
 import 'package:dr_tech/Components/TitleBar.dart';
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
@@ -33,6 +33,9 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
 
   @override
   void initState() {
+    Globals.reloadPageServiceDetails = () {
+      if (mounted) load();
+    };
     load();
     super.initState();
   }
@@ -48,8 +51,6 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
           data = r['data'];
           controller = new TabController(length: (data['images'] as String).split('||').length , vsync: this);
         });
-      } else {
-        Navigator.pop(context);
       }
     });
   }
@@ -102,7 +103,7 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                                   textDirection:
                                       LanguageManager.getTextDirection(),
                                   children: [
-                                    RateStars(
+                                    RateStarsStateless(
                                       14,
                                       stars: data['rate']?? 5,
                                     ),
@@ -110,7 +111,7 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                                       width: 5,
                                     ),
                                     Text(
-                                      (data['rate']?? 5).toString(),
+                                      (Converter.format(data['rate']?? 5)).toString(),
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
@@ -374,6 +375,31 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
                           ],
                           borderRadius: BorderRadius.circular(8),
                           color: Converter.hexToColor("#344f64")),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: InkWell(
+                    onTap: confirmDelete,
+                    child: Container(
+                      margin: EdgeInsets.all(10),
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(169),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.red),
                     ),
                   ),
                 ),
@@ -659,5 +685,116 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
     );
   }
 
+  void confirmDelete() {
+    Alert.show(
+        context,
+        Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            textDirection: LanguageManager.getTextDirection(),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      FlutterIcons.x_fea,
+                      size: 24,
+                    ),
+                  )
+                ],
+              ),
+              Container(
+                child: Icon(
+                  FlutterIcons.trash_faw,
+                  size: 50,
+                  color: Converter.hexToColor("#707070"),
+                ),
+              ),
+              Container(
+                height: 30,
+              ),
+              Text(
+                LanguageManager.getText(363),
+                style: TextStyle(
+                    color: Converter.hexToColor("#707070"),
+                    fontWeight: FontWeight.bold),
+              ),
+              Container(
+                height: 30,
+              ),
+              Row(
+                textDirection: LanguageManager.getTextDirection(),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  InkWell(
+                    onTap: delete,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(169),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#FF0000")),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Alert.publicClose();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 45,
+                      alignment: Alignment.center,
+                      child: Text(
+                        LanguageManager.getText(172),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(15),
+                                spreadRadius: 2,
+                                blurRadius: 2)
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                          color: Converter.hexToColor("#344f64")),
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+        type: AlertType.WIDGET);
+  }
 
+  void delete() {
+    Navigator.pop(context);
+    Alert.startLoading(context);
+    NetworkManager.httpPost(Globals.baseUrl + "provider/service/delete/${widget.id}", context, (r) { // services/add
+      Alert.endLoading();
+      if (r['state'] == true) {
+        Navigator.of(context, rootNavigator: true)..pop(true)..pop(true);
+      }
+    }, body: {});
+  }
 }

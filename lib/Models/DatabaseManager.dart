@@ -1,9 +1,18 @@
+import 'dart:convert';
+
 import 'package:dr_tech/Config/Globals.dart';
 
 class DatabaseManager {
   static Map<String, dynamic> liveDatabase = {};
 
   static void save(key, val) {
+
+    if(val.runtimeType.toString() == 'List<dynamic>')
+      Globals.sharedPreferences.setString(key, json.encode(val));
+
+    if(val.runtimeType.toString() == '_InternalLinkedHashMap<String, dynamic>')
+      Globals.sharedPreferences.setString(key, json.encode(val));
+
     if (val.runtimeType.toString() == "List<String>")
       Globals.sharedPreferences.setStringList(key, val);
 

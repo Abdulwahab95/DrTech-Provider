@@ -20,7 +20,6 @@ class AllTransactions extends StatefulWidget {
 class _AllTransactionsState extends State<AllTransactions> {
   Map data = {};
   bool isLoading = false;
-  var unit;
   int page = 0;
 
   @override
@@ -41,7 +40,6 @@ class _AllTransactionsState extends State<AllTransactions> {
           if (r['state'] == true) {
             setState(() {
               data[page] = r['data'];
-              unit = Globals.getUnit();
             });
           }
         }, cashable: false);
@@ -90,7 +88,8 @@ class _AllTransactionsState extends State<AllTransactions> {
   }
 
   Widget createTransactionItem(item) {
-    Color color = item['type'] == "WITHDRAWAL" ? Colors.blue : Colors.green;
+    print('here_createTransactionItem: $item');
+    Color color = item['type'] == "WITHDRAWAL" ? Colors.blue : (item['order_id'].toString() == '0' ? Colors.red  : Colors.green);
     return Container(
         decoration: BoxDecoration(
             border: Border(
@@ -117,7 +116,7 @@ class _AllTransactionsState extends State<AllTransactions> {
                 children: [
                   Text(
                     item['order_id'].toString() == '0'
-                        ? LanguageManager.getText( item['type'] == "WITHDRAWAL" ? 302 : 334)
+                        ? LanguageManager.getText( item['type'] == "WITHDRAWAL" ? 302 : item['is_usd'].toString() == '1' ? 189 : 334) + (item['is_usd'].toString() == '1'? " " + item['id'].toString() : '')
                         : item['type'] == "WITHDRAWAL"
                             ? LanguageManager.getText(302) + " #" + item['order_id'].toString() // تسديد عمولة الطلب رقم
                             : LanguageManager.getText(303) + " #" + item['order_id'].toString() + " " + item['title'], // تنفيذ طلب
@@ -135,19 +134,43 @@ class _AllTransactionsState extends State<AllTransactions> {
               ),
             ),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: LanguageManager.getDirection() ? CrossAxisAlignment.start : CrossAxisAlignment.end,
               children: [
-                Text(
-                  item['amount'].toString(),
+                Row(
                   textDirection: LanguageManager.getTextDirection(),
-                  style: TextStyle(
-                      color: color, fontWeight: FontWeight.bold, fontSize: 18),
+                  children: [
+                    Text(
+                      Converter.format(item['amount'].toString()),
+                      textDirection: LanguageManager.getTextDirection(),
+                      style: TextStyle(
+                          color: color, fontWeight: FontWeight.bold, fontSize: 17),
+                    ),
+                    Container(width: 5),
+                    Text(
+                      Globals.getUnit(isUsd: item['is_usd'].toString() == '1' ? 'online_services' : item['service_target']),
+                      textDirection: LanguageManager.getTextDirection(),
+                      style: TextStyle(
+                          color: color, fontWeight: FontWeight.normal, fontSize: 16),
+                    ),
+                  ],
                 ),
-                Text(
-                  item['commission'].toString(),
+                Row(
                   textDirection: LanguageManager.getTextDirection(),
-                  style: TextStyle(
-                      color: Converter.hexToColor("#344F64"), fontWeight: FontWeight.bold, fontSize: 14),
+                  children: [
+                    Text(
+                      item['order_id'].toString() == '0'? '' : item['commission'].toString(),
+                      textDirection: LanguageManager.getTextDirection(),
+                      style: TextStyle(
+                          color: Converter.hexToColor("#344F64"), fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    Container(width: 5),
+                    Text(
+                      item['order_id'].toString() == '0'? '' : Globals.getUnit(isUsd: item['service_target']),
+                      textDirection: LanguageManager.getTextDirection(),
+                      style: TextStyle(
+                          color: Converter.hexToColor("#344F64"), fontWeight: FontWeight.normal, fontSize: 12),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -157,18 +180,8 @@ class _AllTransactionsState extends State<AllTransactions> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  unit.toString(),
-                  textDirection: LanguageManager.getTextDirection(),
-                  style: TextStyle(
-                      color: color, fontWeight: FontWeight.normal, fontSize: 16),
-                ),
-                Text(
-                  unit.toString(),
-                  textDirection: LanguageManager.getTextDirection(),
-                  style: TextStyle(
-                      color: Converter.hexToColor("#344F64"), fontWeight: FontWeight.normal, fontSize: 12),
-                ),
+
+
               ],
             ),
           ],

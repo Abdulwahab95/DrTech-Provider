@@ -19,7 +19,8 @@ class Globals {
   static var config;
   static var isLocal = false;
   static var urlServerLocal = "http://192.168.43.152";
-  static var urlServerGlobal = "https://www.drtech-api.com";
+  // static var urlServerGlobal = "https://test.drtech-api.com";
+  static var urlServerGlobal = "https://drtech-api.com";
   // static var urlServerGlobal = "https://drtech.takiddine.co";
   // static var urlServerGlobal = "https://dashboard.drtechapp.com";
   static String authoKey = "Authorization"; // x-autho
@@ -30,9 +31,14 @@ class Globals {
   static SharedPreferences sharedPreferences;
   static dynamic data = [];
   // Callbacks
-  static Function updateInCartCount;
-  static Function updateNotificationCount = (){print('here_not_seen');};
+  static Function updateBottomBarNotificationCount = (){print('here_not_seen1');};
+  static Function updateTitleBarNotificationCount = (){print('here_not_seen2');};
   static Function updateConversationCount = (){};
+  static Function reloadPageNotificationLive = (){};
+  static Function reloadPageOrder = (){};
+  static Function reloadPageOrderDetails = (){};
+  static Function reloadPageEngineerServices = (){};
+  static Function reloadPageServiceDetails = (){};
   static var settings;
   // Chat + Notification
   static String currentConversationId = '';
@@ -178,8 +184,10 @@ class Globals {
     return LanguageManager.getTextDirection() == TextDirection.rtl;
   }
 
-  static String getUnit(){
-    if(isRtl())
+  static String getUnit({isUsd}){
+    if(isUsd.toString() == "online_services")
+      return '\$';
+    else if(isRtl())
       return UserManager.currentUser('unit_ar');
     else
       return UserManager.currentUser('unit_en');

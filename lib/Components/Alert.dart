@@ -62,7 +62,7 @@ class Alert extends StatefulWidget {
     currentLoaderContext = context;
     currentLoader = true;
     showDialog(
-        barrierDismissible: false,
+        barrierDismissible: true,
         context: context,
         builder: (_) {
           return WillPopScope(
@@ -91,7 +91,11 @@ class Alert extends StatefulWidget {
         });
   }
 
-  static void endLoading() {
+  static void endLoading({context2}) {
+    if(context2 != null) {
+      Navigator.pop(context2);
+      return;
+    }
     if (!currentLoader) return;
     currentLoader = false;
     Navigator.pop(currentLoaderContext);
@@ -171,29 +175,30 @@ class _AlertState extends State<Alert> {
     return Container(
       height: MediaQuery.of(context).size.height,
       alignment: Alignment.bottomCenter,
-      child: Container(
-        padding: EdgeInsets.all(10),
-        child: getContent(),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: true
-                ? BorderRadius.only(
-                    topLeft: Radius.circular(15), topRight: Radius.circular(15))
-                : BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: (){},
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          child: getContent(),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: true
+                  ? BorderRadius.only(
+                      topLeft: Radius.circular(15), topRight: Radius.circular(15))
+                  : BorderRadius.circular(15)),
+        ),
       ),
     );
   }
 
   Widget getContent() {
     if (widget.type == AlertType.SELECT) {
-      return ScrollConfiguration(
-        behavior: CustomBehavior(),
-        child: Container(
-          height: widget.content.length > 10 ? 350 : null,
-          child: ListView(
-            shrinkWrap: true,
-            children: getListOptions(),
-          ),
+      return Container(
+        height: widget.content.length > 10 ? 380 : null,
+        child: ListView(
+          shrinkWrap: true,
+          children: getListOptions(),
         ),
       );
     }

@@ -127,25 +127,40 @@ class MessageHandlerState extends State<MessageHandler> {
         // seen and user not on screen liveChat => don't show notification
       } else if (data != null) {
 
-        if (UserManager.currentUser("chat_not_seen").isNotEmpty && data['screen'] == 'LiveChat'
+        if (UserManager.currentUser("chat_not_seen").isNotEmpty
+              && data['screen']         == 'LiveChat'
               && payload['provider_id'] != payload['send_by']) {
 
                 print('here_timer: chat if');
                 UserManager.updateSp("chat_not_seen", (int.parse(UserManager.currentUser("chat_not_seen")) + 1));
-                Globals.updateConversationCount();
                 LocalNotifications.send(data['title'],data['message_txt'], payload);
 
         } else if (UserManager.currentUser("not_seen").isNotEmpty && data['screen'] == 'Notifications') {
                 print('here_timer: not_seen');
                 UserManager.updateSp("not_seen", (int.parse(UserManager.currentUser("not_seen")) + 1));
-                Globals.updateNotificationCount();
+                Globals.reloadPageNotificationLive();
                 LocalNotifications.send(data['title'],data['message_txt'], payload);
         }
       }
     }else {
       print('here_timer: else 1');
+      switch(data['payload_target'].toString()){
+        case 'order':
+          //Globals.reloadPageOrder();
+          Globals.reloadPageOrderDetails();
+        break;
+        case 'services_status':
+          Globals.reloadPageEngineerServices();
+          Globals.reloadPageServiceDetails();
+        break;
+      }
+      Globals.reloadPageNotificationLive();
       LocalNotifications.send(notification.title, notification.body, payload);
     }
+    Globals.reloadPageOrder();
+    Globals.updateConversationCount();
+    Globals.updateBottomBarNotificationCount();
+    Globals.updateTitleBarNotificationCount();
   }
 
 

@@ -69,8 +69,6 @@ class _EngineerRatingsState extends State<EngineerRatings> {
           page++;
           data[r["pgae"]] = r['data'];
         });
-      } else {
-          Navigator.pop(context);
       }
     });
   }

@@ -68,9 +68,11 @@ class NetworkManager {
       log("-----------END--------");
 
       if (body != null)
-        response = await http.post(Uri.parse(url), headers: header, body: body);
+        response = await http.post(Uri.parse(url), headers: header, body: body).catchError((e) {processError(e, context);});
       else
-        response = await http.get(Uri.parse(url), headers: header);
+        response = await http.get(Uri.parse(url), headers: header).catchError((e) {processError(e, context);});
+
+      print("here_error_respon");
 
       if (response == null) {
         if (onError != null) onError("Null Responce");
@@ -259,6 +261,15 @@ class NetworkManager {
 
   static log(e) {
     print(e);
+  }
+
+  void processError(e, context) {
+    Alert.endLoading();
+    Alert.show(context,
+        ((e.toString().contains('errno = 7')
+            && LanguageManager.getText(362) != 'NO_LANGUAGE_FOUND'
+            && LanguageManager.getText(362) != 'NO_TEXT_FOUND'
+            )? LanguageManager.getText(362) : Converter.getRealText(e)));
   }
 }
 

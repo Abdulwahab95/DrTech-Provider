@@ -48,7 +48,7 @@ class UserManager {
       try {
         if (userInfo['state'] == true) {
           UserManager.proccess(userInfo['data']);
-          Globals.updateNotificationCount();
+          Globals.updateBottomBarNotificationCount();
           if (callBack != null) callBack();
         } else
           UserManager.logout((){if (callBack != null) callBack();});

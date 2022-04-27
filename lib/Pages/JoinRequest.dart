@@ -213,10 +213,10 @@ class _JoinRequestState extends State<JoinRequest> {
     //   });
     // }, onEmptyMessage: LanguageManager.getText(205)));
     // items.add(getSelectedOptionList("sub_service_catigory"));
-    items.add(createInput("first_name", 206));
-    items.add(createInput("second_name", 207));
-    items.add(createInput("last_name", 208));
-    items.add(createInput("email", 246));
+    items.add(createInput("first_name"   , 206));
+    items.add(createInput("second_name"  , 207));
+    items.add(createInput("last_name"    , 208));
+    items.add(createInput("email"        , 246, textType: TextInputType.emailAddress,));
     items.add(createInput("friend_number", 209, textType: TextInputType.number));
     items.add(Container(
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
