@@ -8,6 +8,7 @@ import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'LiveChat.dart';
 
@@ -227,19 +228,22 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
                           Row(
                             textDirection: LanguageManager.getTextDirection(),
                             children: [
-                              // InkWell(
-                              //   onTap: () {
-                              //     // Chat action
-                              //   },
-                              //   child: Icon(
-                              //     FlutterIcons.phone_faw,
-                              //     color: Converter.hexToColor("#344F64"),
-                              //     size: 22,
-                              //   ),
-                              // ),
-                              // Container(
-                              //   width: 5,
-                              // ),
+                              (data["status"] == 'PENDING' || data["status"] == 'WAITING' || data["status"] == 'ONE_SIDED_CANCELED') && data["service_target"] != 'online_services' ?
+                              InkWell(
+                                onTap: () {
+                                  // Call action
+                                  launch('tel:${data['number_phone']}');
+                                },
+                                child: Icon(
+                                  FlutterIcons.phone_faw,
+                                  color: Converter.hexToColor("#344F64"),
+                                  size: 22,
+                                ),
+                              ) : Container(),
+                              Container(
+                                width: 5,
+                              ),
+                              data["service_target"] != 'online_services' ? Container() :
                               InkWell(
                                 onTap: () {
                                   Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(data['user_id'].toString())));

@@ -61,21 +61,26 @@ class _AddServicesState extends State<AddServices>
   }
 
   void initDataItem(String bodyName, String configName, {String configNameNext = '', int index = -1}) {
-    List list = configName == 'service'
+    List list = configName == 'service' || configName == 'type'
         ? config[configName]
         : selectOptions[configName]; // for first item
+
 
     if (data[bodyName] != null) {
       body[bodyName] = data[bodyName].toString();
       selectedTexts[bodyName] = getNameFromId(list, data[bodyName].toString());
 
       if (configNameNext.isNotEmpty)
-        selectOptions[configNameNext] =
-            list[getIndexFromId(list, data[bodyName].toString())][configNameNext];  // for last item
+        selectOptions[configNameNext] = list[getIndexFromId(list, data[bodyName].toString())][configNameNext];  // for last item
+
+      if(bodyName == 'type' ) { selectedTexts["type"] = data[bodyName]['name'] ?? ''; }
 
     } else if (index != -1 && cssss[index] == 1) { // without first item // الكل
       selectedTexts[bodyName] = getNameFromId(list, 'null');
     }
+
+
+
   }
 
   void initBodyData() {
@@ -123,6 +128,7 @@ class _AddServicesState extends State<AddServices>
     initDataItem('sub2_id'                 , 'service_sub_2', configNameNext: 'service_sub_3', index : 2);
     initDataItem('sub3_id'                 , 'service_sub_3', configNameNext: 'service_sub_4', index : 3);
     initDataItem('sub4_id'                 , 'service_sub_4', index : 4);
+    initDataItem('type'                    , 'type');
 
     body['title'] = data["name"];
 
@@ -139,7 +145,6 @@ class _AddServicesState extends State<AddServices>
     controllers['title'] = TextEditingController(text: body['title'] ?? "");
     controllers['description'] = TextEditingController(text: body['description'] ?? "");
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -297,6 +302,15 @@ class _AddServicesState extends State<AddServices>
             })
           : Container());
 
+      print('here_service_type: ${body['service_id']}, ${isArrayNotEmpty('service_id', map: body)}');
+    items.add(body['service_id'] != '6' && isArrayNotEmpty('service_id', map: body)
+        ? createSelectInput("type", 200, config['type'], onEmptyMessage: LanguageManager.getText(204), onSelected: (v) {
+          setState(() {
+            selectedTexts["type"] = v['name'];
+            body["type"] = v['id'].toString();
+          });
+        }) : Container());
+
     items.add(createInput("description", 258, maxInput: 500, maxLines: 4));
 
 
@@ -312,114 +326,6 @@ class _AddServicesState extends State<AddServices>
       ),
     ));
     items.add(createImagesPicker());
-
-    // items.add(InkWell(
-    //   onTap: () {
-    //     Alert.show(context, getAddOfferForm(), type: AlertType.WIDGET);
-    //   },
-    //   child: Row(
-    //     crossAxisAlignment: CrossAxisAlignment.center,
-    //     textDirection: LanguageManager.getTextDirection(),
-    //     children: [
-    //       Container(
-    //         margin: EdgeInsets.only(right: 10, left: 10),
-    //         width: 20,
-    //         height: 20,
-    //         decoration: BoxDecoration(
-    //             color: Converter.hexToColor("#344F64"),
-    //             borderRadius: BorderRadius.circular(10)),
-    //         child: Icon(
-    //           Icons.add,
-    //           color: Colors.white,
-    //           size: 20,
-    //         ),
-    //       ),
-    //       Container(
-    //         child: Text(
-    //           LanguageManager.getText(260),
-    //           textDirection: LanguageManager.getTextDirection(),
-    //           style: TextStyle(
-    //               color: Converter.hexToColor("#2094CD"),
-    //               fontSize: 16,
-    //               fontWeight: FontWeight.bold),
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // ));
-    // items.add(offers.length == 0
-    //     ? Container(
-    //         margin: EdgeInsets.all(10),
-    //         decoration: BoxDecoration(
-    //             border: Border.all(color: Colors.grey.withAlpha(50), width: 1),
-    //             borderRadius: BorderRadius.circular(15)),
-    //         padding: EdgeInsets.all(25),
-    //         child: Text(
-    //           LanguageManager.getText(263),
-    //           textAlign: TextAlign.center,
-    //         ),
-    //       )
-    //     : Container(
-    //         child: Column(
-    //           textDirection: LanguageManager.getTextDirection(),
-    //           mainAxisSize: MainAxisSize.min,
-    //           children: offers.map((e) {
-    //             return Container(
-    //               margin: EdgeInsets.all(5),
-    //               padding: EdgeInsets.all(10),
-    //               decoration: BoxDecoration(
-    //                   color: Colors.white,
-    //                   boxShadow: [
-    //                     BoxShadow(
-    //                         color: Colors.black.withAlpha(15),
-    //                         blurRadius: 2,
-    //                         spreadRadius: 2)
-    //                   ],
-    //                   borderRadius: BorderRadius.circular(15)),
-    //               child: Column(
-    //                 textDirection: LanguageManager.getTextDirection(),
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: [
-    //                   Row(
-    //                     textDirection: LanguageManager.getTextDirection(),
-    //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                     children: [
-    //                       Text(
-    //                         e["price"].toString() + " " + Globals.getUnit(),
-    //                         textDirection: LanguageManager.getTextDirection(),
-    //                         style: TextStyle(
-    //                             color: Converter.hexToColor("#2094CD"),
-    //                             fontSize: 16,
-    //                             fontWeight: FontWeight.bold),
-    //                       ),
-    //                       InkWell(
-    //                         onTap: () {
-    //                           setState(() {
-    //                             offers.remove(e);
-    //                           });
-    //                         },
-    //                         child: Icon(
-    //                           Icons.delete,
-    //                           color: Colors.red,
-    //                           size: 20,
-    //                         ),
-    //                       )
-    //                     ],
-    //                   ),
-    //                   Text(
-    //                     e["details"].toString(),
-    //                     textDirection: LanguageManager.getTextDirection(),
-    //                     style: TextStyle(
-    //                         color: Converter.hexToColor("#727272"),
-    //                         fontSize: 16,
-    //                         fontWeight: FontWeight.normal),
-    //                   ),
-    //                 ],
-    //               ),
-    //             );
-    //           }).toList(),
-    //         ),
-    //       ));
 
     if (showSelectCountry) {
       items.add(createSelectInput("country_id", 312, config['countries'], onSelected: (v) {
@@ -442,7 +348,7 @@ class _AddServicesState extends State<AddServices>
       print('here_f_orEach: 9');
       (config['countries'] as List<dynamic>).forEach((element) {
         if((element as Map)['id'].toString() == UserManager.currentUser('country_id')) {
-          print('here_element: $element');
+          // print('here_element: $element');
           selectOptions["cities"] = element['cities']  ?? [];
         }
       });
@@ -451,7 +357,6 @@ class _AddServicesState extends State<AddServices>
 
 
     if (showSelectCity && isArrayNotEmpty('cities'))
-
       items.add(Row(
         textDirection: LanguageManager.getTextDirection(),
         children: [
@@ -510,80 +415,6 @@ class _AddServicesState extends State<AddServices>
       ),
     ));
     return items;
-  }
-
-  Widget getAddOfferForm() {
-    List<Widget> items = [];
-    items.add(Container(
-      padding: EdgeInsets.all(10),
-      child: Row(
-        textDirection: LanguageManager.getTextDirection(),
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(),
-          Text(
-            LanguageManager.getText(260),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          InkWell(
-            onTap: () {
-              Alert.publicClose();
-            },
-            child: Container(
-              child: Icon(Icons.close),
-            ),
-          ),
-        ],
-      ),
-    ));
-    items.add(createInput("offer_price", 95, textType: TextInputType.number));
-    items.add(createInput("offer_details", 261, maxLines: 4, maxInput: 200));
-    items.add(InkWell(
-      onTap: () {
-        if (body['offer_price'] == null ||
-            body['offer_details'] == null ||
-            body['offer_price'].isEmpty ||
-            body['offer_details'].isEmpty) {
-          Alert.show(context, LanguageManager.getText(264));
-          return;
-        }
-        setState(() {
-          offers.add({
-            "price": body["offer_price"],
-            "details": body["offer_details"],
-          });
-        });
-        body['offer_price'] = "";
-        body['offer_details'] = "";
-        controllers["offer_price"].text = "";
-        controllers["offer_details"].text = "";
-        Navigator.pop(context);
-      },
-      child: Container(
-        margin: EdgeInsets.all(10),
-        height: 45,
-        alignment: Alignment.center,
-        child: Text(
-          LanguageManager.getText(260),
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withAlpha(15),
-                  spreadRadius: 2,
-                  blurRadius: 2)
-            ],
-            borderRadius: BorderRadius.circular(8),
-            color: Converter.hexToColor("#344f64")),
-      ),
-    ));
-    return Container(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: items,
-      ),
-    );
   }
 
   Widget createImagesPicker() {
@@ -689,60 +520,6 @@ class _AddServicesState extends State<AddServices>
           ],
         ),
       ),
-    );
-  }
-
-  Widget createImagesUploaded() {
-    double size = (MediaQuery.of(context).size.width - 20) * 0.25;
-    return Container(
-      margin: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          color: Converter.hexToColor("#ffffff")),
-      child: Wrap(
-          textDirection: LanguageManager.getTextDirection(),
-          children: images.map((e) {
-            return Container(
-                width: size,
-                height: size,
-                padding: EdgeInsets.all(10),
-                child: Container(
-                    padding: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withAlpha(25),
-                              spreadRadius: 2,
-                              blurRadius: 2)
-                        ],
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.white),
-                    child: Stack(
-                      children: [
-                        CachedNetworkImage(imageUrl: e['name']),
-                        Container(
-                          alignment: Alignment.bottomLeft,
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                images.remove(e);
-                                removedImagesUpdate.add(e["name"]);
-                                body["removed_images"] = jsonEncode(removedImagesUpdate);
-                              });
-                            },
-                            child: Container(
-                                width: 24,
-                                height: 24,
-                                color: Colors.white,
-                                child: Icon(
-                                  Icons.delete,
-                                  size: 22,
-                                )),
-                          ),
-                        )
-                      ],
-                    )));
-          }).toList()),
     );
   }
 
@@ -1067,6 +844,7 @@ class _AddServicesState extends State<AddServices>
         ),
         type: AlertType.WIDGET);
   }
+
   void update() {
 
     validate(isUpdateDoNotRemove: true);
@@ -1150,7 +928,12 @@ class _AddServicesState extends State<AddServices>
     return index;
   }
 
-  bool isArrayNotEmpty(String s) {
+  bool isArrayNotEmpty(String s, {Map map}) {
+    if(map != null)
+      return map.containsKey(s)
+          && map[s] != null
+          && map[s].length > 0;
+
     return selectOptions.containsKey(s)
         && selectOptions[s] != null
         && selectOptions[s].length > 0;

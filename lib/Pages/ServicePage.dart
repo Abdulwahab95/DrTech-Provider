@@ -10,7 +10,6 @@ import 'package:dr_tech/Models/ShareManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
 import 'package:dr_tech/Pages/AddServices.dart';
 import 'package:dr_tech/Pages/EngineerRatings.dart';
-import 'package:dr_tech/Pages/LiveChat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/svg.dart';
@@ -607,18 +606,6 @@ class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin
       ],
     ));
   }
-
-  void startNewConversation(id) {
-    Alert.startLoading(context);
-    NetworkManager.httpGet(Globals.baseUrl + "chat/add?id=$id",  context, (r) {
-      Alert.endLoading();
-      if (r['state'] == true) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => LiveChat(r['id'].toString())));
-      }
-    });
-  }
-
 
   Widget getFormContent() {
     return Column(

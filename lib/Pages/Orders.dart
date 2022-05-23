@@ -428,19 +428,19 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin, WidgetsB
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-
-                        Container(height: 10),
-
-                        item["status"] == 'PENDING' || item["status"] == 'WAITING' || item["status"] == 'ONE_SIDED_CANCELED'
+                        Container(width: item["service_target"] == 'online_services' ? 0 : 10),
+                        Container(width: 10),
+                        (item["status"] == 'PENDING' || item["status"] == 'WAITING' || item["status"] == 'ONE_SIDED_CANCELED') && item["service_target"] != 'online_services'
                         ? customButton(96, () {// Call Action
                               launch('tel:${item['number_phone']}');
                             }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco)
                         : Container(),
-
+                        Container(width: 10),
+                        item["service_target"] != 'online_services' ? Container() :
                         customButton(117, () {// Chat Action
                           Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item['user_id'].toString())));
                         }, FlutterIcons.message_text_mco, FlutterIcons.message_reply_text_mco),
-
+                        Container(width: 10),
                       ]),
 
                   Container(
@@ -456,37 +456,39 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin, WidgetsB
   }
 
   customButton(int text, Function() onTap, IconData arIc, IconData enIc) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: (LanguageManager.getText(text).length * (LanguageManager.getDirection()? 15 : 10)).toDouble(),
-        height: 34,
-        alignment: Alignment.center,
-        child: Row(
-          textDirection: LanguageManager.getTextDirection(),
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LanguageManager.getDirection()? arIc:enIc,
-              size: 18,
-              color: Colors.white,
-            ),
-            Container(width: 7.5),
-            Text(
-              LanguageManager.getText(text),
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-        decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withAlpha(15),
-                  spreadRadius: 2,
-                  blurRadius: 2)
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: (LanguageManager.getText(text).length * (LanguageManager.getDirection()? 15 : 10)).toDouble(),
+          height: 34,
+          alignment: Alignment.center,
+          child: Row(
+            textDirection: LanguageManager.getTextDirection(),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                LanguageManager.getDirection()? arIc:enIc,
+                size: 18,
+                color: Colors.white,
+              ),
+              Container(width: 7.5),
+              Text(
+                LanguageManager.getText(text),
+                style: TextStyle(color: Colors.white),
+              ),
             ],
-            borderRadius: BorderRadius.circular(8),
-            color: Converter.hexToColor("#344f64")),
+          ),
+          decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withAlpha(15),
+                    spreadRadius: 2,
+                    blurRadius: 2)
+              ],
+              borderRadius: BorderRadius.circular(8),
+              color: Converter.hexToColor("#344f64")),
+        ),
       ),
     );
   }

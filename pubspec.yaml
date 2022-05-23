@@ -1,7 +1,7 @@
 name: dr_tech
 description: A new Flutter project. 
 publish_to: 'none' 
-version: 0.0.14+10
+version: 0.0.15+11
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
@@ -24,10 +24,13 @@ dependencies:
   flutter_webview_plugin:
   url_launcher:
   firebase_core:
-  firebase_messaging:
-  #firebase_analytics:
+  firebase_messaging: ^10.0.7
+  firebase_analytics: ^9.0.5
   firebase_crashlytics:
-  assets_audio_player:  ^3.0.3+6
+  assets_audio_player:
+    git:
+      url: https://github.com/luis901101/Flutter-AssetsAudioPlayer.git
+      ref: master
   share:
   # Pickers
   image_picker: ^0.8.5
@@ -36,6 +39,10 @@ dependencies:
   package_info_plus: ^1.0.6
   cupertino_icons:
   number_to_word_arabic: ^0.0.8
+
+#dependency_overrides:
+#  firebase_messaging_platform_interface: 3.1.6
+#  firebase_auth_platform_interface: 6.1.11
 
 dev_dependencies:
   flutter_test:
