@@ -145,7 +145,7 @@ class _DrTechCodeState extends State<DrTechCode> {
 
     Alert.startLoading(context);
 
-    widget.body['key'] = codeStr;
+    widget.body['key'] = Converter.replaceArabicNumber(codeStr);
 
     NetworkManager.httpPost(Globals.baseUrl + "users/login",  context, (r) { // user/login
       Alert.endLoading();
