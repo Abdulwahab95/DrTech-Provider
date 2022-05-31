@@ -2410,12 +2410,14 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
 
   String getDisCount() {
     try {
+      bool isOnlineService = selectedTexts["service_target"] == "online_services";
+
       double d = double.parse(replaceArabicNumber(offer["price"], isOffer: true));
-      if(providerInfo['percentage'].toString() == 'true') {
-        var commission = d * double.parse(providerInfo['commission'].toString()) / 100;
+      if(providerInfo[isOnlineService? 'percentage_online' : 'percentage'].toString() == 'true') {
+        var commission = d * double.parse(providerInfo[isOnlineService? 'commission_online' : 'commission'].toString()) / 100;
         d -= commission;
       } else
-        d -= double.parse(providerInfo['commission'].toString()) ;
+        d -= double.parse(providerInfo[isOnlineService? 'commission_online' : 'commission'].toString()) ;
 
       return Converter.format(d, numAfterComma: 3);
     } catch(e){

@@ -89,15 +89,6 @@ class Globals {
     return '';
   }
 
-  static double getDefaultCommission(){
-    for (var item in settings) {
-      if(item['name'] == 'default_commission'){
-        return double.parse(item['value']);
-      }
-    }
-    return 20.0;
-  }
-
   static bool showNotOriginal(){
     for (var item in settings) {
       if(item['name'] == 'not_original' && item['value'] == 'true'){

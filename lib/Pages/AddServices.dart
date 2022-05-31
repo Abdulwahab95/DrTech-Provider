@@ -73,7 +73,7 @@ class _AddServicesState extends State<AddServices>
       if (configNameNext.isNotEmpty)
         selectOptions[configNameNext] = list[getIndexFromId(list, data[bodyName].toString())][configNameNext];  // for last item
 
-      if(bodyName == 'type' ) { selectedTexts["type"] = data[bodyName]['name'] ?? ''; }
+      if(bodyName == 'type' ) { selectedTexts["type"] = data[bodyName]['name'] ?? ''; body["type"] = data[bodyName]['id'].toString(); }
 
     } else if (index != -1 && cssss[index] == 1) { // without first item // الكل
       selectedTexts[bodyName] = getNameFromId(list, 'null');

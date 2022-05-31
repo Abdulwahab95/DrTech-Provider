@@ -22,7 +22,7 @@ class Transactions extends StatefulWidget {
   _TransactionsState createState() => _TransactionsState();
 }
 
-class _TransactionsState extends State<Transactions> {
+class _TransactionsState extends State<Transactions> with WidgetsBindingObserver {
   // Map<int, List> data = {};
   Map data = {};
   bool isloading = false;
@@ -32,8 +32,15 @@ class _TransactionsState extends State<Transactions> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     load();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   void load() {
