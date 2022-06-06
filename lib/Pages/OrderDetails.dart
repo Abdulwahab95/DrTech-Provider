@@ -228,7 +228,7 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
                           Row(
                             textDirection: LanguageManager.getTextDirection(),
                             children: [
-                              (data["status"] == 'PENDING' || data["status"] == 'WAITING' || data["status"] == 'ONE_SIDED_CANCELED') && data["service_target"] != 'online_services' ?
+                              (data["status"] == 'PENDING' || data["status"] == 'WAITING' || data["status"] == 'ONE_SIDED_CANCELED') ? //&& data["service_target"] != 'online_services'
                               InkWell(
                                 onTap: () {
                                   // Call action
@@ -243,7 +243,7 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
                               Container(
                                 width: 5,
                               ),
-                              data["service_target"] != 'online_services' ? Container() :
+                              // data["service_target"] != 'online_services' ? Container() :
                               InkWell(
                                 onTap: () {
                                   Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(data['user_id'].toString())));

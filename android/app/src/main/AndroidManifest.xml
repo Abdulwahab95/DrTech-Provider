@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
    <application
-        android:label="مزودين خدمة"
+        android:label="وي تك"
        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
 

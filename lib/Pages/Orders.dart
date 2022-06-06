@@ -478,15 +478,15 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin, WidgetsB
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(width: item["service_target"] == 'online_services' ? 0 : 10),
+                        Container(width: 10), //item["service_target"] == 'online_services' ? 0 :
                         Container(width: 10),
-                        (item["status"] == 'PENDING' || item["status"] == 'WAITING' || item["status"] == 'ONE_SIDED_CANCELED') && item["service_target"] != 'online_services'
+                        (item["status"] == 'PENDING' || item["status"] == 'WAITING' || item["status"] == 'ONE_SIDED_CANCELED') //&& item["service_target"] != 'online_services'
                         ? customButton(96, () {// Call Action
                               launch('tel:${item['number_phone']}');
                             }, FlutterIcons.phone_in_talk_mco, FlutterIcons.phone_in_talk_mco)
                         : Container(),
                         Container(width: 10),
-                        item["service_target"] != 'online_services' ? Container() :
+                        // item["service_target"] != 'online_services' ? Container() :
                         customButton(117, () {// Chat Action
                           Navigator.push(context, MaterialPageRoute(builder: (_) => LiveChat(item['user_id'].toString())));
                         }, FlutterIcons.message_text_mco, FlutterIcons.message_reply_text_mco),

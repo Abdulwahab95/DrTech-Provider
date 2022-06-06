@@ -175,7 +175,7 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
                 ],
               ),
               decoration: BoxDecoration(
-                  color: activeColor,
+                  color: isActive ? activeColor : Colors.grey,
                   borderRadius: BorderRadius.circular(homeIconSize)),
             ),
           ],

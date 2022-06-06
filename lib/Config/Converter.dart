@@ -155,7 +155,7 @@ class Converter {
   static String replaceArabicNumber(String offerNum) {
     print('here_num_ar_before: $offerNum');
     const en = ['0','1','2','3','4','5','6','7','8','9'];
-    const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩']; // ١٢٣٤٥٦٧٨٩
+    const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩']; // ١٢٣٤٥ ٦٧٨٩٠
     for (int i = 0; i< en.length; i++){
       offerNum = offerNum.replaceAll(ar[i], en[i]);
     }
