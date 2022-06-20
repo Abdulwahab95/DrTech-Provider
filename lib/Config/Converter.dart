@@ -57,7 +57,12 @@ class Converter {
     a.DateFormat server = new a.DateFormat('yyyy-MM-dd HH:mm:ss');
     a.DateFormat formatter =
         new a.DateFormat('yyyy MMMM dd', LanguageManager.getLocalStr());
-    DateTime dateTime = server.parse(time, true);
+    DateTime dateTime;
+    try{
+      dateTime = server.parse(time, true);
+    }catch(e){
+      return time;
+    }
     DateTime now = DateTime.now();
 
     int delay =
