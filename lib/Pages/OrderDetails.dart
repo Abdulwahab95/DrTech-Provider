@@ -25,12 +25,15 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
 
   Map cancel = {}, errors = {}, data = {};
   String setPrice = '';
+  String setDescription = '';
 
   @override
   void initState() {
     print('here_OrderDetails: ${widget.data}' );
     WidgetsBinding.instance.addObserver(this);
     data = widget.data;
+    setDescription = data[LanguageManager.getDirection()? 'description' : 'description_en'].toString().split(': ')[1];
+    print('here_setDescription: ${setDescription.contains(':')}, $setDescription');
     Globals.reloadPageOrderDetails = (){
       if(mounted) load();
     };
@@ -59,6 +62,7 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
           data['canceled_reason'] = r['data']['canceled_reason'];
           data['who_canceled'] = r['data']['who_canceled'];
           data['price'] = r['data']['price'];
+          setDescription = data[LanguageManager.getDirection()? 'description' : 'description_en'].toString().split(': ')[1];
         });
     }, cashable: false);
   }
@@ -184,7 +188,7 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
                           children: [
                             Container(width: 10),
                             Text(
-                              LanguageManager.getText(95),
+                              LanguageManager.getText(95),  //  السعر
                               textDirection: LanguageManager.getTextDirection(),
                               style: TextStyle(
                                   fontSize: 14,
@@ -263,7 +267,18 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
 
                         if(data['invoice'] != null)
                           for (var invoiceInfo in data['invoice'])
-                            createTextPrice(invoiceInfo[LanguageManager.getDirection()? 'text_ar' : 'text_en'] , invoiceInfo['number']),
+                            if(invoiceInfo.runtimeType.toString() == '_InternalLinkedHashMap<String, dynamic>')
+                              invoiceInfo['text_en'].toString().toLowerCase().contains('total')
+                                  ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    createUnderLine(),
+                                    createTextPrice(
+                                      invoiceInfo[LanguageManager.getDirection()? 'text_ar' : 'text_en'] , //  المجموع
+                                      Converter.format(invoiceInfo['number'].toString(), numAfterComma: 2),
+                                    )
+                                  ])
+                                  : createTextPrice(invoiceInfo[LanguageManager.getDirection()? 'text_ar' : 'text_en'] , Converter.format(invoiceInfo['number'].toString(), numAfterComma: 2) ),
 
 
                         data['status'] == 'ONE_SIDED_CANCELED' || data['status'] == 'CANCELED'
@@ -422,6 +437,8 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
     } else if(data['price'] == 0){
       body['price'] = setPrice;
     }
+    if(data['invoice'] == null)
+      body['description']  = setDescription;
 
 
 
@@ -630,6 +647,35 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
             style: TextStyle(
                 color: Converter.hexToColor("#707070"),
                 fontWeight: FontWeight.bold),
+          ),
+          if(data['invoice'] == null)
+          Container(
+            margin: EdgeInsets.only(left: 20, right: 20, top: 30, bottom: 0),
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Converter.hexToColor(setDescription.isEmpty? "#ffd1ce" : "#F2F2F2"),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              //margin: EdgeInsets.symmetric(vertical: 30),
+              child: TextField(
+                controller: TextEditingController(text: setDescription),
+                onChanged: (v) {
+                  setDescription = v;
+                },
+                textDirection: LanguageManager.getTextDirection(),
+                maxLines: 3,
+                keyboardType: TextInputType.multiline,
+                decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 0),
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(fontSize: 14),
+                    hintTextDirection: LanguageManager.getTextDirection(),
+                    hintText: LanguageManager.getText(258)), // كم كانت كلفة الطلب؟
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
           Container( height: data['price'] != 0 ? 0 : 20),
           !(data['price'] == 0)
@@ -845,8 +891,9 @@ class _OrderDetailsState extends State<OrderDetails> with WidgetsBindingObserver
     return Container(
       height: 1,
       width: double.infinity,
-      margin: EdgeInsets.only(right: 35,left: 35, top: 15),
-      color: Converter.hexToColor('#e2e2e2'),
+      margin: EdgeInsets.symmetric(horizontal: 35, vertical: 5),
+      color: Converter.hexToColor('#C2C2C2'),
     );
   }
+
 }

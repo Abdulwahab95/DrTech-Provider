@@ -9,6 +9,7 @@ class SplashEffect extends StatelessWidget {
   final EdgeInsets padding;
   final Color color;
   final bool showShadow;
+  final int alphaShadow;
   final bool borderRadius;
 
   const SplashEffect(
@@ -19,6 +20,7 @@ class SplashEffect extends StatelessWidget {
       this.padding = const EdgeInsets.all(0),
       this.color = Colors.transparent,
       this.showShadow = true,
+      this.alphaShadow = 50,
       this.borderRadius = true})
       : super(key: key);
 
@@ -36,7 +38,7 @@ class SplashEffect extends StatelessWidget {
               boxShadow: !showShadow? [] : [
                 BoxShadow(
                     offset: Offset(.5, 1),
-                    color: Colors.black.withAlpha(50),
+                    color: Colors.black.withAlpha(alphaShadow),
                     spreadRadius: 2,
                     blurRadius: 2)
               ]),

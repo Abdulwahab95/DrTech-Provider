@@ -2394,7 +2394,7 @@ class _LiveChatState extends State<LiveChat>  with WidgetsBindingObserver {
        Navigator.pop(context, true);
        return true;
     } else
-      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(page: 1,)), (Route<dynamic> route) => false);
+      return Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(page: 2,)), (Route<dynamic> route) => false);
   }
 
   void loadConfig() {

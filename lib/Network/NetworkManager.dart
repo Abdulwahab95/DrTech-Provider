@@ -81,7 +81,7 @@ class NetworkManager {
       if (statusCode < 200 || statusCode > 400) {
         if (onError != null) onError("Error while fetching data");
         if(context != null) {
-          Alert.endLoading();
+          Alert.endLoading(context2: context);
           Alert.show(context, response.body.toString().length == 0? '$url\n--------\nstatusCode: ${response.statusCode}': response.body);
         }
         print('here_serverCall: statusCode: ${response.statusCode}');

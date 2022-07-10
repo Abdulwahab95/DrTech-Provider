@@ -316,7 +316,7 @@ class _WelcomeState extends State<Welcome> {
                     ? Login()
                     : UserManager.currentUser("identity").isEmpty? JoinRequest() //
                     : Globals.isLiveChatOpenFromNotification? LiveChat(Globals.currentConversationId)
-                    : Globals.isNotificationOpenFromNotification? Home(page: 3) : Home()
+                    : Globals.isNotificationOpenFromNotification? Home(page: 4) : Home()
         )
     );
   }

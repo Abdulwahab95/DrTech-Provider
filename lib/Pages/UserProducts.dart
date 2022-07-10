@@ -33,8 +33,33 @@ class _UserProductsState extends State<UserProducts> {
     setState(() {
       isLoading = true;
     });
-    NetworkManager.httpGet(
-        Globals.baseUrl + "product/load?page=$page&type=user",  context, (r) {
+    // NetworkManager.httpGet(Globals.baseUrl + "product/load?page=$page&type=user",  context, (r) {
+    var r = {
+      'state' : true,
+      'page' : 0,
+      'data' : [
+        {
+          'id': '1',
+          'name': 'mobile',
+          'price': 120,
+          'location': 'جدة',
+          'status': 'NEW',
+          'color': 'احمر',
+          'brand': 'ايفون',
+          'created_at': '2022-06-26',
+          'is_guaranteed': 1,
+          'memory': 120,
+          'description': 'مرفق العلبة والسماعات والشاحن',
+          'expires_at': '2022-06-26',
+          'unit': 'ر.س',
+          'isLiked': true,
+          'user': {'id': '1', 'name': 'abood', 'phone': '09000000'},
+          'active': true,
+          'images': ['/images/avatars/default.png']
+        }
+      ]
+    };
+
       setState(() {
         isLoading = false;
       });
@@ -44,7 +69,7 @@ class _UserProductsState extends State<UserProducts> {
           data[r['page']] = r['data'];
         });
       }
-    }, cashable: true);
+    // }, cashable: true);
   }
 
   @override
@@ -386,7 +411,7 @@ class _UserProductsState extends State<UserProducts> {
 
   void editProduct(id) {
     Navigator.push(
-        context, MaterialPageRoute(builder: (_) => AddProduct(id: id)));
+        context, MaterialPageRoute(builder: (_) => AddProduct(data: id)));
   }
 
   void deleteProduct(id, page, index) {

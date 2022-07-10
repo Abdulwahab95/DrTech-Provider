@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dr_tech/Config/Globals.dart';
 import 'package:flutter/material.dart';
 
 class OpenImage extends StatefulWidget {
@@ -19,7 +20,7 @@ class _OpenImageState extends State<OpenImage> {
       backgroundColor: Colors.black,
       body: Center(
         child: InteractiveViewer(
-           child: CachedNetworkImage(imageUrl: widget.url, height: double.infinity,  width: double.infinity,),
+           child: CachedNetworkImage(imageUrl: Globals.correctLink(widget.url), height: double.infinity,  width: double.infinity,),
         ),
       ),
     );

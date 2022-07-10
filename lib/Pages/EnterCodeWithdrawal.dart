@@ -279,7 +279,7 @@ class _EnterCodeWithdrawalState extends State<EnterCodeWithdrawal> {
       Alert.endLoading();
       if (r['state'] == true) {
         Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (_) => Home(page: 3))); // success
+            MaterialPageRoute(builder: (_) => Home(page: 4))); // success
       }
     }, body: body);
   }

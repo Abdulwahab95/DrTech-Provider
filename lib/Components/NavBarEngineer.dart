@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:dr_tech/Config/Converter.dart';
 import 'package:dr_tech/Config/Globals.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class NavBarEngineer extends StatefulWidget {
@@ -18,8 +21,12 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
   Color activeColor;
   int iSelectedIndex = 0;
   double homeIconSize;
+  bool isOpenMessage = false;
+  String messageText = '';
   int countNotSeen = UserManager.currentUser('not_seen').isNotEmpty? int.parse(UserManager.currentUser('not_seen')) : 0;
   int countChatNotSeen = UserManager.currentUser('chat_not_seen').isNotEmpty? int.parse(UserManager.currentUser('chat_not_seen')) : 0;
+
+  Timer timer;
 
   @override
   void initState() {
@@ -38,6 +45,22 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
           print('here_not_seen: $countNotSeen, ${UserManager.currentUser('not_seen')}');
         });
     };
+    Globals.showMessageBavBar = ()
+    {
+      print('here_showMessageBavBar: $mounted');
+      if(mounted)
+        setState(() {
+          messageText = Globals.messageText;
+          isOpenMessage = true;
+          if(timer != null && timer.isActive )
+            timer.cancel();
+          timer =  Timer(Duration(seconds: 3), () {
+            setState(() {
+              isOpenMessage = false;
+            });
+          });
+        });
+    };
     super.initState();
   }
 
@@ -49,6 +72,44 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
+        AnimatedContainer(
+          margin: EdgeInsets.only(bottom: 70),
+            duration: Duration(milliseconds: 250),
+            height: isOpenMessage ? 50 : 0,
+            decoration:
+            BoxDecoration(color: Converter.hexToColor("#707070")),
+            child: ScrollConfiguration(
+                behavior: ScrollBehavior(),
+                child: SingleChildScrollView(
+                    child: Container(
+                      padding: EdgeInsets.all(12),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          textDirection: LanguageManager.getTextDirection(),
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              messageText,
+                              style: TextStyle(
+                                  color: Converter.hexToColor("#DBE208"),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  isOpenMessage = false;
+                                });
+                              },
+                              child: Icon(
+                                FlutterIcons.close_ant,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            )
+                          ]),
+                    )))),
+        // Container(width: double.infinity,height: 50, color: Colors.grey,margin: EdgeInsets.only(bottom: 70),),
         Container(
           height: homeIconSize * 0.5,
           decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -72,21 +133,25 @@ class _NavBarEngineerState extends State<NavBarEngineer> {
                 widget.onUpdate(iSelectedIndex);
               }, iSelectedIndex == 0, isBig: true),
 
-              createIcon("chat", 250, () { setState(() { iSelectedIndex = 1; });
+              createIcon("store", 37, () { setState(() { iSelectedIndex = 1; });
                 widget.onUpdate(iSelectedIndex);
-              }, iSelectedIndex == 1, count: countChatNotSeen),
+              }, iSelectedIndex == 1),
 
-              createIcon("checklist", 35, () { setState(() { iSelectedIndex = 2; });
+              createIcon("chat", 250, () { setState(() { iSelectedIndex = 2; });
                 widget.onUpdate(iSelectedIndex);
-              }, iSelectedIndex == 2),
+              }, iSelectedIndex == 2, count: countChatNotSeen),
 
-              createIcon("bell", 45, () {print('here_countNotSeen: $countNotSeen'); setState(() { iSelectedIndex = 3; });
+              createIcon("checklist", 35, () { setState(() { iSelectedIndex = 3; });
                 widget.onUpdate(iSelectedIndex);
-              }, iSelectedIndex == 3, count: countNotSeen),
+              }, iSelectedIndex == 3),
 
-              createIcon("menu", 46, () { setState(() { iSelectedIndex = 4; });
+              createIcon("bell", 45, () {print('here_countNotSeen: $countNotSeen'); setState(() { iSelectedIndex = 4; });
                 widget.onUpdate(iSelectedIndex);
-              }, iSelectedIndex == 4),
+              }, iSelectedIndex == 4, count: countNotSeen),
+
+              createIcon("menu", 46, () { setState(() { iSelectedIndex = 5; });
+                widget.onUpdate(iSelectedIndex);
+              }, iSelectedIndex == 5),
             ],
           ),
         ),

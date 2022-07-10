@@ -121,4 +121,11 @@ class LanguageManager {
           item['code'].toString().split(",")[1]));
     return locals;
   }
+
+  static TextDirection getReversTextDirection() {
+    if (getDirection())
+      return TextDirection.ltr;
+    else
+      return TextDirection.rtl;
+  }
 }

@@ -13,7 +13,7 @@ import 'package:dr_tech/Models/DatabaseManager.dart';
 import 'package:dr_tech/Models/LanguageManager.dart';
 import 'package:dr_tech/Models/UserManager.dart';
 import 'package:dr_tech/Network/NetworkManager.dart';
-import 'package:dr_tech/Pages/Conversations.dart';
+import 'package:dr_tech/Screens/Conversations.dart';
 import 'package:dr_tech/Pages/Orders.dart';
 import 'package:dr_tech/Screens/EngineerServices.dart';
 import 'package:dr_tech/Screens/NotificationsScreen.dart';
@@ -21,6 +21,8 @@ import 'package:dr_tech/Screens/ProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../Screens/EngineerProducts.dart';
 
 class Home extends StatefulWidget {
   final page;
@@ -67,7 +69,7 @@ class _HomeEngineerState extends State<Home> {
                     EdgeInsets.only(left: 25, right: 25, bottom: 10, top: 25),
                 child: Text(
                   LanguageManager.getText(
-                      [249, 250, 35, 45, 46][iScreenIndex]),
+                      [249, 37 ,250, 35, 45, 46][iScreenIndex]),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 16,
@@ -78,6 +80,7 @@ class _HomeEngineerState extends State<Home> {
           Expanded(
               child: [
             EngineerServices(),
+            EngineerProducts(),
             Conversations(noheader: true),
             Orders(noheader: true),
             NotificationsScreen(),

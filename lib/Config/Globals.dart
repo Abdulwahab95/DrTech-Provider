@@ -26,6 +26,7 @@ class Globals {
   static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/
   static String shareUrl = "https://share.drtechapp.com/";
   static String appFont = "Cario";
+  static String messageText = "";
   static SharedPreferences sharedPreferences;
   static dynamic data = [];
   // Callbacks
@@ -37,6 +38,7 @@ class Globals {
   static Function reloadPageOrderDetails = (){};
   static Function reloadPageEngineerServices = (){};
   static Function reloadPageServiceDetails = (){};
+  static Function showMessageBavBar = (){};
   static var settings;
   // Chat + Notification
   static String currentConversationId = '';
@@ -185,7 +187,10 @@ class Globals {
   static String correctLink(data) {
     if(!isLocal){
       if (data != null && !data.toString().contains('http') ) {
-        return imageUrl + data;
+        if(data.runtimeType.toString().contains('List'))
+          return imageUrl + data[0];
+        else
+          return imageUrl + data;
       } else
         return data;
     } else  {
