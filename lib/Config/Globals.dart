@@ -19,8 +19,8 @@ class Globals {
   static var config;
   static var isLocal = false;
   static var urlServerLocal = "http://192.168.43.152";
-  // static var urlServerGlobal = "https://test.drtech-api.com";
-  static var urlServerGlobal = "https://drtech-api.com";
+  static var urlServerGlobal = "https://test.drtech-api.com";
+  // static var urlServerGlobal = "https://drtech-api.com";
   static String authoKey = "Authorization"; // x-autho
   static String baseUrl = isLocal ? "$urlServerLocal/api/" : "$urlServerGlobal/api/";
   static String imageUrl = isLocal ? "$urlServerLocal" : "$urlServerGlobal"; // https://server.drtechapp.com/

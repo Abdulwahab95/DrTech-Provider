@@ -19,6 +19,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../Network/NetworkManager.dart';
+
 class ProfileScreen extends StatefulWidget {
   final refrashState;
   const ProfileScreen(this.refrashState);
@@ -167,10 +169,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => RateApp()));
           }),
-          // getProfileItem(FlutterIcons.account_off_mco, 278, () {
-          //   // Navigator.push(context, MaterialPageRoute(builder: (_) => RateApp()));
-          //   Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
-          // }, withArraw: false),
+          getProfileItem(FlutterIcons.account_off_mco, 278, () {  //  اقفال الحساب
+            // Navigator.push(context, MaterialPageRoute(builder: (_) => RateApp()));
+            Alert.show(context, getAlertDeleteAccount(), type: AlertType.WIDGET);
+          }, withArraw: false),
           getProfileItem(FlutterIcons.log_out_fea, 66, () {
             Alert.show(context, 319, onYes: (){
               print('here_logout confirm');
@@ -354,13 +356,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               Container(height: 5),
 
-              Text('   ' + LanguageManager.getText(280),
-                style: TextStyle(color: Converter.hexToColor("#707070"), fontWeight: FontWeight.bold)),
+              Text(LanguageManager.getText(280),  //  تنبيه
+                style: TextStyle(color: Converter.hexToColor("#707070"), fontWeight: FontWeight.bold), textDirection: LanguageManager.getTextDirection()),
 
               Container(height: 30),
 
               Text(
-                LanguageManager.getText(279).replaceAll('\\n', '\n'),
+                LanguageManager.getText(279).replaceAll('\\n', '\n'), // سيتم حذف حسابك بشكل نهائي\nهل انت متأكد من حذف حسابك ؟
                 style: TextStyle(
                     color: Converter.hexToColor("#707070"),
                     fontWeight: FontWeight.bold),
@@ -371,13 +373,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   InkWell(
-                    onTap: () {Alert.publicClose();},
+                    onTap: () {Navigator.pop(context);},
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.45,
                       height: 45,
                       alignment: Alignment.center,
                       child: Text(
-                        LanguageManager.getText(172),
+                        LanguageManager.getText(172), // تراجع
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       decoration: BoxDecoration(
@@ -388,8 +390,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      // Navigator.pop(context);
-                      // cancelOrderConferm();
+                      Navigator.pop(context);
+                      Alert.startLoading(context);
+                      NetworkManager.httpDelete(Globals.baseUrl + "account/delete", context, (r) {
+                        print('ishere22?');
+                        DatabaseManager.unset("current_panel");
+                        DatabaseManager.unset(Globals.authoKey);
+                        var dbData = DatabaseManager.load('user_keys');
+                        List userKeys = dbData != "" ? dbData : [];
+                        for (var key in userKeys) {
+                          DatabaseManager.unset(key);
+                        }
+                        main();
+                      });
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.45,
